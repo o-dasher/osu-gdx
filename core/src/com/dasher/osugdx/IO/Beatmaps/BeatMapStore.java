@@ -2,9 +2,8 @@ package com.dasher.osugdx.IO.Beatmaps;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
 import com.dasher.osugdx.IO.GameIO;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,7 +32,7 @@ import me.zeroeightysix.osureader.parse.OsuFileParser;
 import me.zeroeightysix.osureader.parse.StandardOsuFileParser;
 
 public class BeatMapStore {
-    public final String VERSION = "1.0";
+    public final int VERSION = 1;
     private boolean finishedLoadingCache = false;
     private final List<String> specialFiles = new LinkedList<>();
     private List<BeatMapSet> tempCachedBeatmaps = new LinkedList<>();
@@ -47,12 +45,12 @@ public class BeatMapStore {
     private boolean libraryChanged = false;
     private final Long beatmapStoreCreationTime;
     private final File libCacheFile;
-    private final Json json;
+    private final Preferences beatmapStorePrefs;
 
-    public BeatMapStore(@NotNull GameIO gameIO, @NotNull Json json) {
+    public BeatMapStore(@NotNull GameIO gameIO) {
         this.songsDir = gameIO.getSongsDir();
-        this.json = json;
-        String libCacheFilePath = songsDir.path() + "/beatmap_cache.db";
+        String libCacheFilePath = songsDir.path() + "/.beatmap_cache.db";
+        beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = gameIO.getJavaFile(libCacheFilePath);
         beatMapSetFoldersIterator = new LinkedList<>(Arrays.asList(songsDir.list())).iterator();
         osuFileParser = new StandardOsuFileParser();
@@ -102,6 +100,13 @@ public class BeatMapStore {
     private void loadCache() throws IOException, ClassNotFoundException {
         System.out.println("Started reading cache");
 
+        int version = beatmapStorePrefs.getInteger("VERSION");
+        if (version != VERSION) {
+            System.out.println("Outdated library, clearing cache and reloading");
+            clearCache();
+            return;
+        }
+
         ObjectInputStream istream;
         try {
             istream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(libCacheFile)));
@@ -112,24 +117,6 @@ public class BeatMapStore {
             return;
         }
 
-        Object versionObject;
-        try {
-            versionObject = istream.readObject();
-            if (versionObject instanceof String) {
-                String version = (String) versionObject;
-                System.out.println("Library version: " + version);
-                if (!version.equals(VERSION)) {
-                    istream.close();
-                    System.out.println("Outdated library, clearing cache and reloading");
-                    clearCache();
-                }
-            }
-        } catch (EOFException e) {
-            e.printStackTrace();
-            istream.close();
-            clearCache();
-        }
-
         Object cachedBeatmapSetsList;
         try {
            cachedBeatmapSetsList = istream.readObject();
@@ -137,12 +124,12 @@ public class BeatMapStore {
                 beatMapSets = (List<BeatMapSet>) cachedBeatmapSetsList;
                 tempCachedBeatmaps = new LinkedList<>((Collection<? extends BeatMapSet>) cachedBeatmapSetsList);
             }
-            istream.close();
         } catch (EOFException | InvalidClassException e) {
             e.printStackTrace();
-            istream.close();
             clearCache();
         }
+
+        istream.close();
     }
 
     private void finishCacheLoading() {
@@ -152,11 +139,12 @@ public class BeatMapStore {
 
     private void saveToCache() {
         System.out.println("Saving cache");
+        beatmapStorePrefs.putInteger("VERSION", VERSION);
         try {
             ObjectOutputStream ostream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(libCacheFile)));
-            ostream.writeObject(VERSION);
             ostream.writeObject(beatMapSets);
             ostream.close();
+            beatmapStorePrefs.flush();
             System.out.println("Saved cache successfully");
         } catch (IOException e) {
             System.out.println("Failed to save cache");

@@ -61,7 +61,7 @@ public class OsuGame extends Game {
 		assetManager.load();
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
-		beatMapStore = new BeatMapStore(gameIO, json);
+		beatMapStore = new BeatMapStore(gameIO);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 
