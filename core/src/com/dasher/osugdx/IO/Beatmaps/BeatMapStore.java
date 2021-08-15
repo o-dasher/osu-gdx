@@ -96,7 +96,6 @@ public class BeatMapStore {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadCache() throws IOException, ClassNotFoundException {
         System.out.println("Started reading cache");
 
@@ -117,16 +116,18 @@ public class BeatMapStore {
             return;
         }
 
-        Object cachedBeatmapSetsList;
-        try {
-           cachedBeatmapSetsList = istream.readObject();
-            if (cachedBeatmapSetsList instanceof LinkedList<?>) {
-                beatMapSets = (List<BeatMapSet>) cachedBeatmapSetsList;
-                tempCachedBeatmaps = new LinkedList<>((Collection<? extends BeatMapSet>) cachedBeatmapSetsList);
+        while (true) {
+            try {
+                Object cachedBeatmapSet = istream.readObject();
+                if (cachedBeatmapSet instanceof BeatMapSet) {
+                    BeatMapSet beatMapSet = (BeatMapSet) cachedBeatmapSet;
+                    beatMapSets.add(beatMapSet);
+                    tempCachedBeatmaps.add(beatMapSet);
+                }
+            } catch (EOFException e) {
+                System.out.println("Iterated through all maps saved in the db");
+                break;
             }
-        } catch (EOFException | InvalidClassException e) {
-            e.printStackTrace();
-            clearCache();
         }
 
         istream.close();
@@ -142,7 +143,9 @@ public class BeatMapStore {
         beatmapStorePrefs.putInteger("VERSION", VERSION);
         try {
             ObjectOutputStream ostream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(libCacheFile)));
-            ostream.writeObject(beatMapSets);
+            for (BeatMapSet beatMapSet: beatMapSets) {
+                ostream.writeObject(beatMapSet);
+            }
             ostream.close();
             beatmapStorePrefs.flush();
             System.out.println("Saved cache successfully");
@@ -340,7 +343,7 @@ public class BeatMapStore {
             } else {
                 loadFinalSteps();
             }
-        } else if (currentBeatmapSetFilesIterator != null) {
+        } else {
             if (currentBeatmapSetFilesIterator.hasNext()) {
                 FileHandle nextBeatmapFile = currentBeatmapSetFilesIterator.next();
                 loadBeatmap(currentBeatmapSet, currentCachedBeatmapSet, nextBeatmapFile);
