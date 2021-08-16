@@ -1,5 +1,6 @@
 package com.dasher.osugdx;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -22,6 +23,8 @@ import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.assets.GameAssetManager;
+
+import java.util.concurrent.CompletableFuture;
 
 public class OsuGame extends Game {
 	public SpriteBatch batch;
@@ -63,6 +66,20 @@ public class OsuGame extends Game {
 		gameIO.setup(gameName);
 		beatMapStore = new BeatMapStore(gameIO);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
+			beatMapStore.loadCache();
+			beatMapStore.loadAllBeatmaps();
+		} else {
+			CompletableFuture.runAsync(() -> {
+				beatMapStore.loadCache();
+			}).whenCompleteAsync((res, ex) -> {
+				if (ex != null) {
+					ex.printStackTrace();
+				}
+				beatMapStore.loadAllBeatmaps();
+			});
+		}
+
 	}
 
 	@Override

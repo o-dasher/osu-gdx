@@ -23,7 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class BeatMapStore {
-    public final int VERSION = 3;
+    private final int VERSION = 3;
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -31,8 +31,9 @@ public class BeatMapStore {
     private final FileHandle songsDir;
     private boolean libraryChanged = false;
     private final Long beatmapStoreCreationTime;
-    public final File libCacheFile;
+    private final File libCacheFile;
     private final Preferences beatmapStorePrefs;
+    private boolean loadedAllBeatmaps = false;
     private ObjectOutputStream ostream;
     private ObjectInputStream istream;
 
@@ -105,7 +106,6 @@ public class BeatMapStore {
             loadNextCachedBeatmapSet();
         }
 
-        System.out.println(isFinishedLoadingCache());
         if (!isFinishedLoadingCache()) {
             if (istream != null) {
                 try {
@@ -325,6 +325,7 @@ public class BeatMapStore {
                 e.printStackTrace();
             }
         }
+        loadedAllBeatmaps = true;
     }
 
     public void loadAllBeatmaps() {
@@ -337,5 +338,9 @@ public class BeatMapStore {
 
     public boolean isFinishedLoadingCache() {
         return finishedLoadingCache;
+    }
+
+    public boolean isLoadedAllBeatmaps() {
+        return loadedAllBeatmaps;
     }
 }

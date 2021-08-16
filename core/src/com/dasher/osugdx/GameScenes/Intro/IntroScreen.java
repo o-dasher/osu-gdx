@@ -9,8 +9,6 @@ import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.CompletableFuture;
-
  public class IntroScreen extends GameScreen {
     private IntroStage introStage;
     private boolean startedLoadingCache = false;
@@ -30,27 +28,8 @@ import java.util.concurrent.CompletableFuture;
     public void render(float delta) {
         introStage.act(delta);
         introStage.draw();
-        if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
-            if (!startedLoadingCache) {
-                startedLoadingCache = true;
-                beatMapStore.loadCache();
-            } else if (beatMapStore.isFinishedLoadingCache() && !startedLoadingBeatmaps) {
-                startedLoadingBeatmaps = true;
-                beatMapStore.loadAllBeatmaps();
-            }
-        } else {
-            if (!startedLoadingCache) {
-                CompletableFuture.runAsync(() -> {
-                    startedLoadingCache = true;
-                    beatMapStore.loadCache();
-                }).whenCompleteAsync((res, ex) -> {
-                    if (ex != null) {
-                        ex.printStackTrace();
-                    }
-                    startedLoadingBeatmaps = true;
-                    beatMapStore.loadAllBeatmaps();
-                });
-            }
+        if (beatMapStore.isLoadedAllBeatmaps()) {
+            introStage.switchScreen(new MenuScreen((game)));
         }
     }
 
