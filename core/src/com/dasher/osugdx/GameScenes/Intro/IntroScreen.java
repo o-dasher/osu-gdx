@@ -1,7 +1,5 @@
  package com.dasher.osugdx.GameScenes.Intro;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.dasher.osugdx.GameScenes.GameScreen;
 import com.dasher.osugdx.GameScenes.Menu.MenuScreen;
@@ -11,8 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
  public class IntroScreen extends GameScreen {
     private IntroStage introStage;
-    private boolean startedLoadingCache = false;
-    private boolean startedLoadingBeatmaps = false;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);

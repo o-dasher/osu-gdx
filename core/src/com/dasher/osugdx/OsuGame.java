@@ -79,7 +79,6 @@ public class OsuGame extends Game {
 				beatMapStore.loadAllBeatmaps();
 			});
 		}
-
 	}
 
 	@Override

@@ -237,8 +237,9 @@ public static class Map implements Serializable
 
     public Map() { reset(); }
 
-    public void freeToLoadLater() {
-        objects.clear(); tpoints.clear();
+    public void freeResources() {
+        objects.clear();
+        tpoints.clear();
     }
 
     /** clears the instance so that it can be reused. */

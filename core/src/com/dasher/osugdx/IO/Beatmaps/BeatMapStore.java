@@ -23,7 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class BeatMapStore {
-    private final int VERSION = 5;
+    private final int VERSION = 6;
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -43,8 +43,8 @@ public class BeatMapStore {
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = Gdx.files.external(libCacheFilePath).file();
         beatmapStoreCreationTime = System.nanoTime();
-        setupCaching();
         specialFiles.add(libCacheFile.getName());
+        setupCaching();
     }
 
     private void verifyVersion() {
@@ -220,7 +220,7 @@ public class BeatMapStore {
                 beatmapBR = new BufferedReader(new InputStreamReader(new FileInputStream(javaBeatmapFile)));
                 beatMap = new Koohii.Parser().map(beatmapBR);
                 beatMap.beatmapFile = javaBeatmapFile;
-                beatMap.freeToLoadLater();  // we just want to load the essentials to display the beatmap
+                beatMap.freeResources();
             } catch (UnsupportedOperationException e) {
                 System.out.println("Can't parse other beatmap modes...");
                 beatmapBR.close();
