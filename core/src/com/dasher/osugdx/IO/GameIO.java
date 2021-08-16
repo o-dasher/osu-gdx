@@ -48,15 +48,6 @@ public class GameIO extends LinkedList<FileHandle> {
         return Gdx.files.external(baseDirectoryName + "/" + path);
     }
 
-    @Contract("_ -> new")
-    public @NotNull File getJavaFile(@NotNull FileHandle fileHandle) {
-        return getJavaFile(fileHandle.path());
-    }
-
-    public File getJavaFile(String path) {
-        return new File(Gdx.files.getExternalStoragePath() + path);
-    }
-
     public FileHandle getImportDir() {
         return importDir;
     }
