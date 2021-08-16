@@ -26,7 +26,9 @@ import java.util.concurrent.CompletableFuture;
     public void render(float delta) {
         introStage.act(delta);
         introStage.draw();
-        if (beatMapStore.isFinishedLoadingCache()) {
+        if (!beatMapStore.isFinishedLoadingCache()) {
+            beatMapStore.loadNextCachedBeatmapSet();
+        } else {
             beatMapStore.loadNextBeatMapSet();
             if (beatMapStore.isFinishedLoading()) {
                 introStage.switchScreen(new MenuScreen(game));

@@ -19,7 +19,7 @@ public class OsuSection implements Serializable {
 
     public OsuSection(String name) {
         this.name = name;
-        this.entries = new LinkedList<>();
+        this.entries = new ArrayList<>();
     }
 
     public String getName() {

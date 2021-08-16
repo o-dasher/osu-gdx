@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class EventsSection {
     String backgroundFile;
-    List<Break> breaks = new LinkedList<>();
+    List<Break> breaks = new ArrayList<>();
 
     public EventsSection(OsuSection section) {
         for (OsuNode node : section.getEntries()) {

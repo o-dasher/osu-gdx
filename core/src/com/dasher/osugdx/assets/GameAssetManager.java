@@ -3,10 +3,12 @@ package com.dasher.osugdx.assets;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class GameAssetManager extends AssetManager {
-    private final LinkedList<AssetHolder<?>> holders = new LinkedList<>();
+    private final List<AssetHolder<?>> holders = new ArrayList<>();
 
     public final TextureHolder textures;
     public final SoundsHolder sounds;

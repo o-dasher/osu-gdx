@@ -90,7 +90,7 @@ public class StandardOsuFileParser implements OsuFileParser {
 
     private OsuFile fromNodes(Collection<OsuNode> nodes) {
         int version = -1;
-        List<OsuSection> sections = new LinkedList<>();
+        List<OsuSection> sections = new ArrayList<>();
 
         OsuSection section = null;
         for (OsuNode node : nodes) {
@@ -113,7 +113,7 @@ public class StandardOsuFileParser implements OsuFileParser {
     @Override
     public OsuFile parse(File file) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        List<OsuNode> nodes = new LinkedList<>();
+        List<OsuNode> nodes = new ArrayList<>();
         String line;
         while ((line = reader.readLine()) != null)
             nodes.add(parseNode(line));

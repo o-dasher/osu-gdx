@@ -3,7 +3,9 @@ package com.dasher.osugdx.assets;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 class AssetHolder <T> {
     private final String basePath;
@@ -18,7 +20,7 @@ class AssetHolder <T> {
         return basePath + string;
     }
 
-    protected LinkedList<AssetDescriptor<T>> assets = new LinkedList<>();
+    protected List<AssetDescriptor<T>> assets = new ArrayList<>();
 
     public AssetDescriptor<T> addAsset(String path, Class<T> tClass) {
         AssetDescriptor<T> tAssetDescriptor = new AssetDescriptor<>(newPathString(path), tClass);

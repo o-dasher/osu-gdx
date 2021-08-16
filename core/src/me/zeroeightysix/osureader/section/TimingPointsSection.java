@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class TimingPointsSection {
 
-    List<TimingPoint> timingPoints = new LinkedList<>();
+    List<TimingPoint> timingPoints = new ArrayList<>();
 
     public TimingPointsSection(OsuSection section) {
         for (OsuNode node : section.getEntries()) {

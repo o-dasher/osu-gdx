@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class HitObjectsSection {
 
-    List<HitObject> objects = new LinkedList<>();
+    List<HitObject> objects = new ArrayList<>();
 
     public HitObjectsSection(OsuSection section) {
         for (OsuNode node : section.getEntries()) {
@@ -41,7 +41,7 @@ public class HitObjectsSection {
                     else if (slider) {
                         String[] posList = ((String) list.get(5)).split("\\|");
                         Slider.SliderType sliderType = Slider.SliderType.byShortName(posList[0]);
-                        List<Slider.CurvePoint> curvePointList = new LinkedList<>();
+                        List<Slider.CurvePoint> curvePointList = new ArrayList<>();
                         for (int i = 1; i < posList.length; i++) {
                             String[] xy = posList[i].split(":");
                             curvePointList.add(new Slider.CurvePoint(Integer.parseInt(xy[0]), Integer.parseInt(xy[1])));
@@ -49,11 +49,11 @@ public class HitObjectsSection {
                         int repeat = ((Number) list.get(6)).intValue();
                         double pixelLength = ((Number) list.get(7)).doubleValue();
 
-                        List<HitSound> edgeHitsounds = new LinkedList<>();
+                        List<HitSound> edgeHitsounds = new ArrayList<>();
                         String[] hitList = ((String) list.get(8)).split("\\|");
                         for (String s : hitList)
                             edgeHitsounds.add(new HitSound((byte) Integer.parseInt(s)));
-                        List<Pair<GeneralSection.SampleSet, GeneralSection.SampleSet>> edgeAdditions = new LinkedList<>();
+                        List<Pair<GeneralSection.SampleSet, GeneralSection.SampleSet>> edgeAdditions = new ArrayList<>();
                         String[] additList = ((String) list.get(9)).split("\\|");
                         for (String s : additList) {
                             String[] sa = s.split(":");

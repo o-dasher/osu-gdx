@@ -56,7 +56,7 @@ class Section {
                 if (r instanceof OsuListNode) {
                     field.set(this, ((OsuListNode) r).getValue());
                 }else{
-                    List list = new LinkedList();
+                    List list = new ArrayList();
                     list.add(r.getValue());
                     field.set(this, list);
                 }
