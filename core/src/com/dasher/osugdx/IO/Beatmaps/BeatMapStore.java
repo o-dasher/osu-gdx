@@ -23,7 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class BeatMapStore {
-    private final int VERSION = 3;
+    private final int VERSION = 5;
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -92,6 +92,7 @@ public class BeatMapStore {
             } else {
                 System.out.println("Failed to clear library cache");
             }
+            finishCacheLoading();
         }
     }
 
@@ -218,6 +219,8 @@ public class BeatMapStore {
             try {
                 beatmapBR = new BufferedReader(new InputStreamReader(new FileInputStream(javaBeatmapFile)));
                 beatMap = new Koohii.Parser().map(beatmapBR);
+                beatMap.beatmapFile = javaBeatmapFile;
+                beatMap.freeToLoadLater();  // we just want to load the essentials to display the beatmap
             } catch (UnsupportedOperationException e) {
                 System.out.println("Can't parse other beatmap modes...");
                 beatmapBR.close();

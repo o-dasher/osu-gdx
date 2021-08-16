@@ -1,5 +1,6 @@
 package com.github.francesco149.koohii;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -216,6 +217,7 @@ public static class Map implements Serializable
     public int mode;
     public String title, title_unicode;
     public String artist, artist_unicode;
+    public File beatmapFile;
 
     /** mapper name. */
     public String creator;
@@ -234,6 +236,10 @@ public static class Map implements Serializable
         new ArrayList<Timing>(32);
 
     public Map() { reset(); }
+
+    public void freeToLoadLater() {
+        objects.clear(); tpoints.clear();
+    }
 
     /** clears the instance so that it can be reused. */
     public void reset()
@@ -633,7 +639,6 @@ public static class Parser
                         break;
                 }
             }
-
             catch (NumberFormatException e) {
                 warn("ignoring line with bad number");
             } catch (ArrayIndexOutOfBoundsException e) {
