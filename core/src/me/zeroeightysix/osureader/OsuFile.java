@@ -21,8 +21,6 @@ public class OsuFile implements Serializable {
      */
     private final List<OsuSection> sectionList;
 
-    public boolean wasCachedInTheStart = false;
-
     public OsuFile(int version, List<OsuSection> sectionList) {
         this.version = version;
         this.sectionList = sectionList;

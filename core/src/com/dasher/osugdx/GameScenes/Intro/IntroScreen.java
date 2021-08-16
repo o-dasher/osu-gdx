@@ -1,5 +1,7 @@
  package com.dasher.osugdx.GameScenes.Intro;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.dasher.osugdx.GameScenes.GameScreen;
 import com.dasher.osugdx.GameScenes.Menu.MenuScreen;
@@ -11,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 
  public class IntroScreen extends GameScreen {
     private IntroStage introStage;
+    private boolean startedLoadingCache = false;
+    private boolean startedLoadingBeatmaps = false;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);
@@ -26,12 +30,26 @@ import java.util.concurrent.CompletableFuture;
     public void render(float delta) {
         introStage.act(delta);
         introStage.draw();
-        if (!beatMapStore.isFinishedLoadingCache()) {
-            beatMapStore.loadNextCachedBeatmapSet();
+        if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
+            if (!startedLoadingCache) {
+                startedLoadingCache = true;
+                beatMapStore.loadCache();
+            } else if (beatMapStore.isFinishedLoadingCache() && !startedLoadingBeatmaps) {
+                startedLoadingBeatmaps = true;
+                beatMapStore.loadAllBeatmaps();
+            }
         } else {
-            beatMapStore.loadNextBeatMapSet();
-            if (beatMapStore.isFinishedLoading()) {
-                introStage.switchScreen(new MenuScreen(game));
+            if (!startedLoadingCache) {
+                CompletableFuture.runAsync(() -> {
+                    startedLoadingCache = true;
+                    beatMapStore.loadCache();
+                }).whenCompleteAsync((res, ex) -> {
+                    if (ex != null) {
+                        ex.printStackTrace();
+                    }
+                    startedLoadingBeatmaps = true;
+                    beatMapStore.loadAllBeatmaps();
+                });
             }
         }
     }
