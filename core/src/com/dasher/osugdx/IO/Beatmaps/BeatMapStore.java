@@ -13,15 +13,11 @@ import com.github.francesco149.koohii.Koohii;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Objects;
 
 public class BeatMapStore {
-    private final int VERSION = 10;
+    private final int VERSION = 14;
+    private final String versionKey = "VERSION";
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -34,11 +30,13 @@ public class BeatMapStore {
     private boolean loadedAllBeatmaps = false;
     private final Json json;
     private final PlatformToast toast;
+    private final BeatmapUtils beatmapUtils;
 
-    public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast) {
+    public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.songsDir = gameIO.getSongsDir();
         this.json = json;
         this.toast = toast;
+        this.beatmapUtils = beatmapUtils;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db.json");
         beatmapStoreCreationTime = System.nanoTime();
@@ -47,7 +45,7 @@ public class BeatMapStore {
     }
 
     private void verifyVersion() {
-        int version = beatmapStorePrefs.getInteger("VERSION", VERSION);
+        int version = beatmapStorePrefs.getInteger(versionKey, VERSION);
         if (version != VERSION) {
             System.out.println("Outdated library, clearing cache and reloading");
             clearCache();
@@ -118,7 +116,7 @@ public class BeatMapStore {
         System.out.println("Cache was read completely, found " + tempCachedBeatmaps.size + " beatmapSets in cache");
     }
 
-    private void deleteBeatmapFile(@NotNull FileHandle beatmapFile) {
+    protected void deleteBeatmapFile(@NotNull FileHandle beatmapFile) {
         if (beatmapFile.exists()) {
             if (beatmapFile.delete()) {
                 System.out.println("Deleted the beatmap to save resources");
@@ -154,9 +152,7 @@ public class BeatMapStore {
             return;
         }
 
-        File javaBeatmapFile = beatmapFile.file();
         boolean isMapLoadedInCache = verifyIfMapIsLoadedInCache(cacheBeatmapSet, beatmapFile);
-        Koohii.Map beatMap = null;
 
         if (isMapLoadedInCache) {
             return;
@@ -164,32 +160,10 @@ public class BeatMapStore {
             libraryChanged = true;
         }
 
-        try {
-            BufferedReader beatmapBR = null;
-            try {
-                beatmapBR = new BufferedReader(new InputStreamReader(new FileInputStream(javaBeatmapFile)));
-                beatMap = new Koohii.Parser().map(beatmapBR);
-                beatMap.beatmapFilePath = beatmapFile.path();
-                beatMap.freeResources();
-            } catch (UnsupportedOperationException e) {
-                System.out.println("Can't parse other beatmap modes...");
-                if (beatmapBR != null) {
-                    beatmapBR.close();
-                }
-                deleteBeatmapFile(beatmapFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Error loading beatmap: " + javaBeatmapFile.getPath());
-                if (beatmapBR != null) {
-                    beatmapBR.close();
-                }
-                deleteBeatmapFile(beatmapFile);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Koohii.Map beatMap = beatmapUtils.createMap(beatmapFile);
 
         if (beatMap != null) {
+            beatMap.freeResources();
             beatMapSet.beatmaps.add(beatMap);
             logBeatmapLoaded(beatMap);
         }
@@ -257,7 +231,7 @@ public class BeatMapStore {
 
     private void onLibraryChange() {
         toast.log("Beatmap library changes detected! caching...");
-        beatmapStorePrefs.putInteger("VERSION", VERSION);
+        beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
         libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
     }
@@ -288,5 +262,9 @@ public class BeatMapStore {
 
     public boolean isLoadedAllBeatmaps() {
         return loadedAllBeatmaps;
+    }
+
+    public Array<BeatMapSet> getBeatMapSets() {
+        return beatMapSets;
     }
 }

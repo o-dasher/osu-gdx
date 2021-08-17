@@ -13,24 +13,20 @@ import java.io.Serializable;
 public class BeatMapSet implements Serializable {
     public String beatmapSetFolderPath;
     public Array<Koohii.Map> beatmaps = new Array<>();
-    private final String defaultString = "";
+    private final String defaultString = "UNKNOWN";
 
     private BeatMapSet() {}  // NO-ARG CONSTRUCTOR FOR JSON PARSER!
 
-    private Koohii.@Nullable Map getFirstBeatmap() {
-        return 0 < beatmaps.size? beatmaps.get(0) : null;
-    }
-
     public String getArtist() {
-        return getFirstBeatmap() == null? defaultString : getFirstBeatmap().artist;
+        return beatmaps.first() == null? defaultString : beatmaps.first().artist;
     }
 
     public String getCreator() {
-        return getFirstBeatmap() == null? defaultString : getFirstBeatmap().creator;
+        return beatmaps.first() == null? defaultString : beatmaps.first().creator;
     }
 
     public String getTitle() {
-        return getFirstBeatmap() == null? defaultString : getFirstBeatmap().title;
+        return beatmaps.first() == null? defaultString : beatmaps.first().title;
     }
 
     public FileHandle getFolder() {
@@ -39,5 +35,10 @@ public class BeatMapSet implements Serializable {
 
     public BeatMapSet(@NotNull FileHandle beatmapSetFolder) {
         this.beatmapSetFolderPath = beatmapSetFolder.path();
+    }
+
+    @Override
+    public String toString() {
+        return getArtist() + " // " + getCreator() + " - " + getTitle();
     }
 }

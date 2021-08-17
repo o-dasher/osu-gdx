@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Locale;
 
 /**
 * pure java implementation of github.com/Francesco149/oppai-ng .
@@ -276,8 +277,8 @@ public static class Map implements Serializable
         }
 
         String timing_str = sb.toString();
-
         return String.format(
+                Locale.getDefault(),
             "beatmap { mode=%d, title=%s, title_unicode=%s, " +
             "artist=%s, artist_unicode=%s, creator=%s, " +
             "version=%s, ncircles=%d, nsliders=%d, nspinners=%d," +

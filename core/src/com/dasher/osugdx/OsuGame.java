@@ -15,12 +15,14 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
+import com.dasher.osugdx.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
@@ -72,25 +74,27 @@ public class OsuGame extends Game {
 		assetManager.load();
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
-		beatMapStore = new BeatMapStore(gameIO, json, toast);
+		BeatmapUtils beatmapUtils = new BeatmapUtils();
+		beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
+		beatmapUtils.setBeatMapStore(beatMapStore);
 		oszParser = new OSZParser(gameIO, beatMapStore);
+		BeatmapManager beatmapManager = new BeatmapManager(beatMapStore, toast, beatmapUtils);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
+			beatmapManager.randomizeCurrentBeatmapSet();
 		} else {
 			CompletableFuture
-					.runAsync(() -> oszParser.parseImportDirectory())
-					.whenCompleteAsync((res, ex) -> {
-						if (ex != null) {
-							ex.printStackTrace();
-						}
+					.runAsync(() -> {
+						oszParser.parseImportDirectory();
 						beatMapStore.loadCache();
+						beatMapStore.loadAllBeatmaps();
+						beatmapManager.randomizeCurrentBeatmapSet();
 					})
-					.whenCompleteAsync((res, ex) -> {
+					.whenComplete((res, ex) -> {
 						if (ex != null) {
 							ex.printStackTrace();
 						}
-						beatMapStore.loadAllBeatmaps();
 					});
 		}
 	}
