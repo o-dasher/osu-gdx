@@ -231,7 +231,6 @@ public static class Map implements Serializable
     public float sv, tick_rate;
 
     public final Array<HitObject> objects = new Array<>(512);
-
     public final Array<Timing> tpoints = new Array<>(32);
 
     public Map() { reset(); }

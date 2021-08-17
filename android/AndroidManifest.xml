@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.dasher.osugdx" >
+    package="com.dasher.osugdx">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
@@ -22,6 +21,27 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.dasher.osugdx.ImportOSZ"
+            android:label="Import OSZ BeatmapSet">
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.VIEW" />
+                <category
+                    android:name="android.intent.category.DEFAULT" />
+                <category
+                    android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:mimeType="application/zip"
+                    android:scheme="file" />
+                <data
+                    android:mimeType="application/x-zip-compressed"
+                    android:scheme="file" />
+                <data
+                    android:mimeType="application/octet-stream"
+                    android:scheme="file" />
             </intent-filter>
         </activity>
     </application>

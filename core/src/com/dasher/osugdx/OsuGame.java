@@ -21,7 +21,9 @@ import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
+import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import com.dasher.osugdx.assets.GameAssetManager;
 
 import java.util.concurrent.CompletableFuture;
@@ -41,9 +43,15 @@ public class OsuGame extends Game {
 	public String gameName;
 	public BeatMapStore beatMapStore;
 	public Json json;
+	public OSZParser oszParser;
+	public PlatformToast toast;
 
 	private final int WORLD_WIDTH = 1280;
 	private final int WORLD_HEIGHT = 720;
+
+	public OsuGame(PlatformToast toast) {
+		this.toast = toast;
+	}
 
 	@Override
 	public void create () {
@@ -64,13 +72,20 @@ public class OsuGame extends Game {
 		assetManager.load();
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
-		beatMapStore = new BeatMapStore(gameIO, json);
+		beatMapStore = new BeatMapStore(gameIO, json, toast);
+		oszParser = new OSZParser(gameIO, beatMapStore);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
 		} else {
 			CompletableFuture
-					.runAsync(() -> beatMapStore.loadCache())
+					.runAsync(() -> oszParser.parseImportDirectory())
+					.whenCompleteAsync((res, ex) -> {
+						if (ex != null) {
+							ex.printStackTrace();
+						}
+						beatMapStore.loadCache();
+					})
 					.whenCompleteAsync((res, ex) -> {
 						if (ex != null) {
 							ex.printStackTrace();

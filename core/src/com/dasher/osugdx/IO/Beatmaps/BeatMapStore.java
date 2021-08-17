@@ -7,8 +7,10 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.dasher.osugdx.IO.GameIO;
+import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import com.github.francesco149.koohii.Koohii;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -16,9 +18,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Objects;
 
 public class BeatMapStore {
-    private final int VERSION = 8;
+    private final int VERSION = 10;
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -30,10 +33,12 @@ public class BeatMapStore {
     private final Preferences beatmapStorePrefs;
     private boolean loadedAllBeatmaps = false;
     private final Json json;
+    private final PlatformToast toast;
 
-    public BeatMapStore(@NotNull GameIO gameIO, Json json) {
+    public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast) {
         this.songsDir = gameIO.getSongsDir();
         this.json = json;
+        this.toast = toast;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db.json");
         beatmapStoreCreationTime = System.nanoTime();
@@ -93,6 +98,14 @@ public class BeatMapStore {
         if (cachedSets != null) {
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
+            for (BeatMapSet beatMapSet: tempCachedBeatmaps) {
+                for (Koohii.Map map: beatMapSet.beatmaps) {
+                    System.out.print("CACHE DB: ");
+                    logBeatmapLoaded(map);
+                }
+                System.out.print("CACHE DB: ");
+                System.out.println(logBeatmapSet(beatMapSet));
+            }
         }
 
         if (!isFinishedLoadingCache()) {
@@ -184,7 +197,7 @@ public class BeatMapStore {
 
     private void logBeatmapLoaded(Koohii.Map beatMap) {
         try {
-            System.out.println("Loaded new beatmap: " + beatMap.title + " [" + beatMap.version + "]");
+            System.out.println("Loaded new beatmap: " + beatMap.toString());
         } catch (Exception ignore) {}
     }
 
@@ -198,7 +211,7 @@ public class BeatMapStore {
         return cacheBeatMapSet;
     }
 
-    private void loadBeatmapSet(@NotNull FileHandle beatMapSetFolder) {
+    public void loadBeatmapSet(@NotNull FileHandle beatMapSetFolder) {
         if (!beatMapSetFolder.isDirectory()) {
             if (!specialFiles.contains(beatMapSetFolder.name(), false)) {
                 beatMapSetFolder.delete();
@@ -208,7 +221,7 @@ public class BeatMapStore {
             return;
         }
 
-        FileHandle[] list = beatMapSetFolder.list();
+        FileHandle[] list = beatMapSetFolder.list(pathname -> pathname.getName().endsWith("osu"));
         BeatMapSet samePathBeatmapSet = getSamePathBeatmapSetInCache(beatMapSetFolder.path());
         BeatMapSet beatMapSet = samePathBeatmapSet == null? new BeatMapSet(beatMapSetFolder) : samePathBeatmapSet;
 
@@ -217,6 +230,9 @@ public class BeatMapStore {
         }
 
         addNewBeatmapSet(beatMapSet, samePathBeatmapSet, beatMapSetFolder);
+        if (loadedAllBeatmaps) {
+            onLibraryChange();
+        }
     }
 
     public void addNewBeatmapSet(@NotNull BeatMapSet beatMapSet, BeatMapSet cacheBeatmapSet, FileHandle beatMapSetFolder) {
@@ -229,24 +245,31 @@ public class BeatMapStore {
         if (cacheBeatmapSet == null) {
             if (isBeatmapSetValid(beatMapSet)) {
                 beatMapSets.add(beatMapSet);
-                System.out.println("Added new beatmapSet: " + beatMapSet.getFolder().name());
+                System.out.println(logBeatmapSet(beatMapSet));
             }
         }
     }
 
-    private void loadFirstSteps() {
-        System.out.println("Started loading beatmaps...");
+    @Contract(pure = true)
+    private @NotNull String logBeatmapSet(@NotNull BeatMapSet beatMapSet) {
+        return "New BeatmapSet: " + beatMapSet.beatmapSetFolderPath;
     }
 
     private void onLibraryChange() {
-        System.out.println("Changes to beatmap library detected!");
+        toast.log("Beatmap library changes detected! caching...");
         beatmapStorePrefs.putInteger("VERSION", VERSION);
         beatmapStorePrefs.flush();
         libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
     }
 
-    private void loadFinalSteps() {
-        System.out.println("Starting library loading final steps");
+    public void loadAllBeatmaps() {
+        System.out.println("Started loading beatmaps...");
+        for (FileHandle file :
+                songsDir.list(pathname -> pathname.isDirectory() &&
+                Objects.requireNonNull(pathname.list((dir, name) -> name.endsWith("osu"))).length != 0)
+        ) {
+            loadBeatmapSet(file);
+        }
         if (tempCachedBeatmaps.size != beatMapSets.size) {
             libraryChanged = true;
         }
@@ -254,19 +277,9 @@ public class BeatMapStore {
             onLibraryChange();
         }
         tempCachedBeatmaps.clear();
-        System.out.println(
-                ((System.nanoTime() - beatmapStoreCreationTime) / 1e6) + "ms to load " +
-                        beatMapSets.size + " beatmapSets"
-        );
+        double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
+        System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
         loadedAllBeatmaps = true;
-    }
-
-    public void loadAllBeatmaps() {
-        loadFirstSteps();
-        for (FileHandle file : songsDir.list()) {
-            loadBeatmapSet(file);
-        }
-        loadFinalSteps();
     }
 
     public boolean isFinishedLoadingCache() {

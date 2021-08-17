@@ -2,9 +2,11 @@ package com.dasher.osugdx;
 
 import android.Manifest;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -27,6 +29,7 @@ public class AndroidLauncher extends AndroidApplication {
 		config.useWakelock = true;
 		config.useRotationVectorSensor = false;
 		config.useImmersiveMode = true;
-		initialize(new OsuGame(), config);
+
+		initialize(new OsuGame(new AndroidToast(this)), config);
 	}
 }
