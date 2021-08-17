@@ -3,20 +3,16 @@ package com.dasher.osugdx.IO;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.LinkedList;
 
-public class GameIO extends LinkedList<FileHandle> {
+public class GameIO {
     private String baseDirectoryName;
     private String mainDirectoryPath;
     private FileHandle importDir;
     private FileHandle songsDir;
 
-    @Override
-    public boolean add(FileHandle fileHandle) {
+    public void createDir(@NotNull FileHandle fileHandle) {
         if (fileHandle.exists()) {
             System.out.println(fileHandle.path() + " directory was already created!");
             if (!fileHandle.isDirectory()) {
@@ -27,7 +23,6 @@ public class GameIO extends LinkedList<FileHandle> {
             fileHandle.mkdirs();
             System.out.println("Created game directory: " + fileHandle.path());
         }
-        return super.add(fileHandle);
     }
 
     public void setup(String baseDirectoryName) {
@@ -36,8 +31,8 @@ public class GameIO extends LinkedList<FileHandle> {
 
         System.out.println("MAIN EXTERNAL DIRECTORY: " + getMainDirectoryPath());
 
-        add(importDir = getFileHandle("Import"));
-        add(songsDir = getFileHandle("Songs"));
+        createDir(importDir = getFileHandle("Import"));
+        createDir(songsDir = getFileHandle("Songs"));
     }
 
     private @NotNull String getMainDirectoryPath() {

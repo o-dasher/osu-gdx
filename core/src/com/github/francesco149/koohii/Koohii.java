@@ -1,8 +1,9 @@
 package com.github.francesco149.koohii;
 
-import java.io.File;
+import com.badlogic.gdx.utils.Array;
+
+
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.io.IOException;
 * -----------------------------------------------------------------
 * usage:
 * put Koohii.java in your project's folder
-* -----------------------------------------------------------------
+* --------------- --------------------------------------------------
 * import java.io.BufferedReader;
 * import java.io.InputStreamReader;
 *
@@ -217,7 +218,7 @@ public static class Map implements Serializable
     public int mode;
     public String title, title_unicode;
     public String artist, artist_unicode;
-    public File beatmapFile;
+    public String beatmapFilePath;
 
     /** mapper name. */
     public String creator;
@@ -229,11 +230,9 @@ public static class Map implements Serializable
     public float hp, cs, od, ar;
     public float sv, tick_rate;
 
-    public final ArrayList<HitObject> objects =
-        new ArrayList<HitObject>(512);
+    public final Array<HitObject> objects = new Array<>(512);
 
-    public final ArrayList<Timing> tpoints =
-        new ArrayList<Timing>(32);
+    public final Array<Timing> tpoints = new Array<>(32);
 
     public Map() { reset(); }
 
@@ -313,7 +312,7 @@ public static class Map implements Serializable
             {
                 ++tindex;
 
-                if (tpoints.size() > tindex + 1) {
+                if (tpoints.size > tindex + 1) {
                     tnext = tpoints.get(tindex + 1).time;
                 } else {
                     tnext = Double.POSITIVE_INFINITY;
@@ -1098,8 +1097,7 @@ public static class DiffCalc
     public Map beatmap = null;
 
     private double speed_mul;
-    private final ArrayList<Double> strains =
-        new ArrayList<Double>(512);
+    private final Array<Double> strains = new Array<>(512);
 
     public DiffCalc() { reset(); }
 
@@ -1148,7 +1146,7 @@ public static class DiffCalc
         double max_strain = 0.0;
 
         /* calculate all strains */
-        for (int i = 0; i < beatmap.objects.size(); ++i)
+        for (int i = 0; i < beatmap.objects.size; ++i)
         {
             HitObject obj = beatmap.objects.get(i);
             HitObject prev = i > 0 ?
@@ -1190,7 +1188,7 @@ public static class DiffCalc
         double total = 0.0;
         double difficulty = 0.0;
 
-        Collections.sort(strains, Collections.reverseOrder());
+        strains.sort(Collections.reverseOrder());
 
         for (Double strain : strains)
         {
@@ -1314,7 +1312,7 @@ public static class DiffCalc
             Math.abs(speed - aim) * EXTREME_SCALING_FACTOR;
 
         /* singletap stats */
-        for (i = 1; i < beatmap.objects.size(); ++i)
+        for (i = 1; i < beatmap.objects.size; ++i)
         {
             HitObject prev = beatmap.objects.get(i - 1);
             HitObject obj = beatmap.objects.get(i);
@@ -1597,7 +1595,7 @@ public static class PPv2
             max_combo = beatmap.max_combo();
             nsliders = beatmap.nsliders;
             ncircles = beatmap.ncircles;
-            nobjects = beatmap.objects.size();
+            nobjects = beatmap.objects.size;
         }
 
         if (mode != MODE_STD)
@@ -1782,7 +1780,7 @@ public static class PPv2
     public PPv2(double aim_stars, double speed_stars, Map b)
     {
         this(aim_stars, speed_stars, -1, b.nsliders, b.ncircles,
-            b.objects.size(), b.ar, b.od, b.mode, MODS_NOMOD, -1,
+            b.objects.size, b.ar, b.od, b.mode, MODS_NOMOD, -1,
             -1, 0, 0, 0, 1, b);
     }
 }

@@ -7,20 +7,19 @@ import com.github.francesco149.koohii.Koohii;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedList;
 
-import me.zeroeightysix.osureader.OsuFile;
-
-public class BeatMapSet extends ArrayList<Koohii.Map> implements Serializable {
+public class BeatMapSet implements Serializable {
     public String beatmapSetFolderPath;
-    public File folder;
-    public ArrayList<File> beatmapFiles = new ArrayList<>();
+    public Array<Koohii.Map> beatmaps = new Array<>();
+
+    private BeatMapSet() {}  // NO-ARG CONSTRUCTOR FOR JSON PARSER!
+
+    public FileHandle getFolder() {
+        return Gdx.files.external(beatmapSetFolderPath);
+    }
 
     public BeatMapSet(@NotNull FileHandle beatmapSetFolder) {
-        this.folder = new File(Gdx.files.getExternalStoragePath() + "/" + beatmapSetFolder.path());
         this.beatmapSetFolderPath = beatmapSetFolder.path();
     }
 }

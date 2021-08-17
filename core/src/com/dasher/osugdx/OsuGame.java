@@ -64,30 +64,29 @@ public class OsuGame extends Game {
 		assetManager.load();
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
-		beatMapStore = new BeatMapStore(gameIO);
+		beatMapStore = new BeatMapStore(gameIO, json);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
-			beatMapStore.loadCache();
 			beatMapStore.loadAllBeatmaps();
 		} else {
-			CompletableFuture.runAsync(() -> {
-				beatMapStore.loadCache();
-			}).whenCompleteAsync((res, ex) -> {
-				if (ex != null) {
-					ex.printStackTrace();
-				}
-				beatMapStore.loadAllBeatmaps();
-			});
+			CompletableFuture
+					.runAsync(() -> beatMapStore.loadCache())
+					.whenCompleteAsync((res, ex) -> {
+						if (ex != null) {
+							ex.printStackTrace();
+						}
+						beatMapStore.loadAllBeatmaps();
+					});
 		}
 	}
 
 	@Override
 	public void render () {
+		ScreenUtils.clear(Color.BLACK);
+
 		batch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		Gdx.input.setInputProcessor(inputMultiplexer);
-
-		ScreenUtils.clear(Color.BLACK);
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
 			if (Gdx.graphics.isFullscreen()) {
