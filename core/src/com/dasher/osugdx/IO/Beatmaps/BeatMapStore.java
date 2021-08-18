@@ -15,8 +15,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+
 public class BeatMapStore {
-    private final int VERSION = 14;
+    private final int VERSION = 23;
     private final String versionKey = "VERSION";
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
@@ -83,6 +85,10 @@ public class BeatMapStore {
 
     @SuppressWarnings("unchecked")
     public void loadCache() {
+        if (isFinishedLoadingCache()) {
+            return;
+        }
+
         System.out.println("Started reading cache");
 
         Array<BeatMapSet> cachedSets = null;
@@ -97,7 +103,7 @@ public class BeatMapStore {
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
             for (BeatMapSet beatMapSet: tempCachedBeatmaps) {
-                for (Koohii.Map map: beatMapSet.beatmaps) {
+                for (Beatmap map: beatMapSet.beatmaps) {
                     System.out.print("CACHE DB: ");
                     logBeatmapLoaded(map);
                 }
@@ -133,7 +139,7 @@ public class BeatMapStore {
         if (beatMapSet == null) {
             return false;
         }
-        for (Koohii.Map map: beatMapSet.beatmaps) {
+        for (Beatmap map: beatMapSet.beatmaps) {
             FileHandle file = Gdx.files.external(map.beatmapFilePath);
             if (file.exists()) {
                 if (file.equals(beatmapFile)) {
@@ -160,7 +166,7 @@ public class BeatMapStore {
             libraryChanged = true;
         }
 
-        Koohii.Map beatMap = beatmapUtils.createMap(beatmapFile);
+        Beatmap beatMap = beatmapUtils.createMap(beatmapFile);
 
         if (beatMap != null) {
             beatMap.freeResources();
@@ -169,7 +175,7 @@ public class BeatMapStore {
         }
     }
 
-    private void logBeatmapLoaded(Koohii.Map beatMap) {
+    private void logBeatmapLoaded(Beatmap beatMap) {
         try {
             System.out.println("Loaded new beatmap: " + beatMap.toString());
         } catch (Exception ignore) {}

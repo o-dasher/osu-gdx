@@ -1,16 +1,14 @@
-package com.dasher.osugdx.Beatmaps;
+package com.dasher.osugdx.IO.Beatmaps;
 
 import com.badlogic.gdx.Gdx;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
-import com.github.francesco149.koohii.Koohii;
+
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatmapManager {
     private final BeatMapStore beatMapStore;
     private BeatMapSet currentBeatmapSet;
-    private Koohii.Map currentMap;
+    private Beatmap currentMap;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
 
@@ -33,7 +31,7 @@ public class BeatmapManager {
             return;
         }
         this.currentBeatmapSet = currentBeatmapSet;
-        Koohii.Map beatmapSetFirstMap = currentBeatmapSet.beatmaps.first();
+        Beatmap beatmapSetFirstMap = currentBeatmapSet.beatmaps.first();
         if (beatmapSetFirstMap == null) {
             currentBeatmapSet.getFolder().delete();
             beatMapStore.getBeatMapSets().removeValue(currentBeatmapSet, true);
@@ -44,19 +42,19 @@ public class BeatmapManager {
         }
     }
 
-    public Koohii.Map getCurrentMap() {
+    public Beatmap getCurrentMap() {
         return currentMap;
     }
 
-    public void setCurrentMap(Koohii.Map currentMap) {
-        if (!currentBeatmapSet.beatmaps.contains(currentMap, true)) {
+    public void setCurrentMap(Beatmap newMap) {
+        if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
             toast.log("Abnormal beatmap selected!");
             setCurrentMap(currentBeatmapSet.beatmaps.first());
         }
         if (this.currentMap != null) {
             this.currentMap.freeResources();
         }
-        this.currentMap = beatmapUtils.createMap(Gdx.files.external(currentMap.beatmapFilePath));
-        System.out.println("Selected map: " + currentMap.toString());
+        this.currentMap = beatmapUtils.createMap(Gdx.files.external(newMap.beatmapFilePath));
+        System.out.println("Selected map: " + this.currentMap.toString());
     }
 }
