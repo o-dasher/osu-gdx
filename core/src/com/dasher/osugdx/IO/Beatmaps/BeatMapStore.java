@@ -15,10 +15,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 23;
+    private final int VERSION = 24;
     private final String versionKey = "VERSION";
     private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
@@ -169,6 +170,10 @@ public class BeatMapStore {
         Beatmap beatMap = beatmapUtils.createMap(beatmapFile);
 
         if (beatMap != null) {
+            if (beatMap.getGamemode() != GameMode.OSU) {
+                deleteBeatmapFile(beatmapFile);
+                libraryChanged = true;
+            }
             beatMap.freeResources();
             beatMapSet.beatmaps.add(beatMap);
             logBeatmapLoaded(beatMap);
@@ -236,7 +241,9 @@ public class BeatMapStore {
     }
 
     private void onLibraryChange() {
-        toast.log("Beatmap library changes detected! caching...");
+        if (!loadedAllBeatmaps) {
+            toast.log("Beatmap library changes detected! caching...");
+        }
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
         libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
@@ -251,6 +258,7 @@ public class BeatMapStore {
             loadBeatmapSet(file);
         }
         if (tempCachedBeatmaps.size != beatMapSets.size) {
+            System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
             libraryChanged = true;
         }
         if (libraryChanged) {

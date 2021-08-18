@@ -76,7 +76,6 @@ project(":ios") {
     apply plugin: "java-library"
     apply plugin: "robovm"
 
-
     dependencies {
         implementation project(":core")
         api "com.mobidevelop.robovm:robovm-rt:$roboVMVersion"

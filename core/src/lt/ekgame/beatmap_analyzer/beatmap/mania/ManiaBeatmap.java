@@ -19,8 +19,12 @@ import lt.ekgame.beatmap_analyzer.difficulty.ManiaDifficultyCalculator;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class ManiaBeatmap extends Beatmap {
-	
 	private Array<ManiaObject> hitObjects;
+
+
+	private ManiaBeatmap() {
+		super(null, null, null, null, null, null);
+	}
 
 	public ManiaBeatmap(BeatmapGenerals generals, BeatmapEditorState editorState, BeatmapMetadata metadata,
 			BeatmapDifficulties difficulties, Array<BreakPeriod> breaks, Array<TimingPoint> timingPoints,

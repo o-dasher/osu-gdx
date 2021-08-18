@@ -87,14 +87,23 @@ public class OsuGame extends Game {
 			CompletableFuture
 					.runAsync(() -> {
 						oszParser.parseImportDirectory();
-						beatMapStore.loadCache();
-						beatMapStore.loadAllBeatmaps();
 						beatmapManager.randomizeCurrentBeatmapSet();
 					})
-					.whenComplete((res, ex) -> {
+					.whenCompleteAsync((res, ex) -> {
 						if (ex != null) {
 							ex.printStackTrace();
 						}
+						beatMapStore.loadCache();
+					}).whenCompleteAsync((res, ex) -> {
+						if (ex != null) {
+							ex.printStackTrace();
+						}
+						beatMapStore.loadAllBeatmaps();
+					}).whenComplete((res, ex) -> {
+						if (ex != null) {
+							ex.printStackTrace();
+						}
+						beatmapManager.randomizeCurrentBeatmapSet();
 					});
 		}
 	}

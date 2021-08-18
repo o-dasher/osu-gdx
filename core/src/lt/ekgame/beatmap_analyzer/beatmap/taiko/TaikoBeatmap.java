@@ -12,8 +12,11 @@ import lt.ekgame.beatmap_analyzer.difficulty.TaikoDifficultyCalculator;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class TaikoBeatmap extends Beatmap {
-	
 	private Array<TaikoObject> hitObjects;
+
+	private TaikoBeatmap() {
+		super(null, null, null, null, null, null);
+	}
 
 	public TaikoBeatmap(BeatmapGenerals generals, BeatmapEditorState editorState, BeatmapMetadata metadata,
 			BeatmapDifficulties difficulties, Array<BreakPeriod> breaks, Array<TimingPoint> timingPoints,

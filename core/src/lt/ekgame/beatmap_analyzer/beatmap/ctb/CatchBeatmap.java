@@ -18,7 +18,11 @@ import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class CatchBeatmap extends Beatmap {
 	
-	private final Array<CatchObject> hitObjects;
+	private Array<CatchObject> hitObjects;
+
+	private CatchBeatmap() {
+		super(null, null, null, null, null, null);
+	}
 
 	public CatchBeatmap(BeatmapGenerals generals, BeatmapEditorState editorState, BeatmapMetadata metadata,
 			BeatmapDifficulties difficulties, Array<BreakPeriod> breaks, Array<TimingPoint> timingPoints,
