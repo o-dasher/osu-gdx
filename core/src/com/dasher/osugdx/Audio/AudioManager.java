@@ -15,7 +15,12 @@ public class AudioManager implements AudioHandler {
     }
 
     public void playMusic(@NotNull Music music) {
-        music.setVolume(currentSFXVolume);
+        music.setVolume(currentMusicVolume);
+        music.play();
+    }
+
+    public void stopMusic(@NotNull Music music) {
+        music.setVolume(currentMusicVolume);
         music.play();
     }
 

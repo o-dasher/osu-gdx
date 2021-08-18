@@ -118,4 +118,12 @@ public abstract class Beatmap {
 		return timingPoints;
 	}
 
+	@Override
+	public String toString() {
+		return
+				getMetadata().getArtist()
+				+ " // " + getMetadata().getCreator()
+				+ " - " + getMetadata().getTitle()
+				+ " [" + getMetadata().getVersion() + "] ";
+	}
 }

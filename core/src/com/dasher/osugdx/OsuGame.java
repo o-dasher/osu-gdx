@@ -78,7 +78,7 @@ public class OsuGame extends Game {
 		beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
 		beatmapUtils.setBeatMapStore(beatMapStore);
 		oszParser = new OSZParser(gameIO, beatMapStore);
-		BeatmapManager beatmapManager = new BeatmapManager(beatMapStore, toast, beatmapUtils);
+		BeatmapManager beatmapManager = new BeatmapManager(beatMapStore, toast, beatmapUtils, audioManager);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
