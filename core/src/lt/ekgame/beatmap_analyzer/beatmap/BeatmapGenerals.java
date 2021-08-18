@@ -54,11 +54,11 @@ public class BeatmapGenerals {
 	}
 
 	public int getAudioLeadIn() {
-		return audioLeadIn;
+		return audioLeadIn / 1000;
 	}
 
 	public int getPreviewTime() {
-		return previewTime;
+		return previewTime / 1000;
 	}
 
 	public boolean hasCountdown() {

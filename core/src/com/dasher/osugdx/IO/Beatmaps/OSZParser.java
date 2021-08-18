@@ -1,14 +1,15 @@
 package com.dasher.osugdx.IO.Beatmaps;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.dasher.osugdx.IO.GameIO;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -35,7 +36,7 @@ public class OSZParser {
     public void parseImportDirectory() {
         for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
             System.out.println("Importing: " + file.nameWithoutExtension());
-            if (parseOSZ(file)) {
+            if (parseOSZ(file) != null) {
                 System.out.println(file.nameWithoutExtension() + " imported!");
             }
         }
@@ -44,10 +45,11 @@ public class OSZParser {
     /**
      * Parse an *.osz file. Location of decompressed files depends of settings
      * and storage availability.
+     * return: The osz folder file in external storage
      */
-    public boolean parseOSZ(FileHandle beatmapSetOsz) {
+    public FileHandle parseOSZ(FileHandle beatmapSetOsz) {
         if (!beatmapSetOsz.extension().equals("osz")) {
-            return false;
+            return null;
         }
 
         System.out.println("Importing BeatmapSet: " + beatmapSetOsz);
@@ -58,12 +60,7 @@ public class OSZParser {
         list.add(folderFile.file());
 
         ZipInputStream istream;
-        try {
-            istream = new ZipInputStream(new FileInputStream(beatmapSetOsz.file()));
-        } catch (FileNotFoundException e) {
-            System.out.println("OSZParser.ParseOSZ: " + e.getMessage());
-            return false;
-        }
+        istream = new ZipInputStream(beatmapSetOsz.read());
 
         try {
             for (ZipEntry entry = istream.getNextEntry(); entry != null; entry = istream.getNextEntry()) {
@@ -98,12 +95,14 @@ public class OSZParser {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-            return false;
+            return null;
         }
 
-        beatmapSetOsz.delete();
-        beatMapStore.loadBeatmapSet(Gdx.files.external(beatmapsFolder.path() + folderName));
+        if (beatmapSetOsz.type() == Files.FileType.External) {
+            beatmapSetOsz.delete();
+            beatMapStore.loadBeatmapSet(Gdx.files.external(beatmapsFolder.path() + folderName));
+        }
 
-        return true;
+        return folderFile;
     }
 }

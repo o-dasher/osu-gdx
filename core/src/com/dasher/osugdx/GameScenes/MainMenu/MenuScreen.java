@@ -1,14 +1,15 @@
-package com.dasher.osugdx.GameScenes.Menu;
+package com.dasher.osugdx.GameScenes.MainMenu;
 
 
 import com.badlogic.gdx.graphics.Texture;
 import com.dasher.osugdx.GameScenes.GameScreen;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
+import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MenuScreen extends GameScreen implements ScreenWithBackgroundMusic {
+public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private MenuStage menuStage;
 
     public MenuScreen(@NotNull OsuGame game) {
@@ -17,6 +18,7 @@ public class MenuScreen extends GameScreen implements ScreenWithBackgroundMusic 
 
     @Override
     public void show() {
+        beatmapManager.startMusicPlaying();
         Texture menuBackgroundTexture = assetManager.get(assetManager.textures.menuBackground);
 
        // menuStage = new MenuStage(

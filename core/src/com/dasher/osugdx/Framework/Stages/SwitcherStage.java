@@ -4,12 +4,18 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dasher.osugdx.Framework.Interfaces.Listenable;
+import com.dasher.osugdx.Framework.Interfaces.SwitcherStageListener;
 
-public class SwitcherStage extends FadingStage {
+public class SwitcherStage extends FadingStage implements Listenable<SwitcherStageListener> {
     private Game game;
     private boolean withFadeOut;
+    private boolean isSwitchingScreen = false;
+    private final Array<SwitcherStageListener> switchListeners = new Array<>();
 
     public SwitcherStage(Game game, Viewport viewport, boolean fadeOut) {
         super(viewport);
@@ -52,6 +58,13 @@ public class SwitcherStage extends FadingStage {
     }
 
     public void switchScreen(Screen newScreen) {
+        if (isSwitchingScreen) {
+            return;
+        }
+        isSwitchingScreen = true;
+        for (SwitcherStageListener listener: switchListeners) {
+            listener.onSwitch();
+        }
         if (withFadeOut) {
             addAction(
                     Actions.sequence(
@@ -62,5 +75,18 @@ public class SwitcherStage extends FadingStage {
         } else {
             Gdx.app.postRunnable(() -> applySwitch(newScreen));
         }
+    }
+
+    @Override
+    public void addActor(Actor actor) {
+        super.addActor(actor);
+        if (actor instanceof SwitcherStageListener) {
+            addListener((SwitcherStageListener) actor);
+        }
+    }
+
+    @Override
+    public void addListener(SwitcherStageListener listener) {
+        switchListeners.add(listener);
     }
 }

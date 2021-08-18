@@ -33,6 +33,7 @@ public class ImportOSZ extends Activity {
             BeatMapStore beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
             beatmapUtils.setBeatMapStore(beatMapStore);
             OSZParser oszParser = new OSZParser(gameIO, beatMapStore);
+            beatMapStore.setOszParser(oszParser);
             oszParser.parseOSZ(file);
             Toast.makeText(this, "Imported BeatmapSet: " + file.path(), Toast.LENGTH_SHORT).show();
         }

@@ -51,7 +51,11 @@ public class BuffedImage extends Image {
         });
     }
 
-    protected void toButton(Sound touchDownSound, AudioHandler audioHandler, Runnable onTouchDown) {
+    public void setOriginCenter() {
+        setOrigin(getWidth() / 2, getHeight() / 2);
+    }
+
+    public void toButton(Sound touchDownSound, AudioHandler audioHandler, Runnable onTouchDown) {
         if (!isEnteredExitScaledImage) {
             toEnterExitScaledImage();
         }

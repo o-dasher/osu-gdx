@@ -47,6 +47,8 @@ public class OsuGame extends Game {
 	public Json json;
 	public OSZParser oszParser;
 	public PlatformToast toast;
+	public BeatmapManager beatmapManager;
+	public BeatmapUtils beatmapUtils;
 
 	private final int WORLD_WIDTH = 1280;
 	private final int WORLD_HEIGHT = 720;
@@ -74,11 +76,12 @@ public class OsuGame extends Game {
 		assetManager.load();
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
-		BeatmapUtils beatmapUtils = new BeatmapUtils();
+		beatmapUtils = new BeatmapUtils();
 		beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
 		beatmapUtils.setBeatMapStore(beatMapStore);
 		oszParser = new OSZParser(gameIO, beatMapStore);
-		BeatmapManager beatmapManager = new BeatmapManager(beatMapStore, toast, beatmapUtils, audioManager);
+		beatMapStore.setOszParser(oszParser);
+		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
@@ -87,23 +90,13 @@ public class OsuGame extends Game {
 			CompletableFuture
 					.runAsync(() -> {
 						oszParser.parseImportDirectory();
-						beatmapManager.randomizeCurrentBeatmapSet();
-					})
-					.whenCompleteAsync((res, ex) -> {
-						if (ex != null) {
-							ex.printStackTrace();
-						}
 						beatMapStore.loadCache();
-					}).whenCompleteAsync((res, ex) -> {
-						if (ex != null) {
-							ex.printStackTrace();
-						}
 						beatMapStore.loadAllBeatmaps();
 					}).whenComplete((res, ex) -> {
 						if (ex != null) {
 							ex.printStackTrace();
 						}
-						beatmapManager.randomizeCurrentBeatmapSet();
+						beatmapManager.setCurrentBeatmapSet(beatMapStore.getMainDefaultBeatmapSet());
 					});
 		}
 	}

@@ -12,14 +12,13 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 25;
+    private final int VERSION = 26;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -31,9 +30,11 @@ public class BeatMapStore {
     private final Json json;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
+    private OSZParser oszParser;
     private boolean finishedLoadingCache = false;
     private boolean libraryChanged = false;
     private boolean loadedAllBeatmaps = false;
+    private BeatMapSet mainDefaultBeatmapSet;
 
     public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.songsDir = gameIO.getSongsDir();
@@ -45,6 +46,10 @@ public class BeatMapStore {
         beatmapStoreCreationTime = System.nanoTime();
         specialFiles.add(libCacheFile.name());
         setupCaching();
+    }
+
+    public void setOszParser(OSZParser oszParser) {
+        this.oszParser = oszParser;
     }
 
     private void verifyVersion() {
@@ -131,7 +136,6 @@ public class BeatMapStore {
                 System.out.println("Couldn't deleted beatmap to save resources");
             }
         } else {
-            //System.exit(-1);
             libraryChanged = true;
         }
     }
@@ -186,10 +190,7 @@ public class BeatMapStore {
     }
 
     private void logBeatmapLoaded(Beatmap beatMap) {
-        try {
-            System.out.println("Loaded new beatmap: " + beatMap.toString());
-        } catch (Exception ignore) {
-        }
+        System.out.println("Loaded new beatmap: " + beatMap.toString());
     }
 
     private BeatMapSet getSamePathBeatmapSetInCache(String beatmapSetFolderPath) {
@@ -203,14 +204,14 @@ public class BeatMapStore {
         return cacheBeatMapSet;
     }
 
-    public void loadBeatmapSet(@NotNull FileHandle beatMapSetFolder) {
+    public BeatMapSet loadBeatmapSet(@NotNull FileHandle beatMapSetFolder) {
         if (!beatMapSetFolder.isDirectory()) {
             if (!specialFiles.contains(beatMapSetFolder.name(), false)) {
                 beatMapSetFolder.delete();
             } else {
                 System.out.println("Prevented file deletion!");
             }
-            return;
+            return null;
         }
 
         BeatMapSet samePathBeatmapSet = getSamePathBeatmapSetInCache(beatMapSetFolder.path());
@@ -224,6 +225,8 @@ public class BeatMapStore {
         if (loadedAllBeatmaps) {
             onLibraryChange();
         }
+
+        return beatMapSet;
     }
 
     public void addNewBeatmapSet(@NotNull BeatMapSet beatMapSet, BeatMapSet cacheBeatmapSet, FileHandle beatMapSetFolder) {
@@ -258,13 +261,50 @@ public class BeatMapStore {
     public void loadAllBeatmaps() {
         System.out.println("Started loading beatmaps...");
 
+        String baseTracksPath = "Tracks/";
+        String welcomeOSZ = baseTracksPath + "welcome.osz";
+        String circlesOSZ = baseTracksPath + "circles.osz";
+        String trianglesOSZ = baseTracksPath + "triangles.osz";
+
+        StringBuilder mainTrackStringSB = new StringBuilder();
+        char[] selectedMainTrack = welcomeOSZ.toCharArray();
+
+        for (char character: selectedMainTrack) {
+            mainTrackStringSB.append(character);
+        }
+
+        String mainTrackString = mainTrackStringSB.toString();
+        FileHandle mainDefaultTrack = Gdx.files.internal(mainTrackString);
+        String mainDefaultTrackPath = oszParser.parseOSZ(mainDefaultTrack).path();  // TODO DAR UM JEITO DE VERIFICAR SE O MAPA MAIN JA NAO FOI CARREGADO
+
+        Array<String> notMainTracks = new Array<>();
+        notMainTracks.add(welcomeOSZ);
+        notMainTracks.add(circlesOSZ);
+        notMainTracks.add(trianglesOSZ);
+
+        for (String track: notMainTracks) {
+            if (track.toUpperCase().equals(mainTrackString)) {
+                notMainTracks.removeValue(track, true);
+            }
+        }
+
         FileHandle[] validFiles = songsDir.list(
                 pathname ->
                 pathname.isDirectory() &&
                 Objects.requireNonNull(pathname.list((dir, name) -> name.endsWith("osu"))).length != 0);
 
         for (FileHandle validFile : validFiles) {
-            loadBeatmapSet(validFile);
+            BeatMapSet beatMapSet = loadBeatmapSet(validFile);
+            if (validFile.path().equals(mainDefaultTrackPath)) {
+                mainDefaultBeatmapSet = beatMapSet;
+            }
+        }
+
+        if (mainDefaultBeatmapSet == null) {
+            System.out.println("Installing default maps!");
+            for (String track: notMainTracks) {
+                oszParser.parseOSZ(Gdx.files.internal(track));
+            }
         }
 
         if (tempCachedBeatmaps.size != beatMapSets.size) {
@@ -290,5 +330,9 @@ public class BeatMapStore {
 
     public Array<BeatMapSet> getBeatMapSets() {
         return beatMapSets;
+    }
+
+    public BeatMapSet getMainDefaultBeatmapSet() {
+        return mainDefaultBeatmapSet;
     }
 }

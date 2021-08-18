@@ -6,6 +6,7 @@ import com.dasher.osugdx.OsuGame;
 
 public class GameImage extends CenteredImage {
     private final OsuGame game;
+    private float baseScale = 0;
 
     public GameImage(OsuGame game, boolean forceCenter) {
         super(forceCenter);
@@ -19,7 +20,16 @@ public class GameImage extends CenteredImage {
         applyToGameScale();
     }
 
+    public void setBaseScale(float baseScale) {
+        setScale(baseScale);
+        this.baseScale = baseScale;
+    }
+
+    public float getBaseScale() {
+        return baseScale;
+    }
+
     public void applyToGameScale() {
-        setScale(getScaleX() * game.uiConfig.getScale());
+        setScale((baseScale == 0? getScaleX() : baseScale) * game.uiConfig.getScale());
     }
 }

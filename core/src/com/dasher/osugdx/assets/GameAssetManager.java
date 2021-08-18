@@ -15,7 +15,7 @@ public class GameAssetManager extends AssetManager {
     public final FontHolder fonts;
 
     public GameAssetManager() {
-        com.dasher.osugdx.assets.AssetPaths assetPaths = new AssetPaths();
+        AssetPaths assetPaths = new AssetPaths();
         holders.add(textures = new TextureHolder(assetPaths));
         holders.add(sounds = new SoundsHolder(assetPaths));
         holders.add(musics = new MusicHolder(assetPaths));

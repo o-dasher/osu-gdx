@@ -1,10 +1,15 @@
 package com.dasher.osugdx.IO.Beatmaps;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Audio.AudioManager;
+import com.dasher.osugdx.GameScenes.GameScreen;
+import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
+import com.dasher.osugdx.GameScenes.UIScreen;
+import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
@@ -14,11 +19,15 @@ public class BeatmapManager {
     private BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
     private Music currentMusic;
+    private final OsuGame game;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
     private final AudioManager audioManager;
+    private boolean isFirstBeatmapLoaded = false;
+    private int startMusicPlayingCalls;
 
-    public BeatmapManager(BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils, AudioManager audioManager) {
+    public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils, AudioManager audioManager) {
+        this.game = game;
         this.beatMapStore = beatMapStore;
         this.toast = toast;
         this.beatmapUtils = beatmapUtils;
@@ -61,25 +70,43 @@ public class BeatmapManager {
             newBeatmapSet.beatmaps.clear();
             newBeatmapSet.beatmaps.addAll(loadedBeatmaps);
 
-            this.currentBeatmapSet = newBeatmapSet;
+            currentBeatmapSet = newBeatmapSet;
             setCurrentMap(currentBeatmapSet.beatmaps.first());
         }
     }
 
     private void setupMusic(Beatmap newMap) {
-        if (currentMusic != null && currentMusic.isPlaying()) {
-            audioManager.stopMusic(currentMusic);
+        if (currentMusic != null && currentMusic.isPlaying() && !newMap.equals(currentMap)) {
+            currentMusic.dispose();
         }
-        String musicPath = currentBeatmapSet.beatmapSetFolderPath + "/" + newMap.getGenerals().getAudioFileName();
-        FileHandle musicFile = Gdx.files.external(musicPath);
-        currentMusic = Gdx.audio.newMusic(musicFile);
-        currentMusic.setOnCompletionListener((m) -> {
-            System.out.println("Beatmap music finished!");
-            setCurrentMap(newMap);
-        });
-        audioManager.playMusic(currentMusic);
-    }
 
+        String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
+        String newMusicPath = folder + newMap.getGenerals().getAudioFileName();
+        String currentMusicPath = currentMap != null?
+                folder + currentMap.getGenerals().getAudioFileName() : null;
+
+        // WE DON'T WANT TO RELOAD THE MUSIC IF IT'S THE SAME MUSIC REPLAYING
+        if (currentMusicPath != null && !newMusicPath.equals(currentMusicPath) || currentMusic == null) {
+            FileHandle musicFile = Gdx.files.external(newMusicPath);
+            currentMusic = Gdx.audio.newMusic(musicFile);
+            currentMusic.setOnCompletionListener((music) -> {
+                System.out.println("Beatmap music finished!");
+                setCurrentMap(newMap);
+            });
+            System.out.println("New music: " + newMusicPath);
+        } else {
+            System.out.println("Replaying beatmap music: " + newMap.toString());
+        }
+
+        Screen gameScreen = game.getScreen();
+
+        if (gameScreen instanceof UIScreen) {
+            currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+        }
+        if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
+            audioManager.playMusic(currentMusic);
+        }
+    }
 
     public Beatmap getCurrentMap() {
         return currentMap;
@@ -93,5 +120,21 @@ public class BeatmapManager {
         setupMusic(newMap);
         currentMap = newMap;
         System.out.println("Selected map: " + currentMap.toString());
+        isFirstBeatmapLoaded = true;
+    }
+
+    public void startMusicPlaying() {
+        startMusicPlayingCalls++;
+        if (startMusicPlayingCalls != 1) {
+            throw new IllegalStateException(
+                    "This should only be called when the screen is switched to the MenuScreen"
+            );
+        } else if (currentMusic != null) {
+            currentMusic.play();
+        }
+    }
+
+    public boolean isFirstBeatmapLoaded() {
+        return isFirstBeatmapLoaded;
     }
 }

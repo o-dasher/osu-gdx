@@ -23,14 +23,7 @@ public class BeatmapUtils {
 
 
     public Beatmap createMap(@NotNull FileHandle mapFile) {
-        InputStream reader = null;
-
-        try {
-            reader = new FileInputStream(mapFile.file());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
+        InputStream reader = mapFile.read();
         Beatmap beatmap = null;
 
         try {

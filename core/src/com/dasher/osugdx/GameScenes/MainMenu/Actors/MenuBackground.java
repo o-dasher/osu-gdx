@@ -1,4 +1,4 @@
-package com.dasher.osugdx.GameScenes.Menu.Actors;
+package com.dasher.osugdx.GameScenes.MainMenu.Actors;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
