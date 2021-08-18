@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.taiko.*;
 import lt.ekgame.beatmap_analyzer.beatmap.taiko.TaikoCircle.TaikoColor;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
@@ -39,12 +40,14 @@ public class TaikoDifficultyCalculator implements DifficultyCalculator {
 	}
     
     private Array<DifficultyObject> generateDifficultyObjects(Array<TaikoObject> hitObjects, double timeRate) {
-    	Array<DifficultyObject> difficultyObjects = new Array<>(
-    			Arrays.stream(hitObjects.items)
-				.map(DifficultyObject::new)
-				.sorted((a, b)-> a.object.getStartTime() - b.object.getStartTime())
-				.toArray(DifficultyObject[]::new)
-		);
+    	Array<DifficultyObject> difficultyObjects = new Array<>();
+
+    	for (TaikoObject hitObject: hitObjects) {
+    		DifficultyObject difficultyObject = new DifficultyObject(hitObject);
+    		difficultyObjects.add(difficultyObject);
+		}
+
+    	difficultyObjects.sort((a, b) -> a.object.getStartTime() - b.object.getStartTime());
     	
     	DifficultyObject previous = null;
 		for (DifficultyObject current : difficultyObjects) {

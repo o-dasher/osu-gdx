@@ -79,7 +79,11 @@ public class OsuBeatmap extends Beatmap {
 	
 	@Override
 	public int getMaxCombo() {
-		return Arrays.stream(hitObjects.items).mapToInt(HitObject::getCombo).sum();
+		int maxCombo = 0;
+		for (HitObject o: hitObjects) {
+			maxCombo += o.getCombo();
+		}
+		return maxCombo;
 	}
 
 	public Array<OsuObject> getHitObjects() {

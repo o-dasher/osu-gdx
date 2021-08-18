@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuCircle;
 import lt.ekgame.beatmap_analyzer.performance.OsuPerformanceCalculator;
@@ -66,7 +67,13 @@ public class OsuDifficulty extends Difficulty {
 	}
 	
 	public int getNumCircles() {
-		return (int) Arrays.stream(((OsuBeatmap) beatmap).getHitObjects().items).filter(o->o instanceof OsuCircle).count();
+		int numCircles = 0;
+		for (HitObject object: beatmap.getHitObjects()) {
+			if (object instanceof OsuCircle) {
+				numCircles++;
+			}
+		}
+		return numCircles;
 	}
 
 	@Override

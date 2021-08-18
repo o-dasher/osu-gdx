@@ -3,7 +3,7 @@ package lt.ekgame.beatmap_analyzer.beatmap.taiko;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.*;
@@ -33,7 +33,13 @@ public class TaikoBeatmap extends Beatmap {
 
 	@Override
 	public int getMaxCombo() {
-		return (int) Arrays.stream(hitObjects.items).filter(o->o instanceof TaikoCircle).count();
+		int maxCombo = 0;
+		for (TaikoObject o : hitObjects) {
+			if (o instanceof TaikoCircle) {
+				maxCombo++;
+			}
+		}
+		return maxCombo;
 	}
 	
 	public Array<TaikoObject> getHitObjects() {

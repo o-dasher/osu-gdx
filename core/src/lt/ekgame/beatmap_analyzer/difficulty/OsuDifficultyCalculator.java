@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuSpinner;
@@ -59,12 +60,13 @@ public class OsuDifficultyCalculator implements DifficultyCalculator {
 	
 	private Array<DifficultyObject> generateDifficultyObjects(Array<OsuObject> hitObjects, double csRating, double timeRate) {
 		double radius = (PLAYFIELD_WIDTH/16)*(1 - 0.7*(csRating - 5)/5);
-		
-		Array<DifficultyObject> difficultyObjects = new Array<>(Arrays.stream(hitObjects.items)
-			.map(o-> new DifficultyObject(o, radius))
-			.sorted((a, b)-> a.object.getStartTime() - b.object.getStartTime())
-			.toArray(DifficultyObject[]::new));
-    	
+		Array<DifficultyObject> difficultyObjects = new Array<>();
+
+		for (OsuObject hitObject: hitObjects) {
+			DifficultyObject difficultyObject = new DifficultyObject(hitObject, radius);
+			difficultyObjects.add(difficultyObject);
+		}
+
     	DifficultyObject previous = null;
 		for (DifficultyObject current : difficultyObjects) {
 			if (previous != null)

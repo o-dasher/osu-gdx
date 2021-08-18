@@ -36,9 +36,18 @@ public abstract class Beatmap {
 	public void freeResources() {
 		timingPoints.clear();
 		getHitObjects().clear();
-		breaks.clear();
+		getBreaks().clear();
 		editorState = null;
 		generals = null;
+	}
+
+	public boolean isResourcesFree() {
+		return
+			timingPoints.isEmpty()
+				&& getHitObjects().isEmpty()
+				&& getBreaks().isEmpty()
+				&& getEditorState() == null
+				&& getGenerals() == null;
 	}
 	
 	protected void finalizeObjects(Array<? extends HitObject> objects) {

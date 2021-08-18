@@ -52,11 +52,24 @@ public class Mods {
 	}
 	
 	public boolean isRanked() {
-		return Arrays.stream(mods.items).allMatch(Mod::isRanked);
+		boolean isRanked = true;
+		for (Mod mod: mods) {
+			if (!mod.isRanked()) {
+				isRanked = false;
+				break;
+			}
+		}
+		return isRanked;
 	}
 	
 	public Mods withoutUnranked() {
-		return new Mods(new Array<>(Arrays.stream(mods.items).filter(Mod::isRanked).toArray(Mod[]::new)));
+		Mods rankedMods = new Mods();
+		for (Mod mod: mods) {
+			if (mod.isRanked()) {
+				rankedMods.mods.add(mod);
+			}
+		}
+		return rankedMods;
 	}
 	
 	public Array<Mod> getMods() {
@@ -64,7 +77,11 @@ public class Mods {
 	}
 	
 	public String toString() {
-		return Arrays.stream(mods.items).map(Mod::getShortName).collect(Collectors.joining()).toUpperCase();
+		StringBuilder stringBuilder = new StringBuilder();
+		for (Mod mod: mods) {
+			stringBuilder.append(mod.getShortName().toUpperCase());
+		}
+		return stringBuilder.toString();
 	}
 	
 	public boolean isNoMod() {

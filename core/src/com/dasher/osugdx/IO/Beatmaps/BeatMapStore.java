@@ -8,11 +8,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
-import com.github.francesco149.koohii.Koohii;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
@@ -21,19 +21,19 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 public class BeatMapStore {
     private final int VERSION = 25;
     private final String versionKey = "VERSION";
-    private boolean finishedLoadingCache = false;
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
     private final Array<BeatMapSet> beatMapSets = new Array<>();
     private final FileHandle songsDir;
-    private boolean libraryChanged = false;
     private final Long beatmapStoreCreationTime;
     private final FileHandle libCacheFile;
     private final Preferences beatmapStorePrefs;
-    private boolean loadedAllBeatmaps = false;
     private final Json json;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
+    private boolean finishedLoadingCache = false;
+    private boolean libraryChanged = false;
+    private boolean loadedAllBeatmaps = false;
 
     public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.songsDir = gameIO.getSongsDir();
@@ -56,7 +56,7 @@ public class BeatMapStore {
     }
 
     private void setupCaching() {
-        System.out.println("Library db " + (libCacheFile.exists()? "does" : "doesn't") + " exists!");
+        System.out.println("Library db " + (libCacheFile.exists() ? "does" : "doesn't") + " exists!");
         if (libCacheFile.exists()) {
             verifyVersion();
         } else {
@@ -103,8 +103,8 @@ public class BeatMapStore {
         if (cachedSets != null) {
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
-            for (BeatMapSet beatMapSet: tempCachedBeatmaps) {
-                for (Beatmap map: beatMapSet.beatmaps) {
+            for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
+                for (Beatmap map : beatMapSet.beatmaps) {
                     System.out.print("CACHE DB: ");
                     logBeatmapLoaded(map);
                 }
@@ -141,7 +141,7 @@ public class BeatMapStore {
         if (beatMapSet == null) {
             return false;
         }
-        for (Beatmap map: beatMapSet.beatmaps) {
+        for (Beatmap map : beatMapSet.beatmaps) {
             FileHandle file = Gdx.files.external(map.beatmapFilePath);
             if (file.exists()) {
                 if (file.equals(beatmapFile)) {
@@ -188,14 +188,16 @@ public class BeatMapStore {
     private void logBeatmapLoaded(Beatmap beatMap) {
         try {
             System.out.println("Loaded new beatmap: " + beatMap.toString());
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
     }
 
     private BeatMapSet getSamePathBeatmapSetInCache(String beatmapSetFolderPath) {
         BeatMapSet cacheBeatMapSet = null;
-        for (BeatMapSet cachedBeatmapSet: tempCachedBeatmaps) {
+        for (BeatMapSet cachedBeatmapSet : tempCachedBeatmaps) {
             if (cachedBeatmapSet.beatmapSetFolderPath.equals(beatmapSetFolderPath)) {
                 cacheBeatMapSet = cachedBeatmapSet;
+                break;
             }
         }
         return cacheBeatMapSet;
@@ -211,12 +213,11 @@ public class BeatMapStore {
             return;
         }
 
-        FileHandle[] list = beatMapSetFolder.list(pathname -> pathname.getName().endsWith("osu"));
         BeatMapSet samePathBeatmapSet = getSamePathBeatmapSetInCache(beatMapSetFolder.path());
-        BeatMapSet beatMapSet = samePathBeatmapSet == null? new BeatMapSet(beatMapSetFolder) : samePathBeatmapSet;
+        BeatMapSet beatMapSet = samePathBeatmapSet == null ? new BeatMapSet(beatMapSetFolder) : samePathBeatmapSet;
 
-        for (FileHandle file : list) {
-           loadBeatmap(beatMapSet, samePathBeatmapSet, file);
+        for (FileHandle file : beatMapSetFolder.list(pathname -> pathname.getName().endsWith("osu"))) {
+            loadBeatmap(beatMapSet, samePathBeatmapSet, file);
         }
 
         addNewBeatmapSet(beatMapSet, samePathBeatmapSet, beatMapSetFolder);
@@ -256,12 +257,16 @@ public class BeatMapStore {
 
     public void loadAllBeatmaps() {
         System.out.println("Started loading beatmaps...");
-        for (FileHandle file :
-                songsDir.list(pathname -> pathname.isDirectory() &&
-                Objects.requireNonNull(pathname.list((dir, name) -> name.endsWith("osu"))).length != 0)
-        ) {
-            loadBeatmapSet(file);
+
+        FileHandle[] validFiles = songsDir.list(
+                pathname ->
+                pathname.isDirectory() &&
+                Objects.requireNonNull(pathname.list((dir, name) -> name.endsWith("osu"))).length != 0);
+
+        for (FileHandle validFile : validFiles) {
+            loadBeatmapSet(validFile);
         }
+
         if (tempCachedBeatmaps.size != beatMapSets.size) {
             System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
             libraryChanged = true;

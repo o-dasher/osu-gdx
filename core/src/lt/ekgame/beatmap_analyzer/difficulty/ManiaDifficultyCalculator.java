@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import java.util.Arrays;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.mania.ManiaBeatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.mania.ManiaObject;
 import lt.ekgame.beatmap_analyzer.utils.MathUtils;
@@ -34,9 +35,12 @@ public class ManiaDifficultyCalculator implements DifficultyCalculator {
 
 	private Array<DifficultyObject> generateDifficultyObjects(Array<ManiaObject> hitObjects, double timeRate,
 			int collumns) {
-		Array<DifficultyObject> difficultyObjects = new Array<>(
-				Arrays.stream(hitObjects.items).map(o -> new DifficultyObject(o, collumns))
-				.toArray(DifficultyObject[]::new));
+		Array<DifficultyObject> difficultyObjects = new Array<>();
+
+		for (ManiaObject hitObject: hitObjects) {
+			DifficultyObject difficultyObject = new DifficultyObject(hitObject, collumns);
+			difficultyObjects.add(difficultyObject);
+		}
 
 		Quicksort.sort(difficultyObjects);
 		// .NET 4.0 framework uses quicksort - an unstable algorithm, which means

@@ -53,7 +53,11 @@ public class OsuSlider extends OsuObject {
 	}
 	
 	private Array<Vec2> cloneSliderPoints() {
-		return new Array<>(Arrays.stream(sliderPoints.items).map(Vec2::clone).toArray(Vec2[]::new));
+		Array<Vec2> cloned = new Array<>();
+		for (Vec2 point: sliderPoints) {
+			cloned.add(point.clone());
+		}
+		return cloned;
 	}
 	
 	public SliderType getSliderType() {

@@ -65,7 +65,11 @@ public class ManiaBeatmap extends Beatmap {
 
 	@Override
 	public int getMaxCombo() {
-		return Arrays.stream(hitObjects.items).mapToInt(HitObject::getCombo).sum();
+		int maxCombo = 0;
+		for (ManiaObject o : hitObjects) {
+			maxCombo += o.getCombo();
+		}
+		return maxCombo;
 	}
 	
 	@Override
