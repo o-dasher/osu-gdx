@@ -7,4 +7,7 @@ public interface Listenable<T> {
     default void addListener(T listener) {
         getListeners().add(listener);
     }
+    default void removeListener(T listener) {
+        getListeners().removeValue(listener, true);
+    }
 }

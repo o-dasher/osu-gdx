@@ -2,7 +2,9 @@ package com.dasher.osugdx.GameScenes.MainMenu;
 
 
 import com.badlogic.gdx.graphics.Texture;
-import com.dasher.osugdx.GameScenes.GameScreen;
+import com.badlogic.gdx.math.Polygon;
+import com.dasher.osugdx.Framework.Stages.SwitcherStage;
+import com.dasher.osugdx.GameScenes.MainMenu.Actors.MenuLogo;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
@@ -10,7 +12,9 @@ import com.dasher.osugdx.OsuGame;
 import org.jetbrains.annotations.NotNull;
 
 public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
-    private MenuStage menuStage;
+    private Texture logoTexture;
+    private MenuLogo menuLogo;
+    private SwitcherStage menuStage;
 
     public MenuScreen(@NotNull OsuGame game) {
         super(game);
@@ -18,21 +22,21 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
     @Override
     public void show() {
+        super.show();
+
+        logoTexture = assetManager.get(assetManager.textures.logo);
+        menuLogo = new MenuLogo(game, logoTexture, true);
+        menuStage = new SwitcherStage(game, viewport, true);
+        menuStage.addActor(menuLogo);
         beatmapManager.startMusicPlaying();
-        Texture menuBackgroundTexture = assetManager.get(assetManager.textures.menuBackground);
-
-       // menuStage = new MenuStage(
-       //         game, viewport, menuBackgroundTexture, menuTitleTexture, menuPlayButtonTexture,
-       //         menuButtonClickSound
-       // );
-
-        //game.inputMultiplexer.addProcessor(menuStage);
+        beatFactory.addListener(menuLogo);
     }
 
     @Override
     public void render(float delta) {
-        //menuStage.act(delta);
-        //menuStage.draw();
+        menuLogo.update(delta);
+        menuStage.act(delta);
+        menuStage.draw();
     }
 
     @Override
@@ -51,7 +55,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
     @Override
     public void hide() {
-
+        beatFactory.removeListener(menuLogo);
     }
 
     @Override

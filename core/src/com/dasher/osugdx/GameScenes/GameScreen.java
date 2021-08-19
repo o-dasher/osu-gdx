@@ -12,6 +12,7 @@ import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
+import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ public abstract class GameScreen implements Screen {
     protected final BeatMapStore beatMapStore;
     protected final BeatmapManager beatmapManager;
     protected final BeatmapUtils beatmapUtils;
+    protected final BeatFactory beatFactory;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -41,5 +43,6 @@ public abstract class GameScreen implements Screen {
         beatMapStore = game.beatMapStore;
         beatmapManager = game.beatmapManager;
         beatmapUtils = game.beatmapUtils;
+        beatFactory = game.beatFactory;
     }
 }

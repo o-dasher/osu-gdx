@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
     @Override
     public void show() {
+        super.show();
+
         logoTexture = assetManager.get(assetManager.textures.logo);
         LogoActor osuLogo = new LogoActor(game, logoTexture);
 
@@ -82,7 +84,6 @@ import org.jetbrains.annotations.NotNull;
     @Override
     public void dispose() {
         introStage.dispose();
-        logoTexture.dispose();
         seeyaSound.dispose();
         welcomeSound.dispose();
     }

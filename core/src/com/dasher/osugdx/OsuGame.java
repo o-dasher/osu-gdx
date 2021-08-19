@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.PolygonBatch;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -33,6 +35,7 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
@@ -42,7 +45,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public Viewport viewport;
 	public GameAssetManager assetManager;
 	public AudioManager audioManager;
-	public Camera camera;
 	public UIConfig uiConfig;
 	public InputMultiplexer inputMultiplexer;
 	public BuffedShapeRenderer shapeRenderer;
@@ -57,6 +59,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public BeatmapManager beatmapManager;
 	public BeatmapUtils beatmapUtils;
 	public BeatFactory beatFactory;
+	public Random random;
 
 	private int WORLD_WIDTH = 800;
 	private final int WORLD_HEIGHT = 600;
@@ -67,7 +70,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 	@Override
 	public void create () {
-		camera = new OrthographicCamera();
 		gameName = "osu!gdx";
 		WORLD_WIDTH = (Gdx.graphics.getWidth() / Gdx.graphics.getHeight()) * WORLD_HEIGHT;
 		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
@@ -80,6 +82,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		audioManager = new AudioManager();
 		glyphLayout = new GlyphLayout();
 		uiConfig = new UIConfig();
+		random = new Random();
 		inputMultiplexer = new InputMultiplexer();
 		assetManager.load();
 		gameIO = new GameIO();
@@ -115,8 +118,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public void render() {
 		ScreenUtils.clear(Color.BLACK);
 
-		batch.setProjectionMatrix(camera.combined);
-		shapeRenderer.setProjectionMatrix(camera.combined);
+		batch.setProjectionMatrix(viewport.getCamera().combined);
+		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		Gdx.input.setInputProcessor(inputMultiplexer);
 
 		Music currentMusic = beatmapManager.getCurrentMusic();
