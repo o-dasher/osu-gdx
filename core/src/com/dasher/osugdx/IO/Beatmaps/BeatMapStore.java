@@ -18,7 +18,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 26;
+    private final int VERSION = 27;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -182,6 +182,7 @@ public class BeatMapStore {
                 System.out.println("Found beatmap with wrong game mode deleting it...");
                 deleteBeatmapFile(beatmapFile);
                 libraryChanged = true;
+                return;
             }
             beatMap.freeResources();
             beatMapSet.beatmaps.add(beatMap);
@@ -275,7 +276,7 @@ public class BeatMapStore {
 
         String mainTrackString = mainTrackStringSB.toString();
         FileHandle mainDefaultTrack = Gdx.files.internal(mainTrackString);
-        String mainDefaultTrackPath = oszParser.parseOSZ(mainDefaultTrack).path();  // TODO DAR UM JEITO DE VERIFICAR SE O MAPA MAIN JA NAO FOI CARREGADO
+        String mainDefaultTrackPath = oszParser.parseOSZ(mainDefaultTrack).path();
 
         Array<String> notMainTracks = new Array<>();
         notMainTracks.add(welcomeOSZ);

@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Audio.AudioManager;
-import com.dasher.osugdx.GameScenes.GameScreen;
+import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
@@ -14,17 +14,19 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
-public class BeatmapManager {
+public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener {
     private final BeatMapStore beatMapStore;
     private BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
     private Music currentMusic;
+    private long timeLastMap;
     private final OsuGame game;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
     private final AudioManager audioManager;
     private boolean isFirstBeatmapLoaded = false;
     private int startMusicPlayingCalls;
+    private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
 
     public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils, AudioManager audioManager) {
         this.game = game;
@@ -119,6 +121,8 @@ public class BeatmapManager {
         }
         setupMusic(newMap);
         currentMap = newMap;
+        timeLastMap = System.nanoTime();
+        onNewBeatmap(currentMap);
         System.out.println("Selected map: " + currentMap.toString());
         isFirstBeatmapLoaded = true;
     }
@@ -136,5 +140,25 @@ public class BeatmapManager {
 
     public boolean isFirstBeatmapLoaded() {
         return isFirstBeatmapLoaded;
+    }
+
+    public long getTimeLastMap() {
+        return timeLastMap;
+    }
+
+    public Music getCurrentMusic() {
+        return currentMusic;
+    }
+
+    @Override
+    public Array<BeatmapManagerListener> getListeners() {
+        return beatmapManagerListeners;
+    }
+
+    @Override
+    public void onNewBeatmap(Beatmap beatmap) {
+        for (BeatmapManagerListener listener: beatmapManagerListeners) {
+            listener.onNewBeatmap(beatmap);
+        }
     }
 }

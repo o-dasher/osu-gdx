@@ -86,7 +86,7 @@ public class SwitcherStage extends FadingStage implements Listenable<SwitcherSta
     }
 
     @Override
-    public void addListener(SwitcherStageListener listener) {
-        switchListeners.add(listener);
+    public Array<SwitcherStageListener> getListeners() {
+        return switchListeners;
     }
 }

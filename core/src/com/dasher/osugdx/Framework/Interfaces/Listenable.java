@@ -1,5 +1,10 @@
 package com.dasher.osugdx.Framework.Interfaces;
 
+import com.badlogic.gdx.utils.Array;
+
 public interface Listenable<T> {
-    void addListener(T listener);
+    Array<T> getListeners();
+    default void addListener(T listener) {
+        getListeners().add(listener);
+    }
 }

@@ -4,14 +4,11 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.dasher.osugdx.IO.GameIO;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -42,6 +39,10 @@ public class OSZParser {
         }
     }
 
+    public String getFolderPathFor(@NotNull FileHandle oszFile) {
+       return beatmapsFolder.path() + "/" + oszFile.nameWithoutExtension();
+    }
+
     /**
      * Parse an *.osz file. Location of decompressed files depends of settings
      * and storage availability.
@@ -53,9 +54,9 @@ public class OSZParser {
         }
 
         System.out.println("Importing BeatmapSet: " + beatmapSetOsz);
-        String folderName = beatmapSetOsz.nameWithoutExtension();
         Array<File> list = new Array<>();
-        final FileHandle folderFile = Gdx.files.external(beatmapsFolder.path() + "/" + folderName);
+        String folderPath = getFolderPathFor((beatmapSetOsz));
+        final FileHandle folderFile = Gdx.files.external(folderPath);
         folderFile.mkdirs();
         list.add(folderFile.file());
 
@@ -100,7 +101,7 @@ public class OSZParser {
 
         if (beatmapSetOsz.type() == Files.FileType.External) {
             beatmapSetOsz.delete();
-            beatMapStore.loadBeatmapSet(Gdx.files.external(beatmapsFolder.path() + folderName));
+            beatMapStore.loadBeatmapSet(Gdx.files.external(folderPath));
         }
 
         return folderFile;

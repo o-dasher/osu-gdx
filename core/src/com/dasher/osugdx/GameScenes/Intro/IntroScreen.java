@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
         logoTexture = assetManager.get(assetManager.textures.logo);
         LogoActor osuLogo = new LogoActor(game, logoTexture);
 
-
         // IntroStage
         introStage = new SwitcherStage(game, viewport, true, true);
         introStage.addActor(osuLogo);

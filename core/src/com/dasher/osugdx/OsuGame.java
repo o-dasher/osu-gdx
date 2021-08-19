@@ -5,6 +5,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
@@ -22,15 +25,19 @@ import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
+import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
 import java.util.concurrent.CompletableFuture;
 
-public class OsuGame extends Game {
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+
+public class OsuGame extends Game implements BeatmapManagerListener {
 	public SpriteBatch batch;
 	public Viewport viewport;
 	public GameAssetManager assetManager;
@@ -49,9 +56,10 @@ public class OsuGame extends Game {
 	public PlatformToast toast;
 	public BeatmapManager beatmapManager;
 	public BeatmapUtils beatmapUtils;
+	public BeatFactory beatFactory;
 
-	private final int WORLD_WIDTH = 1280;
-	private final int WORLD_HEIGHT = 720;
+	private int WORLD_WIDTH = 800;
+	private final int WORLD_HEIGHT = 600;
 
 	public OsuGame(PlatformToast toast) {
 		this.toast = toast;
@@ -61,8 +69,8 @@ public class OsuGame extends Game {
 	public void create () {
 		camera = new OrthographicCamera();
 		gameName = "osu!gdx";
-		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
-		viewport.apply();
+		WORLD_WIDTH = (Gdx.graphics.getWidth() / Gdx.graphics.getHeight()) * WORLD_HEIGHT;
+		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		json = new Json();
@@ -82,6 +90,8 @@ public class OsuGame extends Game {
 		oszParser = new OSZParser(gameIO, beatMapStore);
 		beatMapStore.setOszParser(oszParser);
 		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
+		beatmapManager.addListener(this);
+		beatFactory = new BeatFactory(beatmapManager);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
@@ -96,18 +106,23 @@ public class OsuGame extends Game {
 						if (ex != null) {
 							ex.printStackTrace();
 						}
-						beatmapManager.setCurrentBeatmapSet(beatMapStore.getMainDefaultBeatmapSet());
+						beatmapManager.randomizeCurrentBeatmapSet();
 					});
 		}
 	}
 
 	@Override
-	public void render () {
+	public void render() {
 		ScreenUtils.clear(Color.BLACK);
 
 		batch.setProjectionMatrix(camera.combined);
 		shapeRenderer.setProjectionMatrix(camera.combined);
 		Gdx.input.setInputProcessor(inputMultiplexer);
+
+		Music currentMusic = beatmapManager.getCurrentMusic();
+		if (currentMusic != null && currentMusic.isPlaying()) {
+			beatFactory.update();
+		}
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
 			if (Gdx.graphics.isFullscreen()) {
@@ -139,5 +154,10 @@ public class OsuGame extends Game {
 		assetManager.dispose();
 		batch.dispose();
 		shapeRenderer.dispose();
+	}
+
+	@Override
+	public void onNewBeatmap(Beatmap beatmap) {
+		beatFactory.onNewBeatmap(beatmap);
 	}
 }
