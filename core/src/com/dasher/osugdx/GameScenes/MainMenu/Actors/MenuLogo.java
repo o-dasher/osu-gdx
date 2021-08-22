@@ -7,8 +7,11 @@ import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleByAction;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
@@ -33,8 +36,9 @@ public class MenuLogo extends GameImage implements BeatListener {
     private final Sound heartbeat;
     private final Sound downbeat;
     private final Array<Triangle> triangles = new Array<>();
+    private final float scaleBy = 0.025f;
 
-    public MenuLogo(OsuGame game, Texture texture, Sound heartbeat, Sound downbeat) {
+    public MenuLogo(OsuGame game, Texture texture, Sound heartbeat, Sound downbeat, Sound select, Sound hoverSound) {
         super(game, texture, false);
         shapeRenderer = game.shapeRenderer;
         viewport = game.viewport;
@@ -56,6 +60,16 @@ public class MenuLogo extends GameImage implements BeatListener {
             restartTriangleColor(triangle);
             triangles.add(triangle);
         }
+
+        toEnterExitScaledImage(scaleBy / 2, 0.25f);
+        toButton(select, audioManager);
+        addListener(new ClickListener() {
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                audioManager.playSound(hoverSound);
+                super.enter(event, x, y, pointer, fromActor);
+            }
+        });
     }
 
     public void setAlpha(float alpha) {
@@ -64,13 +78,12 @@ public class MenuLogo extends GameImage implements BeatListener {
     }
 
     private void pulseToBeat(@NotNull TimingPoint timingPoint, boolean isQuad) {
-        float amountScale = 0.025f;
+        float amountScale = scaleBy;
         amountScale = isQuad? amountScale * 2 : amountScale;
 
         float scaleIn = -amountScale;
         float scaleOut = +amountScale;
         float time = (float) (timingPoint.getBeatLength() / 1000) / 2;
-        time = isQuad? time / 2 : time;
 
         addAction(Actions.sequence(
                 Actions.scaleBy(scaleIn, scaleIn, time),

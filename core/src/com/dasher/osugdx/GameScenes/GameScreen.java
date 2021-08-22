@@ -1,5 +1,6 @@
 package com.dasher.osugdx.GameScenes;
 
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -32,6 +33,7 @@ public abstract class GameScreen implements Screen {
     protected final BeatmapUtils beatmapUtils;
     protected final BeatFactory beatFactory;
     protected WorkingBackground workingBackground;
+    protected InputMultiplexer inputMultiplexer;
     protected Viewport uiViewport;
     protected Stage backgroundStage;
 
@@ -50,6 +52,7 @@ public abstract class GameScreen implements Screen {
         beatFactory = game.beatFactory;
         backgroundStage = game.backgroundStage;
         workingBackground = game.workingBackground;
+        inputMultiplexer = game.inputMultiplexer;
         uiViewport = game.uiViewport;
     }
 }

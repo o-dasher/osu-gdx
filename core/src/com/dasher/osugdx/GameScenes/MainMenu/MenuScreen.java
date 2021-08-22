@@ -27,9 +27,11 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         Texture logoTexture = assetManager.get(assetManager.textures.logo);
         Sound heartBeat = assetManager.get(assetManager.sounds.osuLogoHeartBeat);
         Sound downBeat = assetManager.get(assetManager.sounds.osuLogoDownBeat);
+        Sound logoSelect = assetManager.get(assetManager.sounds.osuLogoSelect);
+        Sound hover = assetManager.get(assetManager.sounds.buttonHover);
 
-        menuLogo = new MenuLogo(game, logoTexture, heartBeat, downBeat);
-        logoOverlay = new MenuLogo(game, logoTexture, heartBeat, downBeat);
+        menuLogo = new MenuLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
+        logoOverlay = new MenuLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
         logoOverlay.setAlpha(0.1f);
         logoOverlay.setScale(logoOverlay.getScaleX() * 0.95f);
         menuStage = new SwitcherStage(game, viewport, true);
@@ -39,6 +41,8 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
         beatmapManager.startMusicPlaying();
         beatFactory.addListener(menuLogo);
+
+        inputMultiplexer.addProcessor(menuStage);
     }
 
     @Override
@@ -55,7 +59,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
     @Override
     public void resize(int width, int height) {
-
+        show();
     }
 
     @Override

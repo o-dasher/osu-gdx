@@ -169,6 +169,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		System.out.println("New resolution: " + width + ", " + height);
+		super.resize(width, height);
 	}
 
 	@Override

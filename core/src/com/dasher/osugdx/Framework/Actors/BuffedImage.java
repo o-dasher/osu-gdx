@@ -36,7 +36,6 @@ public class BuffedImage extends Image {
 
     protected void toEnterExitScaledImage(float scaleBy, float scaleAnimationDuration) {
         isEnteredExitScaledImage = true;
-        float scaleBefore = getScaleX();
 
         addListener(new ClickListener() {
             @Override
@@ -46,7 +45,7 @@ public class BuffedImage extends Image {
 
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                event.getTarget().addAction(Actions.scaleTo(scaleBefore, scaleBefore, scaleAnimationDuration));
+                event.getTarget().addAction(Actions.scaleBy(-scaleBy, -scaleBy, scaleAnimationDuration));
             }
         });
     }
@@ -67,5 +66,9 @@ public class BuffedImage extends Image {
                 return super.touchDown(event, x, y, pointer, button);
             }
         });
+    }
+
+    public void toButton(Sound touchDownSound, AudioHandler audioHandler) {
+        toButton(touchDownSound, audioHandler, () -> {});
     }
 }

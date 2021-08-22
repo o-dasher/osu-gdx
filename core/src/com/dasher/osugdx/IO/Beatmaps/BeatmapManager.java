@@ -28,7 +28,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     private final BeatmapUtils beatmapUtils;
     private final AudioManager audioManager;
     private boolean isFirstBeatmapLoaded = false;
-    private int startMusicPlayingCalls;
     private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
 
     public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils, AudioManager audioManager) {
@@ -87,17 +86,19 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
         String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
         String newMusicPath = folder + newMap.getGenerals().getAudioFileName();
-        String currentMusicPath = currentMap != null?
+        String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
                 folder + currentMap.getGenerals().getAudioFileName() : null;
 
         // WE DON'T WANT TO RELOAD THE MUSIC IF IT'S THE SAME MUSIC REPLAYING
-        if (currentMusicPath != null && !newMusicPath.equals(currentMusicPath) || currentMusic == null) {
+        if (currentMusicPath != null && !newMusicPath.equals(currentMusicPath) || currentMusic == null || currentMusic != null) {
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
                 currentMusic = Gdx.audio.newMusic(musicFile);
                 currentMusic.setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
-                    setCurrentMap(newMap);
+                    if (currentMusic == music) {
+                        randomizeCurrentBeatmapSet();
+                    }
                 });
             } catch (Exception e) {
                 toast.log("Failed to create map music!");
@@ -136,13 +137,8 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     public void startMusicPlaying() {
-        startMusicPlayingCalls++;
-        if (startMusicPlayingCalls != 1) {
-            throw new IllegalStateException(
-                    "This should only be called when the screen is switched to the MenuScreen"
-            );
-        } else if (currentMusic != null) {
-            currentMusic.play();
+      if (currentMusic != null) {
+            audioManager.playMusic(currentMusic);
         }
     }
 

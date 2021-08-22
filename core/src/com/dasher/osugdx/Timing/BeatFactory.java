@@ -42,7 +42,6 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         }
 
         Array<TimingPoint> timingPoints = beatmapManager.getCurrentMap().getTimingPoints();
-        double deltaSinceLastMap = (System.nanoTime() - beatmapManager.getTimeLastMap()) / 1e6;
 
         if (currentTimingPoint == null) {
             for (TimingPoint timingPoint: timingPoints) {
@@ -52,7 +51,7 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
             }
         }
 
-        while (currentTimingPointIndex < timingPoints.size - 1 && timingPoints.get(currentTimingPointIndex + 1).getTimestamp() <= deltaSinceLastMap) {
+        while (currentTimingPointIndex < timingPoints.size - 1 && timingPoints.get(currentTimingPointIndex + 1).getTimestamp() <= beatmapManager.getCurrentMusic().getPosition() * 1000) {
             currentTimingPointIndex++;
         }
 

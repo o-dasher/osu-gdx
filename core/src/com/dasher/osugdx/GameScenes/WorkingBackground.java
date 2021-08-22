@@ -6,6 +6,7 @@ import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
@@ -32,6 +33,8 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         textureParameter = game.assetManager.textures.textureParameter;
         currentTexture = texture;
         viewport = game.viewport;
+        setScaling(Scaling.fill);
+        setAlign(Align.center);
         setOrigin(Align.center);
         setBackground(texture);
     }
@@ -43,35 +46,24 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
 
         texture.setFilter(textureParameter.minFilter, textureParameter.magFilter);
         currentTexture = texture;
-        setDrawable(new SpriteDrawable(new Sprite(currentTexture)));
+        float time = 1f / 8f;
+        addAction(Actions.sequence(
+                Actions.fadeOut(time),
+                Actions.run(() -> setDrawable(new SpriteDrawable(new Sprite(currentTexture)))),
+                Actions.fadeIn(time)
+        ));
     }
-
-    boolean appliedW = false;
-    boolean appliedH = false;
 
     @Override
     public void act(float delta) {
         super.act(delta);
 
-        float w = viewport.getWorldWidth() / currentTexture.getWidth();
-        float h = viewport.getWorldHeight() / currentTexture.getHeight();
+        float w = viewport.getWorldWidth() / getWidth();
+        float h = viewport.getWorldHeight() / getHeight();
         float ratio = Math.max(w, h);
 
         setScale(ratio);
-
-        /*
-            Why this you may ask me, this basically ensures that w and h
-             is set correctly because the user may flip their phone etc.
-         */
-        if (!appliedW && !appliedH) {
-            appliedW = ratio == w;
-        }
-        if (!appliedH && !appliedW) {
-            appliedH = ratio == h;
-        }
-        if (appliedW && ratio == w || appliedH && ratio == h) {
-            applyCentering(viewport);
-        }
+        applyCentering(viewport);
     }
 
     public Texture getCurrentTexture() {
