@@ -16,10 +16,8 @@ import org.jetbrains.annotations.NotNull;
 
  public class IntroScreen extends UIScreen {
     private SwitcherStage introStage;
-     private Music seeyaSound;
+    private Music seeyaSound;
     private Music welcomeSound;
-    private boolean didRunSwitchScreenTimerTask = false;
-    private boolean shouldSwitchScreen = false;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);
@@ -48,19 +46,8 @@ import org.jetbrains.annotations.NotNull;
     public void render(float delta) {
         introStage.act(delta);
         introStage.draw();
-        if (!didRunSwitchScreenTimerTask) {
-            Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    shouldSwitchScreen = true;
-                }
-            }, 3);
-        }
-        if (beatMapStore.isLoadedAllBeatmaps() && beatmapManager.isFirstBeatmapLoaded()) {
-            if (shouldSwitchScreen) {
-                didRunSwitchScreenTimerTask = true;
-                introStage.switchScreen(new MenuScreen((game)));
-            }
+        if (beatMapStore.isLoadedAllBeatmaps() && beatmapManager.isFirstBeatmapLoaded() && !welcomeSound.isPlaying()) {
+            introStage.switchScreen(new MenuScreen((game)));
         }
     }
 
@@ -88,6 +75,6 @@ import org.jetbrains.annotations.NotNull;
     public void dispose() {
         introStage.dispose();
         seeyaSound.dispose();
-        //welcomeSound.dispose();
+        welcomeSound.dispose();
     }
 }

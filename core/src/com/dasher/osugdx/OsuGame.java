@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.utils.async.AsyncTask;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -33,6 +35,8 @@ import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -62,7 +66,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public Random random;
 	public WorkingBackground workingBackground;
 	public Stage backgroundStage;
-	public boolean loadedAllMaps = false;
+	public AsyncExecutor asyncExecutor;
 	private Texture tempBackgroundTexture;
 
 	private final int WORLD_WIDTH = 800;
@@ -70,6 +74,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 	public OsuGame(PlatformToast toast) {
 		this.toast = toast;
+	}
+
+	public OsuGame(PlatformToast toast, @NotNull Runnable runnable) {
+		this(toast);
+		runnable.run();
 	}
 
 	@Override
@@ -102,26 +111,18 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		workingBackground = new WorkingBackground(this, tempBackgroundTexture);
 		beatmapManager.addListener(workingBackground);
 		beatmapManager.addListener(this);
+		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
 		backgroundStage = new SwitcherStage(this, viewport, false, false);
 		backgroundStage.addActor(workingBackground);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
+		asyncExecutor.submit(() -> {
+			if (Gdx.app.getType() != Application.ApplicationType.WebGL) {
+				beatMapStore.loadCache();
+			}
 			beatMapStore.loadAllBeatmaps();
-			beatmapManager.randomizeCurrentBeatmapSet();
-		} else {
-			CompletableFuture
-					.runAsync(() -> {
-						oszParser.parseImportDirectory();
-						beatMapStore.loadCache();
-						beatMapStore.loadAllBeatmaps();
-						loadedAllMaps = true;
-					}).whenComplete((res, ex) -> {
-						if (ex != null) {
-							ex.printStackTrace();
-						}
-						Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
-					});
-		}
+			Gdx.app.postRunnable(() -> 	beatmapManager.randomizeCurrentBeatmapSet());
+			return null;
+		});
 	}
 
 	@Override

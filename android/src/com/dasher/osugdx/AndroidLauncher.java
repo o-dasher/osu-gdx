@@ -2,10 +2,12 @@ package com.dasher.osugdx;
 
 import android.Manifest;
 import android.content.Intent;
-import android.hardware.Sensor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
@@ -21,7 +23,14 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-			startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION));
+			if (!Environment.isExternalStorageManager()) {
+				Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+				try {
+					startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
+				} catch (RuntimeException e) {
+					Toast.makeText(this, "You must supply the permission if you want the game to work properly on android 11!", Toast.LENGTH_LONG).show();
+				}
+			}
 		} else {
 			if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
 				requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -41,5 +50,6 @@ public class AndroidLauncher extends AndroidApplication {
 		config.useImmersiveMode = true;
 
 		initialize(new OsuGame(new AndroidToast(this)), config);
+
 	}
 }

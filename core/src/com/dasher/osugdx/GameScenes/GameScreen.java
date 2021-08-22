@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Stages.SwitcherStage;
@@ -18,6 +19,8 @@ import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.ExecutorService;
 
 public abstract class GameScreen implements Screen {
     protected final OsuGame game;
@@ -33,6 +36,7 @@ public abstract class GameScreen implements Screen {
     protected final BeatmapUtils beatmapUtils;
     protected final BeatFactory beatFactory;
     protected WorkingBackground workingBackground;
+    protected AsyncExecutor asyncExecutor;
     protected InputMultiplexer inputMultiplexer;
     protected Viewport uiViewport;
     protected Stage backgroundStage;
@@ -53,6 +57,7 @@ public abstract class GameScreen implements Screen {
         backgroundStage = game.backgroundStage;
         workingBackground = game.workingBackground;
         inputMultiplexer = game.inputMultiplexer;
+        asyncExecutor = game.asyncExecutor;
         uiViewport = game.uiViewport;
     }
 }
