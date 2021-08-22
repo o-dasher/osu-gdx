@@ -16,10 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
  public class IntroScreen extends UIScreen {
     private SwitcherStage introStage;
-    private Texture logoTexture;
-    private Music seeyaSound;
+     private Music seeyaSound;
     private Music welcomeSound;
     private boolean didRunSwitchScreenTimerTask = false;
+    private boolean shouldSwitchScreen = false;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);
@@ -29,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
     public void show() {
         super.show();
 
-        logoTexture = assetManager.get(assetManager.textures.logo);
+        Texture logoTexture = assetManager.get(assetManager.textures.logo);
         LogoActor osuLogo = new LogoActor(game, logoTexture);
 
         // IntroStage
@@ -48,15 +48,18 @@ import org.jetbrains.annotations.NotNull;
     public void render(float delta) {
         introStage.act(delta);
         introStage.draw();
+        if (!didRunSwitchScreenTimerTask) {
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    shouldSwitchScreen = true;
+                }
+            }, 3);
+        }
         if (beatMapStore.isLoadedAllBeatmaps() && beatmapManager.isFirstBeatmapLoaded()) {
-            if (!didRunSwitchScreenTimerTask) {
+            if (shouldSwitchScreen) {
                 didRunSwitchScreenTimerTask = true;
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        introStage.switchScreen(new MenuScreen((game)));
-                    }
-                }, 2);
+                introStage.switchScreen(new MenuScreen((game)));
             }
         }
     }
@@ -85,6 +88,6 @@ import org.jetbrains.annotations.NotNull;
     public void dispose() {
         introStage.dispose();
         seeyaSound.dispose();
-        welcomeSound.dispose();
+        //welcomeSound.dispose();
     }
 }

@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
+import com.dasher.osugdx.GameScenes.GameScreen;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
+import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
@@ -90,11 +93,16 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         // WE DON'T WANT TO RELOAD THE MUSIC IF IT'S THE SAME MUSIC REPLAYING
         if (currentMusicPath != null && !newMusicPath.equals(currentMusicPath) || currentMusic == null) {
             FileHandle musicFile = Gdx.files.external(newMusicPath);
-            currentMusic = Gdx.audio.newMusic(musicFile);
-            currentMusic.setOnCompletionListener((music) -> {
-                System.out.println("Beatmap music finished!");
-                setCurrentMap(newMap);
-            });
+            try {
+                currentMusic = Gdx.audio.newMusic(musicFile);
+                currentMusic.setOnCompletionListener((music) -> {
+                    System.out.println("Beatmap music finished!");
+                    setCurrentMap(newMap);
+                });
+            } catch (Exception e) {
+                toast.log("Failed to create map music!");
+                e.printStackTrace();
+            }
             System.out.println("New music: " + newMusicPath);
         } else {
             System.out.println("Replaying beatmap music: " + newMap.toString());

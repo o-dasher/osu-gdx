@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Config.UIConfig;
+import com.dasher.osugdx.Framework.Stages.SwitcherStage;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
@@ -30,6 +31,9 @@ public abstract class GameScreen implements Screen {
     protected final BeatmapManager beatmapManager;
     protected final BeatmapUtils beatmapUtils;
     protected final BeatFactory beatFactory;
+    protected WorkingBackground workingBackground;
+    protected Viewport uiViewport;
+    protected Stage backgroundStage;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -44,5 +48,8 @@ public abstract class GameScreen implements Screen {
         beatmapManager = game.beatmapManager;
         beatmapUtils = game.beatmapUtils;
         beatFactory = game.beatFactory;
+        backgroundStage = game.backgroundStage;
+        workingBackground = game.workingBackground;
+        uiViewport = game.uiViewport;
     }
 }

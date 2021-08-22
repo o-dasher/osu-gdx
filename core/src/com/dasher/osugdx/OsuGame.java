@@ -6,27 +6,26 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.PolygonBatch;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
+import com.dasher.osugdx.Framework.Stages.SwitcherStage;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
+import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.IO.Beatmaps.OSZParser;
@@ -43,6 +42,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 public class OsuGame extends Game implements BeatmapManagerListener {
 	public SpriteBatch batch;
 	public Viewport viewport;
+	public Viewport uiViewport;
 	public GameAssetManager assetManager;
 	public AudioManager audioManager;
 	public UIConfig uiConfig;
@@ -60,8 +60,12 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public BeatmapUtils beatmapUtils;
 	public BeatFactory beatFactory;
 	public Random random;
+	public WorkingBackground workingBackground;
+	public Stage backgroundStage;
+	public boolean loadedAllMaps = false;
+	private Texture tempBackgroundTexture;
 
-	private int WORLD_WIDTH = 800;
+	private final int WORLD_WIDTH = 800;
 	private final int WORLD_HEIGHT = 600;
 
 	public OsuGame(PlatformToast toast) {
@@ -71,8 +75,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void create () {
 		gameName = "osu!gdx";
-		WORLD_WIDTH = (Gdx.graphics.getWidth() / Gdx.graphics.getHeight()) * WORLD_HEIGHT;
 		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
+		uiViewport = new ScreenViewport();
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		json = new Json();
@@ -93,8 +97,13 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		oszParser = new OSZParser(gameIO, beatMapStore);
 		beatMapStore.setOszParser(oszParser);
 		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
-		beatmapManager.addListener(this);
 		beatFactory = new BeatFactory(beatmapManager);
+		tempBackgroundTexture = new Texture(Gdx.files.internal(assetManager.textures.menuBackground.fileName), true);
+		workingBackground = new WorkingBackground(this, tempBackgroundTexture);
+		beatmapManager.addListener(workingBackground);
+		beatmapManager.addListener(this);
+		backgroundStage = new SwitcherStage(this, viewport, false, false);
+		backgroundStage.addActor(workingBackground);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		if (Gdx.app.getType() == Application.ApplicationType.WebGL) {
 			beatMapStore.loadAllBeatmaps();
@@ -105,11 +114,12 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 						oszParser.parseImportDirectory();
 						beatMapStore.loadCache();
 						beatMapStore.loadAllBeatmaps();
+						loadedAllMaps = true;
 					}).whenComplete((res, ex) -> {
 						if (ex != null) {
 							ex.printStackTrace();
 						}
-						beatmapManager.randomizeCurrentBeatmapSet();
+						Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
 					});
 		}
 	}
@@ -118,8 +128,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public void render() {
 		ScreenUtils.clear(Color.BLACK);
 
+		viewport.apply();
 		batch.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+
 		Gdx.input.setInputProcessor(inputMultiplexer);
 
 		Music currentMusic = beatmapManager.getCurrentMusic();
@@ -140,6 +152,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		if (assetManager.update()) {
 			if (getScreen() == null) {
 				fonts = new Fonts(assetManager);
+				workingBackground.defaultTexture = assetManager.get(assetManager.textures.menuBackground);
+				if (workingBackground.getCurrentTexture().equals(tempBackgroundTexture)) {
+					workingBackground.setBackground(workingBackground.defaultTexture);
+				}
+				tempBackgroundTexture.dispose();
 				setScreen(new IntroScreen(this));
 			}
 		}
@@ -148,8 +165,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
+		// CENTERINGHELPER SETTING SHOLD BE THE FIRST CALL AFTER VIEWPORT UPDATE ALWAYS
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
+		System.out.println("New resolution: " + width + ", " + height);
 	}
 
 	@Override
@@ -158,6 +177,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		batch.dispose();
 		shapeRenderer.dispose();
 	}
+
 
 	@Override
 	public void onNewBeatmap(Beatmap beatmap) {

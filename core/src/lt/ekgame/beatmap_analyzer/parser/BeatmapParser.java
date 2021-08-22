@@ -131,6 +131,14 @@ public class BeatmapParser {
 	private @NotNull Array<BreakPeriod> parseBreaks(@NotNull FilePart part) {
 		Array<BreakPeriod> breaks = new Array<>();
 		for (String string: part.getLines()) {
+			if (string.length() >= 3 && string.trim().startsWith("0,0")) {
+				final String[] parts = string.split("\\s*,\\s*");
+				if (2 < parts.length) {
+					String backgroundFileName = parts[2].substring(1, parts[2].length() - 1);
+					breaks.add(new BreakPeriod(backgroundFileName));
+					continue;
+				}
+			}
 			if (string.trim().startsWith("2, ")) {
 				String[] args = string.split(",");
 				 breaks.add(new BreakPeriod(

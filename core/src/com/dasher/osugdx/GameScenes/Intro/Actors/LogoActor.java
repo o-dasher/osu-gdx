@@ -13,9 +13,10 @@ public class LogoActor extends GameImage implements SwitcherStageListener {
     private final float scaleDuration = 0.5f;
 
     public LogoActor(OsuGame game, Texture logoTexture) {
-        super(game, logoTexture, true);
+        super(game, logoTexture, false);
         setOriginCenter();
         setBaseScale(1);
+        applyCentering();
         float scale = getBaseScale() / 2;
         addAction(Actions.scaleTo(scale, scale, scaleDuration, Interpolation.smooth));
         applyToGameScale();

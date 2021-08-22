@@ -6,6 +6,7 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Null;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
@@ -18,7 +19,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 27;
+    private final int VERSION = 29;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -32,7 +33,6 @@ public class BeatMapStore {
     private final BeatmapUtils beatmapUtils;
     private OSZParser oszParser;
     private boolean finishedLoadingCache = false;
-    private boolean libraryChanged = false;
     private boolean loadedAllBeatmaps = false;
     private BeatMapSet mainDefaultBeatmapSet;
 
@@ -72,7 +72,6 @@ public class BeatMapStore {
     }
 
     private void clearCache() {
-        libraryChanged = true;
         if (libCacheFile.exists()) {
             if (libCacheFile.delete()) {
                 setupCaching();
@@ -106,6 +105,17 @@ public class BeatMapStore {
         }
 
         if (cachedSets != null) {
+            for (BeatMapSet cachedSet: cachedSets) {
+                for (Beatmap beatmap: cachedSet.beatmaps) {
+                    FileHandle file = Gdx.files.external(beatmap.beatmapFilePath);
+                    if (!file.exists()) {
+                        cachedSet.beatmaps.removeValue(beatmap, true);
+                    }
+                }
+                if (cachedSet.beatmaps.isEmpty()) {
+                    cachedSets.removeValue(cachedSet, true);
+                }
+            }
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
             for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
@@ -128,15 +138,20 @@ public class BeatMapStore {
         System.out.println("Cache was read completely, found " + tempCachedBeatmaps.size + " beatmapSets in cache");
     }
 
-    protected void deleteBeatmapFile(@NotNull FileHandle beatmapFile) {
+    protected void deleteBeatmapFile(@Null BeatMapSet beatMapSet, @NotNull FileHandle beatmapFile) {
         if (beatmapFile.exists()) {
             if (beatmapFile.delete()) {
                 System.out.println("Deleted the beatmap to save resources");
             } else {
                 System.out.println("Couldn't deleted beatmap to save resources");
             }
-        } else {
-            libraryChanged = true;
+        }
+        if (beatMapSet != null) {
+            for (Beatmap beatmap: beatMapSet.beatmaps) {
+                if (beatmap.beatmapFilePath.equals(beatmapFile.path())) {
+                    beatMapSet.beatmaps.removeValue(beatmap, true);
+                }
+            }
         }
     }
 
@@ -153,7 +168,7 @@ public class BeatMapStore {
                     break;
                 }
             } else {
-                deleteBeatmapFile(file);
+                deleteBeatmapFile(beatMapSet, file);
             }
         }
         return isMapLoadedInCache;
@@ -170,18 +185,16 @@ public class BeatMapStore {
             return;
         } else {
             System.out.println("Library changed, map not found in cache!");
-            libraryChanged = true;
         }
 
         Beatmap beatMap = beatmapUtils.createMap(beatmapFile);
 
         if (beatMap == null) {
-            deleteBeatmapFile(beatmapFile);
+            deleteBeatmapFile(beatMapSet, beatmapFile);
         } else {
             if (beatMap.getGamemode() != GameMode.OSU) {
                 System.out.println("Found beatmap with wrong game mode deleting it...");
-                deleteBeatmapFile(beatmapFile);
-                libraryChanged = true;
+                deleteBeatmapFile(beatMapSet, beatmapFile);
                 return;
             }
             beatMap.freeResources();
@@ -190,7 +203,7 @@ public class BeatMapStore {
         }
     }
 
-    private void logBeatmapLoaded(Beatmap beatMap) {
+    private void logBeatmapLoaded(@NotNull Beatmap beatMap) {
         System.out.println("Loaded new beatmap: " + beatMap.toString());
     }
 
@@ -224,7 +237,7 @@ public class BeatMapStore {
 
         addNewBeatmapSet(beatMapSet, samePathBeatmapSet, beatMapSetFolder);
         if (loadedAllBeatmaps) {
-            onLibraryChange();
+            saveCache();
         }
 
         return beatMapSet;
@@ -250,10 +263,7 @@ public class BeatMapStore {
         return "New BeatmapSet: " + beatMapSet.beatmapSetFolderPath;
     }
 
-    private void onLibraryChange() {
-        if (!loadedAllBeatmaps) {
-            toast.log("Beatmap library changes detected! caching...");
-        }
+    private void saveCache() {
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
         libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
@@ -310,11 +320,8 @@ public class BeatMapStore {
 
         if (tempCachedBeatmaps.size != beatMapSets.size) {
             System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
-            libraryChanged = true;
         }
-        if (libraryChanged) {
-            onLibraryChange();
-        }
+        saveCache();
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");

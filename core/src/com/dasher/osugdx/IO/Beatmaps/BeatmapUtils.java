@@ -29,7 +29,7 @@ public class BeatmapUtils {
         try {
             beatmap = beatmapParser.parse(reader);
         } catch (BeatmapException e) {
-            beatMapStore.deleteBeatmapFile(mapFile);
+            beatMapStore.deleteBeatmapFile(null, mapFile);
             e.printStackTrace();
         }
 

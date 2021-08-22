@@ -8,13 +8,14 @@ import com.badlogic.gdx.graphics.Texture;
 import org.jetbrains.annotations.NotNull;
 
 public class TextureHolder extends AssetHolder<Texture> {
-    final TextureLoader.TextureParameter textureParameter = new TextureLoader.TextureParameter();
+    public final TextureLoader.TextureParameter textureParameter = new TextureLoader.TextureParameter();
 
     public AssetDescriptor<Texture> logo;
     public AssetDescriptor<Texture> menuBackground;
 
     public TextureHolder(@NotNull AssetPaths assetPaths) {
         super(assetPaths.textures.path());
+
         textureParameter.genMipMaps = true;
         textureParameter.minFilter = Texture.TextureFilter.MipMapLinearLinear;
         textureParameter.magFilter = Texture.TextureFilter.MipMapLinearLinear;

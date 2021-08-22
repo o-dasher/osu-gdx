@@ -27,6 +27,7 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
     private int currentTimingPointIndex = 0;
     private TimingPoint currentTimingPoint = null;
     private long timeSinceLastBeat = 0;
+    private int beatAccumulator = 0;
 
     @Override
     public void update(float delta) {
@@ -65,7 +66,12 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
 
         if (timePassedSinceLastBeat > beatLength) {
             timeSinceLastBeat = System.nanoTime();
-            onNewBeat(currentTimingPoint);
+            if (beatAccumulator % 4 == 0) {
+                onFourthBeat(currentTimingPoint);
+            } else {
+                onNewBeat(currentTimingPoint);
+            }
+            beatAccumulator++;
         }
     }
 
@@ -85,7 +91,7 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
     @Override
     public void onFourthBeat(TimingPoint timingPoint) {
         for (BeatListener listener: getListeners()) {
-            listener.onNewBeat(getBeatFor(listener, timingPoint));
+            listener.onFourthBeat(getBeatFor(listener, timingPoint));
         }
     }
 
@@ -99,5 +105,6 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         currentTimingPointIndex = 0;
         currentTimingPoint = null;
         timeSinceLastBeat = 0;
+        beatAccumulator = 0;
     }
 }
