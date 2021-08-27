@@ -99,8 +99,11 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
         pulseToBeat(timingPoint, true);
     }
 
-    public void colorLayer() {
-        shapeRenderer.setColor(Color.PINK);
+    private final Color colorLayerColor = Color.PINK.cpy();
+
+    private void colorLayer() {
+        colorLayerColor.a = getParent().getColor().a;
+        shapeRenderer.setColor(colorLayerColor);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.circle(
                 getX() + getWidth() / 2,
@@ -111,13 +114,9 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     }
 
     @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-    }
-
-    @Override
     public void act(float delta) {
         baseVec.set(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
+        colorLayer();
         super.act(delta);
     }
 

@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
-import com.badlogic.gdx.utils.async.AsyncTask;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -22,7 +21,6 @@ import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
-import com.dasher.osugdx.Framework.Stages.SwitcherStage;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.Graphics.Fonts;
@@ -112,7 +110,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatmapManager.addListener(workingBackground);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
-		backgroundStage = new SwitcherStage(this, viewport, false, false);
+		backgroundStage = new Stage(viewport);
 		backgroundStage.addActor(workingBackground);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		asyncExecutor.submit(() -> {

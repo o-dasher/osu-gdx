@@ -8,7 +8,7 @@ import com.dasher.osugdx.OsuGame;
 public class OverlayLogo extends MenuLogo {
     public OverlayLogo(OsuGame game, Texture texture, Sound heartbeat, Sound downbeat, Music select, Sound hoverSound) {
         super(game, texture, heartbeat, downbeat, select, hoverSound);
-        setAlpha(0.1f);
+        getColor().a = 0.5f;
         setScale(getScaleX() * 0.95f);
     }
 }

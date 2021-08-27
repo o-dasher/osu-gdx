@@ -5,9 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
-import com.dasher.osugdx.Framework.Stages.SwitcherStage;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.dasher.osugdx.Framework.Stages.FadingStage;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.LogoButton;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.MainLogo;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.OverlayLogo;
@@ -20,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private MainLogo menuLogo;
     private OverlayLogo logoOverlay;
-    private SwitcherStage menuStage;
-    private SwitcherStage buttonsStage;
+    private Stage menuStage;
+    private Stage buttonsStage;
 
     public MenuScreen(@NotNull OsuGame game) {
         super(game);
@@ -47,11 +46,10 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         LogoButton optionsButton = new LogoButton(optionsButtonTex, menuLogo, 2);
         LogoButton exitButton = new LogoButton(exitButtonTex, menuLogo, 3);
 
-        menuStage = new SwitcherStage(game, viewport, true);
-        menuStage.addActor(logoOverlay);
+        menuStage = new Stage(viewport);
         menuStage.addActor(menuLogo);
 
-        buttonsStage = new SwitcherStage(game, viewport, true);
+        buttonsStage = new Stage(viewport);
         buttonsStage.addActor(playButton);
         buttonsStage.addActor(optionsButton);
         buttonsStage.addActor(exitButton);
@@ -68,12 +66,14 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         viewport.apply(true);
         backgroundStage.act(delta);
         backgroundStage.draw();
-        logoOverlay.setPosition(menuLogo.getX(), menuLogo.getY());
         buttonsStage.act(delta);
         buttonsStage.draw();
-        menuLogo.colorLayer();
         menuStage.act(delta);
         menuStage.draw();
+        logoOverlay.setPosition(menuLogo.getX(), menuLogo.getY());
+        batch.begin();
+        logoOverlay.draw(batch, logoOverlay.getColor().a);
+        batch.end();
     }
 
     @Override

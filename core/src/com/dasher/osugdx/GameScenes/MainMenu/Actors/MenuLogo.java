@@ -31,8 +31,4 @@ public abstract class MenuLogo extends GameImage {
         setBaseScale(0.5f);
         setScale(getBaseScale());
     }
-
-    public void setAlpha(float alpha) {
-        addAction(Actions.alpha(alpha));
-    }
 }
