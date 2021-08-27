@@ -56,14 +56,9 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
 
     @Override
     public void act(float delta) {
-        super.act(delta);
-
-        float w = viewport.getWorldWidth() / getWidth();
-        float h = viewport.getWorldHeight() / getHeight();
-        float ratio = Math.max(w, h);
-
-        setScale(ratio);
+        setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
         applyCentering(viewport);
+        super.act(delta);
     }
 
     public Texture getCurrentTexture() {
@@ -73,8 +68,10 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
 
     @Override
     public void onNewBeatmap(@NotNull Beatmap beatmap) {
+        boolean hasBackground = false;
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
+                hasBackground = true;
                 FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
                 String bgFileName = breakPeriod.getBackgroundFileName();
                 FileHandle bgFile = Gdx.files.external(beatmapFile.parent() + "/" + bgFileName);
@@ -84,6 +81,9 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
                     setBackground(defaultTexture);
                 }
             }
+        }
+        if (!hasBackground) {
+            setBackground(defaultTexture);
         }
     }
 }

@@ -11,13 +11,11 @@ public class GameImage extends CenteredImage {
     public GameImage(OsuGame game, boolean forceCenter) {
         super(forceCenter);
         this.game = game;
-        applyToGameScale();
     }
 
     public GameImage(OsuGame game, Texture texture, boolean forceCenter) {
         super(texture, forceCenter);
         this.game = game;
-        applyToGameScale();
     }
 
     public void setBaseScale(float baseScale) {
@@ -27,9 +25,5 @@ public class GameImage extends CenteredImage {
 
     public float getBaseScale() {
         return baseScale;
-    }
-
-    public void applyToGameScale() {
-        setScale((baseScale == 0? getScaleX() : baseScale) * game.uiConfig.getScale());
     }
 }

@@ -116,6 +116,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		backgroundStage.addActor(workingBackground);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		asyncExecutor.submit(() -> {
+			oszParser.parseImportDirectory();
 			if (Gdx.app.getType() != Application.ApplicationType.WebGL) {
 				beatMapStore.loadCache();
 			}
@@ -153,7 +154,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		if (assetManager.update()) {
 			if (getScreen() == null) {
 				fonts = new Fonts(assetManager);
-				workingBackground.defaultTexture = assetManager.get(assetManager.textures.menuBackground);
+				workingBackground.defaultTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
 				if (workingBackground.getCurrentTexture().equals(tempBackgroundTexture)) {
 					workingBackground.setBackground(workingBackground.defaultTexture);
 				}

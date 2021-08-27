@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.GameScreen;
@@ -87,10 +88,10 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
         String newMusicPath = folder + newMap.getGenerals().getAudioFileName();
         String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
-                folder + currentMap.getGenerals().getAudioFileName() : null;
+                folder + currentMap.getGenerals().getAudioFileName() : "";
 
         // WE DON'T WANT TO RELOAD THE MUSIC IF IT'S THE SAME MUSIC REPLAYING
-        if (currentMusicPath != null && !newMusicPath.equals(currentMusicPath) || currentMusic == null || currentMusic != null) {
+        if (!newMusicPath.equals(currentMusicPath)) {
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
                 currentMusic = Gdx.audio.newMusic(musicFile);
@@ -112,7 +113,13 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         Screen gameScreen = game.getScreen();
 
         if (gameScreen instanceof UIScreen) {
-            currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+            try {
+                currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+            } catch (GdxRuntimeException e) {
+                toast.log("Unexpected error while loading beatmap music!");
+                randomizeCurrentBeatmapSet();
+                return;
+            }
         }
         if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
             audioManager.playMusic(currentMusic);

@@ -9,6 +9,9 @@ public interface AudioHandler {
     default void playMusic(@NotNull Music music) {
         music.play();
     }
+    default void playMusicSFX(@NotNull Music music) {
+        music.play();
+    }
     default void stopMusic(@NotNull Music music) { music.stop(); }
     default void playSound(@NotNull Sound sound) {
         sound.play();

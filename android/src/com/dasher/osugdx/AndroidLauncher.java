@@ -7,6 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
@@ -22,12 +26,12 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
 			if (!Environment.isExternalStorageManager()) {
 				Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-				try {
-					startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
-				} catch (RuntimeException e) {
+				startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
+				if (!Environment.isExternalStorageManager()) {
 					Toast.makeText(this, "You must supply the permission if you want the game to work properly on android 11!", Toast.LENGTH_LONG).show();
 				}
 			}
@@ -41,15 +45,14 @@ public class AndroidLauncher extends AndroidApplication {
 		}
 
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+		config.hideStatusBar = true;
 		config.useCompass = false;
+		config.useImmersiveMode = true;
 		config.useAccelerometer = false;
 		config.useGyroscope = false;
-		config.hideStatusBar = true;
 		config.useWakelock = true;
 		config.useRotationVectorSensor = false;
-		config.useImmersiveMode = true;
 
 		initialize(new OsuGame(new AndroidToast(this)), config);
-
 	}
 }

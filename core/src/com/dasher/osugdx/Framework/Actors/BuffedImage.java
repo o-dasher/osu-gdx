@@ -49,26 +49,4 @@ public class BuffedImage extends Image {
             }
         });
     }
-
-    public void setOriginCenter() {
-        setOrigin(getWidth() / 2, getHeight() / 2);
-    }
-
-    public void toButton(Sound touchDownSound, AudioHandler audioHandler, Runnable onTouchDown) {
-        if (!isEnteredExitScaledImage) {
-            toEnterExitScaledImage();
-        }
-        addListener(new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                audioHandler.playSound(touchDownSound);
-                onTouchDown.run();
-                return super.touchDown(event, x, y, pointer, button);
-            }
-        });
-    }
-
-    public void toButton(Sound touchDownSound, AudioHandler audioHandler) {
-        toButton(touchDownSound, audioHandler, () -> {});
-    }
 }
