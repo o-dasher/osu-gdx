@@ -15,9 +15,9 @@ public abstract class MenuLogo extends GameImage {
     protected final Sound heartbeat;
     protected final Sound downbeat;
     protected final Sound hoverSound;
-    protected final Music select;
+    protected final Sound select;
 
-    public MenuLogo(OsuGame game, Texture texture, Sound heartbeat, Sound downbeat, Music select, Sound hoverSound) {
+    public MenuLogo(OsuGame game, Texture texture, Sound heartbeat, Sound downbeat, Sound select, Sound hoverSound) {
         super(game, texture, false);
         audioManager = game.audioManager;
         this.heartbeat = heartbeat;

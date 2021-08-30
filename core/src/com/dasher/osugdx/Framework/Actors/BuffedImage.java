@@ -2,6 +2,7 @@ package com.dasher.osugdx.Framework.Actors;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -48,5 +49,14 @@ public class BuffedImage extends Image {
                 event.getTarget().addAction(Actions.scaleBy(-scaleBy, -scaleBy, scaleAnimationDuration));
             }
         });
+    }
+
+    public boolean hasActionOf(Class<? extends Action> klass) {
+        for (Action action: getActions()) {
+            if (action.getClass().equals(klass)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

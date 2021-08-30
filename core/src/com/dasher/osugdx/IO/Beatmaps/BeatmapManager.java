@@ -99,7 +99,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                     }
                 });
             } catch (Exception e) {
-                toast.log("Failed to create map music!");
+                toast.log("Failed to create map music for: " + musicFile.name());
                 e.printStackTrace();
             }
             System.out.println("New music: " + newMusicPath);
