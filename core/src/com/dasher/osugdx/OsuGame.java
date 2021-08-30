@@ -1,10 +1,10 @@
 package com.dasher.osugdx;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -37,7 +38,6 @@ import com.dasher.osugdx.assets.GameAssetManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
@@ -65,7 +65,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public WorkingBackground workingBackground;
 	public Stage backgroundStage;
 	public AsyncExecutor asyncExecutor;
-	private Texture tempBackgroundTexture;
 
 	private final int WORLD_WIDTH = 800;
 	private final int WORLD_HEIGHT = 600;
@@ -105,23 +104,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatMapStore.setOszParser(oszParser);
 		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
 		beatFactory = new BeatFactory(beatmapManager);
-		tempBackgroundTexture = new Texture(Gdx.files.internal(assetManager.textures.menuBackground.fileName), true);
-		workingBackground = new WorkingBackground(this, tempBackgroundTexture);
-		beatmapManager.addListener(workingBackground);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
 		backgroundStage = new Stage(viewport);
-		backgroundStage.addActor(workingBackground);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-		asyncExecutor.submit(() -> {
-			oszParser.parseImportDirectory();
-			if (Gdx.app.getType() != Application.ApplicationType.WebGL) {
-				beatMapStore.loadCache();
-			}
-			beatMapStore.loadAllBeatmaps();
-			Gdx.app.postRunnable(() -> 	beatmapManager.randomizeCurrentBeatmapSet());
-			return null;
-		});
 	}
 
 	@Override
@@ -152,11 +138,17 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		if (assetManager.update()) {
 			if (getScreen() == null) {
 				fonts = new Fonts(assetManager);
-				workingBackground.defaultTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
-				if (workingBackground.getCurrentTexture().equals(tempBackgroundTexture)) {
-					workingBackground.setBackground(workingBackground.defaultTexture);
-				}
-				tempBackgroundTexture.dispose();
+				Texture bgTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
+				workingBackground = new WorkingBackground(this, bgTexture);
+				backgroundStage.addActor(workingBackground);
+				beatmapManager.addListener(workingBackground);
+				asyncExecutor.submit(() -> {
+					oszParser.parseImportDirectory();
+					beatMapStore.loadCache();
+					beatMapStore.loadAllBeatmaps();
+					Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
+					return null;
+				});
 				setScreen(new IntroScreen(this));
 			}
 		}

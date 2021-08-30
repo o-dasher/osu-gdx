@@ -101,7 +101,7 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
 
     private final Color colorLayerColor = Color.PINK.cpy();
 
-    private void colorLayer() {
+    public void colorLayer() {
         colorLayerColor.a = getParent().getColor().a;
         shapeRenderer.setColor(colorLayerColor);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -116,7 +116,6 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     @Override
     public void act(float delta) {
         baseVec.set(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
-        colorLayer();
         super.act(delta);
     }
 

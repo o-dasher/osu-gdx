@@ -12,11 +12,13 @@
 
  import org.jetbrains.annotations.NotNull;
 
- public class IntroScreen extends UIScreen {
+ public
+ class IntroScreen extends UIScreen {
     private FadingStage introStage;
     private Music seeyaSound;
     private Music welcomeSound;
     private LogoActor osuLogo;
+    private boolean didSetupBeatmaps;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);
@@ -27,7 +29,7 @@
         super.show();
 
         Texture logoTexture = assetManager.get(assetManager.textures.logo);
-        osuLogo = new LogoActor(game, logoTexture);
+        osuLogo = new LogoActor(game, logoTexture, cleanupTime);
 
         // IntroStage
         introStage = new FadingStage(viewport, cleanupTime);
@@ -42,8 +44,11 @@
 
     @Override
     public void render(float delta) {
+        viewport.apply(true);
+
         introStage.act(delta);
         introStage.draw();
+
         if (beatMapStore.isLoadedAllBeatmaps() && beatmapManager.isFirstBeatmapLoaded() && !welcomeSound.isPlaying()) {
             introStage.fadeOut();
             osuLogo.switchCleanup();

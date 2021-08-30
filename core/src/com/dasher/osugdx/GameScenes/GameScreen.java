@@ -14,6 +14,7 @@ import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
+import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
@@ -33,12 +34,13 @@ public abstract class GameScreen implements Screen {
     protected final BeatmapManager beatmapManager;
     protected final BeatmapUtils beatmapUtils;
     protected final BeatFactory beatFactory;
-    protected WorkingBackground workingBackground;
-    protected AsyncExecutor asyncExecutor;
-    protected InputMultiplexer inputMultiplexer;
-    protected Viewport uiViewport;
-    protected Stage backgroundStage;
+    protected final WorkingBackground workingBackground;
+    protected final InputMultiplexer inputMultiplexer;
+    protected final Viewport uiViewport;
+    protected final Stage backgroundStage;
+    protected final OSZParser oszParser;
     protected float cleanupTime = 0.5f;
+    protected AsyncExecutor asyncExecutor;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -57,6 +59,7 @@ public abstract class GameScreen implements Screen {
         workingBackground = game.workingBackground;
         inputMultiplexer = game.inputMultiplexer;
         asyncExecutor = game.asyncExecutor;
+        oszParser = game.oszParser;
         uiViewport = game.uiViewport;
     }
 
@@ -66,6 +69,6 @@ public abstract class GameScreen implements Screen {
             public void run() {
                 game.setScreen(screen);
             }
-        }, cleanupTime);
+        }, cleanupTime * 2);
     }
 }

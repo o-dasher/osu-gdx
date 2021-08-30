@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 
+import org.jetbrains.annotations.NotNull;
+
 public class CenteredImage extends BuffedImage {
     private final boolean forceCenter;
 
@@ -19,7 +21,7 @@ public class CenteredImage extends BuffedImage {
         applyCentering();
     }
 
-    public void applyCentering(Viewport viewport) {
+    public void applyCentering(@NotNull Viewport viewport) {
         setPosition(
                 viewport.getWorldWidth() / 2 - getWidth() / 2,
                 viewport.getWorldHeight() / 2 - getHeight() / 2
@@ -30,39 +32,11 @@ public class CenteredImage extends BuffedImage {
         setPosition(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
     }
 
-    private void forceCentering() {
+    @Override
+    public void act(float delta) {
+        super.act(delta);
         if (forceCenter) {
             applyCentering();
         }
-    }
-
-    @Override
-    public void setSize(float width, float height) {
-        super.setSize(width, height);
-        forceCentering();
-    }
-
-    @Override
-    public void setScale(float scaleXY) {
-        super.setScale(scaleXY);
-        forceCentering();
-    }
-
-    @Override
-    public void setScaleX(float scaleX) {
-        super.setScaleX(scaleX);
-        forceCentering();
-    }
-
-    @Override
-    public void setScaleY(float scaleY) {
-        super.setScaleY(scaleY);
-        forceCentering();
-    }
-
-    @Override
-    public void setScale(float scaleX, float scaleY) {
-        super.setScale(scaleX, scaleY);
-        forceCentering();
     }
 }

@@ -5,9 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -22,8 +21,8 @@ import lt.ekgame.beatmap_analyzer.beatmap.BreakPeriod;
 
 public class WorkingBackground extends GameImage implements BeatmapManagerListener {
     private final Viewport viewport;
-    private Texture currentTexture;
     private final TextureLoader.TextureParameter textureParameter;
+    private boolean isFirstBGChange = true;
 
     public Texture defaultTexture;
 
@@ -31,27 +30,38 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         super(game, texture, false);
         defaultTexture = texture;
         textureParameter = game.assetManager.textures.textureParameter;
-        currentTexture = texture;
         viewport = game.viewport;
         setScaling(Scaling.fill);
         setAlign(Align.center);
         setOrigin(Align.center);
-        setBackground(texture);
     }
 
-    public void setBackground(Texture texture) {
+    public void setBackground(@NotNull Texture texture) {
+        TextureRegionDrawable drawable = (TextureRegionDrawable) getDrawable();
+        Texture currentTexture = drawable.getRegion().getTexture();
+
+        if (texture.equals(currentTexture)) {
+            return;
+        }
         if (!currentTexture.equals(defaultTexture)) {
             currentTexture.dispose();
         }
 
+        float time = 1f / (isFirstBGChange? 4 : 8);
+
+        if (isFirstBGChange) {
+            isFirstBGChange = false;
+            getColor().a = 0;
+        }
+
         texture.setFilter(textureParameter.minFilter, textureParameter.magFilter);
-        currentTexture = texture;
-        float time = 1f / 8f;
-        addAction(Actions.sequence(
-                Actions.fadeOut(time),
-                Actions.run(() -> setDrawable(new SpriteDrawable(new Sprite(currentTexture)))),
-                Actions.fadeIn(time)
-        ));
+        addAction(
+                Actions.sequence(
+                        Actions.fadeOut(time),
+                        Actions.run(() -> drawable.getRegion().setTexture(texture)),
+                        Actions.fadeIn(time)
+                )
+        );
     }
 
     @Override
@@ -60,11 +70,6 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         applyCentering(viewport);
         super.act(delta);
     }
-
-    public Texture getCurrentTexture() {
-        return currentTexture;
-    }
-
 
     @Override
     public void onNewBeatmap(@NotNull Beatmap beatmap) {
@@ -75,11 +80,8 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
                 FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
                 String bgFileName = breakPeriod.getBackgroundFileName();
                 FileHandle bgFile = Gdx.files.external(beatmapFile.parent() + "/" + bgFileName);
-                if (bgFile.exists()) {
-                    setBackground(new Texture(bgFile, true));
-                } else {
-                    setBackground(defaultTexture);
-                }
+                setBackground(bgFile.exists()? new Texture(bgFile, true) : defaultTexture);
+                break;
             }
         }
         if (!hasBackground) {
