@@ -66,8 +66,6 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
     @Override
     public void render(float delta) {
-        viewport.apply(true);
-
         // ACT
         backgroundStage.act(delta);
         buttonsStage.act(delta);
@@ -75,6 +73,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         logoOverlay.setPosition(menuLogo.getX(), menuLogo.getY());
 
         // DRAW
+        viewport.apply(true);
         backgroundStage.draw();
         menuLogo.renderBeatCircles(delta);
         buttonsStage.draw();

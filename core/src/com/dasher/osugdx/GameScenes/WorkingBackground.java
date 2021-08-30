@@ -23,7 +23,6 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
     private final Viewport viewport;
     private final TextureLoader.TextureParameter textureParameter;
     private boolean isFirstBGChange = true;
-
     public Texture defaultTexture;
 
     public WorkingBackground(@NotNull OsuGame game, Texture texture) {

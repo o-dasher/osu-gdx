@@ -43,6 +43,9 @@ public class TimingPoint {
 	public double getBeatLength() {
 		return beatLength;
 	}
+	public double getBeatLengthS() {
+		return beatLength / 1000;
+	}
 
 	public int getMeter() {
 		return meter;

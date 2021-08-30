@@ -25,7 +25,6 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     private final float scaleBy = 0.025f;
     private final ShapeRenderer shapeRenderer;
     private final Vector2 baseVec;
-    private boolean isClicked;
     public final Array<LogoButton> buttons = new Array<>();
 
     public MainLogo(
@@ -46,27 +45,22 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
                 select.stop();
                 select.play();
                 boolean isClicked = !(getX() == baseVec.x && getY() == baseVec.y);
-                onClick(isClicked);
+                float time = 0.25f;
+                if (isClicked) {
+                    for (LogoButton logoButton: buttons) {
+                        logoButton.addAction(Actions.fadeOut(time));
+                    }
+                    addAction(Actions.moveTo(baseVec.x, baseVec.y, time));
+                } else {
+                    for (LogoButton logoButton: buttons) {
+                        logoButton.addAction(Actions.fadeIn(time));
+                    }
+                    float moveTo = getX() - getWidth() / 5;
+                    addAction(Actions.moveTo(moveTo, baseVec.y, time));
+                }
                 return false;
             }
         });
-    }
-
-    private void onClick(boolean isClicked) {
-        this.isClicked = isClicked;
-        float time = 0.25f;
-        if (isClicked) {
-            for (LogoButton logoButton: buttons) {
-                logoButton.addAction(Actions.fadeOut(time));
-            }
-            addAction(Actions.moveTo(baseVec.x, baseVec.y, time));
-        } else {
-            for (LogoButton logoButton: buttons) {
-                logoButton.addAction(Actions.fadeIn(time));
-            }
-            float moveTo = getX() - getWidth() / 5;
-            addAction(Actions.moveTo(moveTo, baseVec.y, time));
-        }
     }
 
     private void pulseToBeat(@NotNull TimingPoint timingPoint, boolean isQuad) {
@@ -113,17 +107,15 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
         shapeRenderer.circle(
                 getX() + getWidth() / 2,
                 getY() + getHeight() / 2,
-                getWidth() * 0.45f * getScaleX(),
-                64
+                getWidth() * 0.45f * getScaleX()
         );
         shapeRenderer.end();
     }
 
     public void renderBeatCircles(float delta) {
-        Gdx.gl.glLineWidth(2);
         Gdx.gl.glEnable(GL30.GL_BLEND);
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (BeatCircle beatCircle: beatCircles) {
             beatCircle.update(delta);
             if (beatCircle.color.a == 0) {
@@ -135,12 +127,10 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
         }
         shapeRenderer.end();
         Gdx.gl.glDisable(GL30.GL_BLEND);
-        Gdx.gl.glLineWidth(1);
     }
 
     @Override
     public void act(float delta) {
-        baseVec.set(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
         for (Action action: getActions()) {
             if (action instanceof MoveToAction) {
                 for (LogoButton logoButton: buttons) {
@@ -155,10 +145,9 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     @Override
     public void onResize() {
         baseVec.set(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
-        onClick(true);
-    }
-
-    public boolean isClicked() {
-        return isClicked;
+        setPosition(baseVec.x, baseVec.y);
+        for (LogoButton logoButton: buttons) {
+            logoButton.getColor().a = 0;
+        }
     }
 }
