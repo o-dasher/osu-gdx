@@ -18,7 +18,6 @@
     private Music seeyaSound;
     private Music welcomeSound;
     private LogoActor osuLogo;
-    private boolean didSetupBeatmaps;
 
     public IntroScreen(@NotNull OsuGame game) {
         super(game);

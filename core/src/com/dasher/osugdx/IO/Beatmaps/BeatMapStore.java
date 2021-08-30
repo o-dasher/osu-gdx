@@ -105,16 +105,25 @@ public class BeatMapStore {
         }
 
         if (cachedSets != null) {
+            Array<BeatMapSet> invalidSets = new Array<>();
+            Array<Beatmap> invalidBeatmaps = new Array<>();
             for (BeatMapSet cachedSet: cachedSets) {
                 for (Beatmap beatmap: cachedSet.beatmaps) {
                     FileHandle file = Gdx.files.external(beatmap.beatmapFilePath);
                     if (!file.exists()) {
-                        cachedSet.beatmaps.removeValue(beatmap, true);
+                        invalidBeatmaps.add(beatmap);
                     }
                 }
-                if (cachedSet.beatmaps.isEmpty()) {
-                    cachedSets.removeValue(cachedSet, true);
+                for (Beatmap beatmap: invalidBeatmaps) {
+                    cachedSet.beatmaps.removeValue(beatmap, true);
                 }
+                invalidBeatmaps.clear();
+                if (cachedSet.beatmaps.isEmpty()) {
+                    invalidSets.add(cachedSet);
+                }
+            }
+            for (BeatMapSet beatMapSet: invalidSets) {
+                cachedSets.removeValue(beatMapSet, true);
             }
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);

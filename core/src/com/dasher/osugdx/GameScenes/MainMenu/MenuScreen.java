@@ -1,8 +1,6 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.dasher.osugdx.Audio.GameSound;

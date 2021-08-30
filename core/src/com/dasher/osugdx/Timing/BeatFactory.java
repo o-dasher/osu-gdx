@@ -76,7 +76,12 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
 
     public TimingPoint getBeatFor(@NotNull BeatListener beatListener, @NotNull TimingPoint timingPoint) {
         TimingPoint clone = timingPoint.clone();
-        clone.setBeatLength(timingPoint.getBeatLength() / beatListener.getBeatDivisor());
+        clone.setBeatLength(
+                Math.max(
+                        beatListener.getMinimalBeatLength(),
+                        clone.getBeatLength() / beatListener.getBeatDivisor()
+                )
+        );
         return clone;
     }
 

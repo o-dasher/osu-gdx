@@ -95,13 +95,13 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     @Override
     public void onNewBeat(TimingPoint timingPoint) {
         pulseToBeat(timingPoint, false);
-        beatCircles.add(new BeatCircle(this));
+        beatCircles.add(new BeatCircle(this, timingPoint));
     }
 
     @Override
     public void onFourthBeat(TimingPoint timingPoint) {
         pulseToBeat(timingPoint, true);
-        beatCircles.add(new FourthBeatCircle(this));
+        beatCircles.add(new FourthBeatCircle(this, timingPoint));
     }
 
     private final Color colorLayerColor = Color.PINK.cpy();
@@ -120,7 +120,7 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     }
 
     public void renderBeatCircles(float delta) {
-        Gdx.gl.glLineWidth(4);
+        Gdx.gl.glLineWidth(2);
         Gdx.gl.glEnable(GL30.GL_BLEND);
         Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -128,11 +128,10 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
             beatCircle.update(delta);
             if (beatCircle.color.a == 0) {
                 beatCircles.removeValue(beatCircle, true);
-                continue;
+            } else {
+                shapeRenderer.setColor(beatCircle.color);
+                shapeRenderer.circle(beatCircle.x, beatCircle.y, beatCircle.radius);
             }
-            shapeRenderer.setColor(beatCircle.color);
-            shapeRenderer.circle(beatCircle.x, beatCircle.y, beatCircle.radius, 128);
-
         }
         shapeRenderer.end();
         Gdx.gl.glDisable(GL30.GL_BLEND);
