@@ -82,8 +82,10 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
                 Actions.run(() -> {
                     if (isQuad) {
                         downbeat.play();
+                        beatCircles.add(new FourthBeatCircle(this, timingPoint));
                     } else {
                         heartbeat.play();
+                        beatCircles.add(new BeatCircle(this, timingPoint));
                     }
                 }),
                 Actions.scaleBy(scaleOut, scaleOut, time)
@@ -95,13 +97,11 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     @Override
     public void onNewBeat(TimingPoint timingPoint) {
         pulseToBeat(timingPoint, false);
-        beatCircles.add(new BeatCircle(this, timingPoint));
     }
 
     @Override
     public void onFourthBeat(TimingPoint timingPoint) {
         pulseToBeat(timingPoint, true);
-        beatCircles.add(new FourthBeatCircle(this, timingPoint));
     }
 
     private final Color colorLayerColor = Color.PINK.cpy();
