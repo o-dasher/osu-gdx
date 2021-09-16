@@ -1,19 +1,21 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
-
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.dasher.osugdx.Audio.GameSound;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.*;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
+import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
 import org.jetbrains.annotations.NotNull;
+
 
 public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private MainLogo menuLogo;
     private OverlayLogo logoOverlay;
     private Stage menuStage;
+    private Stage overlayStage;
     private Stage buttonsStage;
     private final Texture logoTexture;
     private final GameSound heartBeat;
@@ -44,14 +46,17 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         menuLogo = new MainLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
         logoOverlay = new OverlayLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
 
-        LogoButton playButton = new PlayButton(playButtonTex, menuLogo, hover, 1);
-        LogoButton optionsButton = new OptionButton(optionsButtonTex, menuLogo, hover, 2);
-        LogoButton exitButton = new ExitButton(exitButtonTex, menuLogo, hover,3);
+        LogoButton playButton = new PlayButton(game, playButtonTex, menuLogo, hover, 0);
+        LogoButton optionsButton = new OptionButton(game, optionsButtonTex, menuLogo, hover, 1);
+        LogoButton exitButton = new ExitButton(game, exitButtonTex, menuLogo, hover,2);
 
-        menuStage = new Stage(viewport);
+        menuStage = new Stage(viewport, batch);
         menuStage.addActor(menuLogo);
 
-        buttonsStage = new Stage(viewport);
+        overlayStage = new Stage(viewport, batch);
+        overlayStage.addActor(logoOverlay);
+
+        buttonsStage = new Stage(viewport, batch);
         buttonsStage.addActor(playButton);
         buttonsStage.addActor(optionsButton);
         buttonsStage.addActor(exitButton);
@@ -59,13 +64,18 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         beatmapManager.startMusicPlaying();
         beatFactory.addListener(menuLogo);
 
-        inputMultiplexer.addProcessor(menuStage);
         inputMultiplexer.addProcessor(buttonsStage);
+        inputMultiplexer.addProcessor(menuStage);
+    }
 
+    public void toSoundSelectScreen() {
+        this.switchScreen(new SoundSelectScreen(game));
     }
 
     @Override
     public void render(float delta) {
+        super.render(delta);
+
         // ACT
         backgroundStage.act(delta);
         buttonsStage.act(delta);
@@ -79,9 +89,9 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         buttonsStage.draw();
         menuLogo.colorLayer();
         menuStage.draw();
-        batch.begin();
-        logoOverlay.draw(batch, logoOverlay.getColor().a);
-        batch.end();
+        overlayStage.draw();
+
+        renderFade(delta);
     }
 
     @Override
@@ -106,6 +116,8 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
     @Override
     public void dispose() {
-        //menuStage.dispose();
+        menuStage.dispose();
+        overlayStage.dispose();
+        buttonsStage.dispose();
     }
 }

@@ -35,6 +35,7 @@ public class BeatMapStore {
     private boolean finishedLoadingCache = false;
     private boolean loadedAllBeatmaps = false;
     private BeatMapSet mainDefaultBeatmapSet;
+    private boolean logBeatmaps = false;
 
     public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.songsDir = gameIO.getSongsDir();
@@ -127,13 +128,15 @@ public class BeatMapStore {
             }
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
-            for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
-                for (Beatmap map : beatMapSet.beatmaps) {
+            if (logBeatmaps) {
+                for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
+                    for (Beatmap map : beatMapSet.beatmaps) {
+                        System.out.print("CACHE DB: ");
+                        logBeatmapLoaded(map);
+                    }
                     System.out.print("CACHE DB: ");
-                    logBeatmapLoaded(map);
+                    System.out.println(logBeatmapSet(beatMapSet));
                 }
-                System.out.print("CACHE DB: ");
-                System.out.println(logBeatmapSet(beatMapSet));
             }
         }
 

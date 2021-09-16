@@ -3,8 +3,7 @@
  import com.badlogic.gdx.Gdx;
  import com.badlogic.gdx.audio.Music;
  import com.badlogic.gdx.graphics.Texture;
- import com.badlogic.gdx.scenes.scene2d.actions.Actions;
- import com.dasher.osugdx.Framework.Stages.FadingStage;
+ import com.badlogic.gdx.scenes.scene2d.Stage;
  import com.dasher.osugdx.GameScenes.Intro.Actors.LogoActor;
  import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
  import com.dasher.osugdx.GameScenes.UIScreen;
@@ -14,7 +13,7 @@
 
  public
  class IntroScreen extends UIScreen {
-    private FadingStage introStage;
+    private Stage introStage;
     private Music seeyaSound;
     private Music welcomeSound;
     private LogoActor osuLogo;
@@ -31,7 +30,7 @@
         osuLogo = new LogoActor(game, logoTexture, cleanupTime);
 
         // IntroStage
-        introStage = new FadingStage(viewport, cleanupTime);
+        introStage = new Stage(viewport);
         introStage.addActor(osuLogo);
 
         // USING MUSIC API BECAUSE THE FILES ARE TOO HEAVY FOR ANDROID SOUND I GUESS
@@ -43,16 +42,18 @@
 
     @Override
     public void render(float delta) {
+        super.render(delta);
         viewport.apply(true);
 
         introStage.act(delta);
         introStage.draw();
 
         if (beatMapStore.isLoadedAllBeatmaps() && beatmapManager.isFirstBeatmapLoaded() && !welcomeSound.isPlaying()) {
-            introStage.fadeOut();
             osuLogo.switchCleanup();
             switchScreen(new MenuScreen(game));
         }
+
+        renderFade(delta);
     }
 
     @Override

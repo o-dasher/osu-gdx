@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -14,17 +13,19 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.Framework.Interfaces.ResizeListener;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Timing.BeatListener;
-import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
+
 import org.jetbrains.annotations.NotNull;
+
+
+import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 
 public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     private final float scaleBy = 0.025f;
     private final ShapeRenderer shapeRenderer;
-    private final Vector2 baseVec;
+    private boolean isClicked = false;
     public final Array<LogoButton> buttons = new Array<>();
 
     public MainLogo(
@@ -32,7 +33,6 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
             Sound heartbeat, Sound downbeat, Sound select, Sound hoverSound
     ) {
         super(game, texture, heartbeat, downbeat, select, hoverSound);
-        baseVec = new Vector2(getX(), getY());
         shapeRenderer = game.shapeRenderer;
         toEnterExitScaledImage(scaleBy / 2, 0.25f);
         addListener(new ClickListener() {
@@ -44,20 +44,13 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 select.stop();
                 select.play();
-                boolean isClicked = !(getX() == baseVec.x && getY() == baseVec.y);
+                isClicked = !(getX() == getCenterX(game.viewport));
                 float time = 0.25f;
-                if (isClicked) {
-                    for (LogoButton logoButton: buttons) {
-                        logoButton.addAction(Actions.fadeOut(time));
-                    }
-                    addAction(Actions.moveTo(baseVec.x, baseVec.y, time));
-                } else {
-                    for (LogoButton logoButton: buttons) {
-                        logoButton.addAction(Actions.fadeIn(time));
-                    }
-                    float moveTo = getX() - getWidth() / 5;
-                    addAction(Actions.moveTo(moveTo, baseVec.y, time));
+                for (LogoButton logoButton: buttons) {
+                    logoButton.addAction(isClicked? Actions.fadeOut(time) : Actions.fadeIn(time));
                 }
+                float moveX = isClicked? getCenterX(game.viewport) : getX() - getWidth() / 6;
+                addAction(Actions.moveTo(moveX, getCenterY(game.viewport), time));
                 return false;
             }
         });
@@ -101,13 +94,12 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
     private final Color colorLayerColor = Color.PINK.cpy();
 
     public void colorLayer() {
-        colorLayerColor.a = getParent().getColor().a;
         shapeRenderer.setColor(colorLayerColor);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.circle(
                 getX() + getWidth() / 2,
                 getY() + getHeight() / 2,
-                getWidth() * 0.45f * getScaleX()
+                ((getWidth() / 2) * getScaleX()) * 0.9f
         );
         shapeRenderer.end();
     }
@@ -126,7 +118,6 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
             }
         }
         shapeRenderer.end();
-        Gdx.gl.glDisable(GL30.GL_BLEND);
     }
 
     @Override
@@ -144,8 +135,7 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
 
     @Override
     public void onResize() {
-        baseVec.set(CenteringHelper.getCenterX(getWidth()), CenteringHelper.getCenterY(getHeight()));
-        setPosition(baseVec.x, baseVec.y);
+        applyCentering(getStage().getViewport());
         for (LogoButton logoButton: buttons) {
             logoButton.getColor().a = 0;
         }

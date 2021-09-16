@@ -1,11 +1,14 @@
 package com.dasher.osugdx.GameScenes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
@@ -16,6 +19,7 @@ import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.OsuGame;
+import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
@@ -39,11 +43,15 @@ public abstract class GameScreen implements Screen {
     protected final Viewport uiViewport;
     protected final Stage backgroundStage;
     protected final OSZParser oszParser;
-    protected float cleanupTime = 0.5f;
+    protected final SkinManager skinManager;
+    protected float cleanupTime;
     protected AsyncExecutor asyncExecutor;
+    private Screen nextScreen;
+
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
+        cleanupTime = game.cleanupTime;
         assetManager = game.assetManager;
         audioManager = game.audioManager;
         uiConfig = game.uiConfig;
@@ -59,16 +67,60 @@ public abstract class GameScreen implements Screen {
         workingBackground = game.workingBackground;
         inputMultiplexer = game.inputMultiplexer;
         asyncExecutor = game.asyncExecutor;
+        skinManager = game.skinManager;
         oszParser = game.oszParser;
         uiViewport = game.uiViewport;
     }
 
-    public void switchScreen(Screen screen) {
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                game.setScreen(screen);
+    private static boolean isFirstFadeRender = true;
+    private static boolean calledToSwitchScreen = false;
+    private static final Color fadeBlockColor = Color.BLACK.cpy();
+    private static boolean isFadingIn = false;
+    private static boolean isFadingOut = false;
+
+    protected void renderFade(float delta) {
+        if (calledToSwitchScreen) {
+            if (isFirstFadeRender) {
+                isFirstFadeRender = false;
+                fadeBlockColor.a = 0;
             }
-        }, cleanupTime * 2);
+            if (isFadingIn || isFadingOut) {
+                if (isFadingIn) {
+                    fadeBlockColor.a = Math.min(1, fadeBlockColor.a + delta / cleanupTime);
+                    if (fadeBlockColor.a >= 1) {
+                        isFadingOut = true;
+                        isFadingIn = false;
+                        game.getScreen().dispose();
+                        game.setScreen(nextScreen);
+                    }
+                } else if (isFadingOut) {
+                    fadeBlockColor.a = Math.max(0, fadeBlockColor.a - delta / cleanupTime);
+                    if (fadeBlockColor.a <= 0) {
+                        isFadingOut = false;
+                        calledToSwitchScreen = false;
+                        isFirstFadeRender = true;
+                    }
+                }
+                Gdx.gl.glEnable(GL30.GL_BLEND);
+                Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
+                shapeRenderer.setColor(fadeBlockColor);
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                shapeRenderer.rect(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+                shapeRenderer.end();
+            }
+        }
+    }
+
+    @Override
+    public void render(float delta) {
+
+    }
+
+    public void switchScreen(Screen screen) {
+        if (!calledToSwitchScreen) {
+            calledToSwitchScreen = true;
+            isFadingIn = true;
+            nextScreen = screen;
+        }
     }
 }

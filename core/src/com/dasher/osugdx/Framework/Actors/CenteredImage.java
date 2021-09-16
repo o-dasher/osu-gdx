@@ -22,10 +22,15 @@ public class CenteredImage extends BuffedImage {
     }
 
     public void applyCentering(@NotNull Viewport viewport) {
-        setPosition(
-                viewport.getWorldWidth() / 2 - getWidth() / 2,
-                viewport.getWorldHeight() / 2 - getHeight() / 2
-        );
+        setPosition(getCenterX(viewport), getCenterY(viewport));
+    }
+
+    public float getCenterX(Viewport viewport) {
+        return viewport.getWorldWidth() / 2 - getWidth() / 2;
+    }
+
+    public float getCenterY(Viewport viewport) {
+        return viewport.getWorldHeight() / 2 - getHeight() / 2;
     }
 
     public void applyCentering() {

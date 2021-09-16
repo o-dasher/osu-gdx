@@ -21,6 +21,11 @@ public abstract class UIScreen extends GameScreen {
     }
 
     @Override
+    public void render(float delta) {
+        super.render(delta);
+    }
+
+    @Override
     public void show() {
         buttonBackSelect = assetManager.get(assetManager.sounds.buttonBackSelect);
         buttonDirectSelect = assetManager.get(assetManager.sounds.buttonDirectSelect);

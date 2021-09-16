@@ -1,9 +1,7 @@
 package com.dasher.osugdx.GameScenes.MainMenu.Actors;
 
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
@@ -31,4 +29,5 @@ public abstract class MenuLogo extends GameImage {
         setBaseScale(0.5f);
         setScale(getBaseScale());
     }
+
 }

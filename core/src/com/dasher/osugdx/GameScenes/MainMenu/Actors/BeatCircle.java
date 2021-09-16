@@ -16,7 +16,7 @@ public class BeatCircle extends Circle {
     public Color color = Color.WHITE.cpy();
 
     public BeatCircle(@NotNull MainLogo logo, TimingPoint timingPoint) {
-        super(logo.getX(), logo.getY(), logo.getWidth() * 0.45f * logo.getScaleX());
+        super(logo.getX(), logo.getY(), (logo.getWidth() / 2) * logo.getScaleX());
         this.logo = logo;
         this.timingPoint = timingPoint;
         color.a = baseAlpha;

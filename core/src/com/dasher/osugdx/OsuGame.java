@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -32,6 +33,7 @@ import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.IO.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
+import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 
@@ -65,6 +67,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public WorkingBackground workingBackground;
 	public Stage backgroundStage;
 	public AsyncExecutor asyncExecutor;
+	public SkinManager skinManager;
+	public float cleanupTime;
 
 	private final int WORLD_WIDTH = 800;
 	private final int WORLD_HEIGHT = 600;
@@ -85,6 +89,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		uiViewport = new ScreenViewport();
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
+		cleanupTime = 0.25f;
 		json = new Json();
 		batch = new SpriteBatch();
 		shapeRenderer = new BuffedShapeRenderer();
@@ -106,7 +111,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatFactory = new BeatFactory(beatmapManager);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
-		backgroundStage = new Stage(viewport);
+		backgroundStage = new Stage(viewport, batch);
+		skinManager = new SkinManager();
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 

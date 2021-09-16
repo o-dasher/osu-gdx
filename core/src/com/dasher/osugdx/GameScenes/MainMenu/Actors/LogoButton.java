@@ -8,54 +8,66 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.dasher.osugdx.OsuGame;
+
 import org.jetbrains.annotations.NotNull;
 
-public class LogoButton extends Image {
+public abstract class LogoButton extends Image {
     private final MainLogo logo;
     private final int pos;
+    protected final OsuGame game;
+    private final float moveBy = getWidth() * 0.05f;
 
-    public LogoButton(Texture texture, @NotNull MainLogo logo, Sound hoverSound, int pos) {
+    private boolean isClickable() {
+        return getColor().a == 1;
+    }
+
+    public LogoButton(OsuGame game, Texture texture, @NotNull MainLogo logo, Sound hoverSound, int pos) {
         super(texture);
 
+        this.game = game;
         this.logo = logo;
         this.pos = pos;
         getColor().a = 0;
-        onLogoMove();
         logo.buttons.add(this);
-
         float time = 0.125f;
-        float moveBy = getWidth() * 0.05f;
+        onLogoMove();
 
         addListener(new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                hoverSound.play();
-                addAction(Actions.moveTo(getTargetX() + moveBy, getY(), time));
+                if (isClickable()) {
+                    hoverSound.play();
+                    addAction(Actions.moveTo(getTargetX() + moveBy, getY(), time));
+                }
             }
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                addAction(Actions.moveTo(getTargetX() - moveBy, getY(), time));
+                if (isClickable()) {
+                    addAction(Actions.moveTo(getTargetX() - moveBy, getY(), time));
+                }
+            }
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (isClickable()) {
+                    onClick();
+                }
+                return false;
             }
         });
     }
 
     private float getTargetX() {
-        float x = logo.getX() + getWidth() * 0.9f;
-        for (int i = 0; i < pos; i++) {
-            x -= i == 0? 0 : getWidth() * 0.02f;
-        }
-        return x;
+        return (logo.getX() + getWidth() * 0.9f) - ((getWidth() * 0.02f) * pos);
     }
 
     private float getTargetY() {
-        float y = (logo.getY() + logo.getHeight() * 0.55f);
-        for (int i = 0; i < pos; i++) {
-            y -= i == 0? 0 : getHeight() * 1.25f;
-        }
-        return y;
+        return ((logo.getY() + logo.getHeight() * 0.55f) - ((getHeight() * 1.25f) * pos));
     }
 
     public void onLogoMove() {
-        setPosition(getTargetX(), getTargetY());
+        setPosition(getTargetX() - moveBy, getTargetY());
     }
+
+    abstract void onClick();
 }

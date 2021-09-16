@@ -109,7 +109,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
         Screen gameScreen = game.getScreen();
 
-        if (gameScreen instanceof UIScreen) {
+        if (gameScreen instanceof UIScreen && currentMusic != null) {
             try {
                 currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
             } catch (GdxRuntimeException e) {
