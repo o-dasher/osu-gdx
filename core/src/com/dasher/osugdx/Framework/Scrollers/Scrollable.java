@@ -11,17 +11,21 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.dasher.osugdx.Framework.Actors.CenteredImage;
-import com.dasher.osugdx.GameScenes.SoundSelect.BeatmapSetSelector;
+import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 
-public class Scrollable extends Stage implements GestureDetector.GestureListener {
+public class Scrollable<T extends Actor> extends Stage implements GestureDetector.GestureListener {
+    private final Array<T> items = new Array<>();
+    private final Table table = new Table();
     private float scrollMultiplier = 25;
     private float heightMultiplier = 1;
     private boolean isXScrollable = true;
     private boolean isYScrollable = true;
+    private int align = Align.center;
 
     public Scrollable() {
         super();
@@ -44,10 +48,11 @@ public class Scrollable extends Stage implements GestureDetector.GestureListener
     }
 
     private void init() {
+        table.setFillParent(true);
         addListener(new ClickListener() {
             @Override
             public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
-                if (!isLayouting()) {
+                if (isNotLayouting()) {
                     float byX = isXScrollable? amountX * scrollMultiplier : 0;
                     float byY = isYScrollable? amountY * scrollMultiplier : 0;
                     addAction(Actions.moveBy(byX, byY, 0.025f));
@@ -61,7 +66,7 @@ public class Scrollable extends Stage implements GestureDetector.GestureListener
         this.heightMultiplier = heightMultiplier;
     }
 
-    public boolean isLayouting() {
+    public boolean isNotLayouting() {
         boolean isLayouting = false;
         for (Actor actor: getActors()) {
             for (Action action: actor.getActions()) {
@@ -71,35 +76,46 @@ public class Scrollable extends Stage implements GestureDetector.GestureListener
                 }
             }
         }
-        return isLayouting;
+        return !isLayouting;
+    }
+
+    public void setAlign(int align) {
+        this.align = align;
     }
 
     public void layout() {
-        for (int i = 0; i < getActors().size; i++) {
-            Actor currentActor = getActors().get(i);
-            if (currentActor instanceof CenteredImage) {
-                CenteredImage currentImage = (CenteredImage) currentActor;
-                for (Action action: currentImage.getActions()) {
-                    if (action instanceof MoveByAction) {
-                        currentImage.removeAction(action);
-                    }
+        for (int i = 0; i < items.size; i++) {
+            T currentActor = items.get(i);
+            for (Action action: currentActor.getActions()) {
+                if (action instanceof MoveByAction) {
+                    currentActor.removeAction(action);
                 }
-                float height = currentActor.getHeight() * heightMultiplier;
-                currentActor.setPosition(
-                        currentImage.getCenterX(getViewport()),
-                        currentImage.getCenterY(getViewport()) - ((height * i) / 2)
-                );
-                currentImage.addAction(
-                        Actions.moveBy(
-                                0,
-                                height * (getActors().size - i),
-                                0.25f
-                        )
-                );
-            } else {
-                throw new IllegalStateException("Scrollable actors needs to be of class CenteredImage");
             }
+            float height = currentActor.getHeight() * heightMultiplier;
+            currentActor.setPosition(
+                    CenteringHelper.getCenterX(currentActor.getWidth()),
+                    CenteringHelper.getCenterY(currentActor.getHeight()) - ((height * i) / 2)
+            );
+            currentActor.addAction(
+                    Actions.moveBy(
+                            0,
+                            height * (items.size - i),
+                            1
+                    )
+            );
         }
+    }
+
+    public void addItem(T item) {
+        items.add(item);
+        table.add(item).right();
+        super.addActor(item);
+    }
+
+    @Override
+    public void addActor(Actor actor) {
+        System.out.println("For scrollable use addItem() instead!...");
+        System.exit(-1);
     }
 
     public void setScrollMultiplier(float scrollMultiplier) {
@@ -112,12 +128,12 @@ public class Scrollable extends Stage implements GestureDetector.GestureListener
     public void act(float delta) {
         super.act(delta);
 
-        if (!isLayouting()) {
+        if (isNotLayouting()) {
             Group root = getRoot();
 
             float upperBound = 0;
             float lowerBound = 0;
-            for (Actor actor: getActors()) {
+            for (T actor: items) {
                 upperBound = Math.max(upperBound, actor.getY());
                 lowerBound = Math.min(lowerBound, actor.getY());
             }
@@ -164,7 +180,7 @@ public class Scrollable extends Stage implements GestureDetector.GestureListener
 
     @Override
     public boolean pan(float x, float y, float deltaX, float deltaY) {
-        if (!isLayouting()) {
+        if (isNotLayouting()) {
             float panScrollMultiplier = scrollMultiplier / 12.5f;
             float byX = isXScrollable? -(deltaX * panScrollMultiplier) : 0;
             float byY = isYScrollable? -(deltaY * panScrollMultiplier) : 0;

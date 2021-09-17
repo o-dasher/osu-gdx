@@ -47,7 +47,6 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 public class OsuGame extends Game implements BeatmapManagerListener {
 	public SpriteBatch batch;
 	public Viewport viewport;
-	public Viewport uiViewport;
 	public GameAssetManager assetManager;
 	public AudioManager audioManager;
 	public UIConfig uiConfig;
@@ -87,7 +86,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public void create () {
 		gameName = "osu!gdx";
 		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
-		uiViewport = new ScreenViewport();
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		cleanupTime = 0.25f;
@@ -164,7 +162,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
-		// CENTERINGHELPER SETTING SHOLD BE THE FIRST CALL AFTER VIEWPORT UPDATE ALWAYS
+		// CENTERINGHELPER SETTING SHOULD BE THE FIRST CALL AFTER VIEWPORT UPDATE ALWAYS
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		System.out.println("New resolution: " + width + ", " + height);

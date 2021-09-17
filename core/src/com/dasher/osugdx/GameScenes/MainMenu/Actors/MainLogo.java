@@ -50,6 +50,7 @@ public class MainLogo extends MenuLogo implements BeatListener, ResizeListener {
                     logoButton.addAction(isClicked? Actions.fadeOut(time) : Actions.fadeIn(time));
                 }
                 float moveX = isClicked? getCenterX(game.viewport) : getX() - getWidth() / 6;
+                addAction(Actions.rotateBy(360, time));
                 addAction(Actions.moveTo(moveX, getCenterY(game.viewport), time));
                 return false;
             }

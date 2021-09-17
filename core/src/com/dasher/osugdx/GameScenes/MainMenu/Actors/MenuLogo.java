@@ -28,6 +28,7 @@ public abstract class MenuLogo extends GameImage {
         setAlign(Align.center);
         setBaseScale(0.5f);
         setScale(getBaseScale());
+
     }
 
 }

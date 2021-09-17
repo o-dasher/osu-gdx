@@ -40,7 +40,6 @@ public abstract class GameScreen implements Screen {
     protected final BeatFactory beatFactory;
     protected final WorkingBackground workingBackground;
     protected final InputMultiplexer inputMultiplexer;
-    protected final Viewport uiViewport;
     protected final Stage backgroundStage;
     protected final OSZParser oszParser;
     protected final SkinManager skinManager;
@@ -69,7 +68,6 @@ public abstract class GameScreen implements Screen {
         asyncExecutor = game.asyncExecutor;
         skinManager = game.skinManager;
         oszParser = game.oszParser;
-        uiViewport = game.uiViewport;
     }
 
     private static boolean isFirstFadeRender = true;

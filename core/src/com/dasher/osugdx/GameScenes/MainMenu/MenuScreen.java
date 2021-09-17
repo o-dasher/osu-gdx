@@ -2,6 +2,7 @@ package com.dasher.osugdx.GameScenes.MainMenu;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.dasher.osugdx.Audio.GameSound;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.*;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
@@ -44,7 +45,8 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         super.show();
 
         menuLogo = new MainLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
-        logoOverlay = new OverlayLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover);
+        logoOverlay = new OverlayLogo(game, logoTexture, heartBeat, downBeat, logoSelect, hover, menuLogo);
+        logoOverlay.setTouchable(Touchable.disabled);
 
         LogoButton playButton = new PlayButton(game, playButtonTex, menuLogo, hover, 0);
         LogoButton optionsButton = new OptionButton(game, optionsButtonTex, menuLogo, hover, 1);
@@ -80,7 +82,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         backgroundStage.act(delta);
         buttonsStage.act(delta);
         menuStage.act(delta);
-        logoOverlay.setPosition(menuLogo.getX(), menuLogo.getY());
+        overlayStage.act(delta);
 
         // DRAW
         viewport.apply(true);

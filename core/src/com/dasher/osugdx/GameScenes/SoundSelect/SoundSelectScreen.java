@@ -1,14 +1,10 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
@@ -22,9 +18,11 @@ import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
-public class SoundSelectScreen extends UIScreen implements BeatmapManagerListener, GestureDetector.GestureListener {
-    public Scrollable beatmapSetSelectorStage;
+public class SoundSelectScreen extends UIScreen implements BeatmapManagerListener {
+    public BeatmapSetSelector selectedSelector;
+    public Scrollable<BeatmapSetSelector> beatmapSetSelectorStage;
     public Array<BeatmapSetSelector> beatmapSetSelectors;
+    public boolean isScrollingToNextBeatmapSet = true;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -34,18 +32,19 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public void show() {
         super.show();
         beatmapSetSelectors = new Array<>();
-        beatmapSetSelectorStage = new Scrollable(viewport, batch);
+        beatmapSetSelectorStage = new Scrollable<>(viewport, batch);
         beatmapSetSelectorStage.setHeightMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
         SkinElement beatmapSetSelectorElement = skinManager.getSelectedSkin().menuButtonBG;
         Array<BeatMapSet> beatMapSets = beatMapStore.getBeatMapSets();
         for (BeatMapSet beatMapSet: beatMapSets) {
             BeatmapSetSelector beatmapSetSelector = new BeatmapSetSelector(
-                    game, beatmapSetSelectorElement, beatMapSet, beatmapManager
+                    game, beatmapSetSelectorElement, beatMapSet, beatmapManager, this
             );
             beatmapSetSelectors.add(beatmapSetSelector);
-            beatmapSetSelectorStage.addActor(beatmapSetSelector);
+            beatmapSetSelectorStage.addItem(beatmapSetSelector);
         }
+        beatmapSetSelectorStage.setAlign(Align.right);
         beatmapSetSelectorStage.layout();
         beatmapManager.addListener(this);
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
@@ -54,15 +53,20 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
     public boolean scrollToSelectedBeatmapSet() {
         BeatMapSet currentSelectedBeatmap = beatmapManager.getCurrentBeatmapSet();
-        if (!beatmapSetSelectorStage.isLayouting()) {
+        if (beatmapSetSelectorStage.isNotLayouting()) {
             for (BeatmapSetSelector beatmapSetSelector: beatmapSetSelectors) {
                 if (beatmapSetSelector.beatMapSet == currentSelectedBeatmap) {
                     beatmapSetSelectorStage.addAction(
-                            Actions.moveTo(
-                                    beatmapSetSelectorStage.getRoot().getX(),
-                                    -beatmapSetSelector.getY() + beatmapSetSelector.getHeight(),
-                                    1
+                            Actions.sequence(
+                                    Actions.run(() -> isScrollingToNextBeatmapSet = true),
+                                    Actions.moveTo(
+                                            beatmapSetSelectorStage.getRoot().getX(),
+                                            -beatmapSetSelector.getY() + beatmapSetSelector.getHeight() * 2,
+                                            1
+                                    ),
+                                    Actions.run(() -> isScrollingToNextBeatmapSet = false)
                             )
+
                     );
                     break;
                 }
@@ -85,7 +89,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         viewport.apply(true);
         backgroundStage.act(delta);
         backgroundStage.draw();
-
+        viewport.apply();
         beatmapSetSelectorStage.act(delta);
         beatmapSetSelectorStage.draw();
 
@@ -98,7 +102,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
     @Override
     public void resize(int width, int height) {
-
+        beatmapSetSelectorStage.layout();
     }
 
     @Override
@@ -128,51 +132,6 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
-
-    }
-
-    @Override
-    public boolean touchDown(float x, float y, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean tap(float x, float y, int count, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean longPress(float x, float y) {
-        return false;
-    }
-
-    @Override
-    public boolean fling(float velocityX, float velocityY, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
-        return false;
-    }
-
-    @Override
-    public boolean panStop(float x, float y, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean zoom(float initialDistance, float distance) {
-        return false;
-    }
-
-    @Override
-    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-        return false;
-    }
-
-    @Override
-    public void pinchStop() {
 
     }
 }
