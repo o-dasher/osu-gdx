@@ -60,7 +60,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                     beatmapSetSelectorStage.addAction(
                             Actions.moveTo(
                                     beatmapSetSelectorStage.getRoot().getX(),
-                                    -(beatmapSetSelector.getY() + beatmapSetSelector.getHeight()),
+                                    -beatmapSetSelector.getY() + beatmapSetSelector.getHeight(),
                                     1
                             )
                     );
