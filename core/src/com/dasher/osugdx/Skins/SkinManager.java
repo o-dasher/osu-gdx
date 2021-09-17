@@ -31,34 +31,39 @@ public class SkinManager {
 
     public void loadElements() {
         for (SkinElementNames elementName: SkinElementNames.values()) {
+            SkinElement createdElement = null;
             for (String name: elementName.names) {
                 for (String extension: elementName.extensions) {
                     String path = selectedSkin.getDirectory().path() + "/" +name+"."+ extension;
                     FileHandle file = Gdx.files.internal(path);
-                    if (!file.exists()) {
+                    ElementString string = new ElementString(file.nameWithoutExtension(), file.extension());
+                    try {
+                        createdElement = createElement(file, string);
+                    } catch (Exception e) {
                         continue;
                     }
-                    ElementString string = new ElementString(file.nameWithoutExtension(), file.extension());
                     switch (elementName) {
                         case CURSOR:
-                            selectedSkin.cursor = createElement(file, string);
+                            selectedSkin.cursor = createdElement;
                             break;
                         case CURSOR_MIDDLE: {
-                            selectedSkin.cursorMiddle = createElement(file, string);
+                            selectedSkin.cursorMiddle = createdElement;
                             break;
                         }
                         case CURSOR_TRAIL: {
-                            selectedSkin.cursorTrail = createElement(file, string);
+                            selectedSkin.cursorTrail = createdElement;
                             break;
                         }
                         case MENU_BUTTON_BG: {
-                            selectedSkin.menuButtonBG = createElement(file, string);
+                            selectedSkin.menuButtonBG = createdElement;
+                            break;
                         }
                         default:
                             break;
                     }
                 }
             }
+            selectedSkin.elements.add(createdElement);
         }
     }
 
@@ -72,7 +77,7 @@ public class SkinManager {
     @Contract("_, _ -> new")
     private @NotNull SkinElement defaultElement(FileHandle file, ElementString elementString) {
         file = Gdx.files.internal(defaultDir+"/"+file.nameWithoutExtension());
-        return new SkinElement(file, elementString);
+        return new SkinElement(file, elementString, selectedSkin);
     }
 
     private SkinElement createElement(FileHandle file, ElementString elementString) {
@@ -80,7 +85,7 @@ public class SkinManager {
         try {
             if (file.exists()) {
                 if (elementString.getExtension().equals("png") || elementString.getExtension().equals("jpg")) {
-                    skinElement = new SkinElement(file, elementString);
+                    skinElement = new SkinElement(file, elementString, selectedSkin);
                 }  else {
                     skinElement = defaultElement(file, elementString);
                 }
@@ -90,7 +95,6 @@ public class SkinManager {
         } catch (Exception e) {
             skinElement = defaultElement(file, elementString);
         }
-        selectedSkin.elements.add(skinElement);
         return skinElement;
     }
 

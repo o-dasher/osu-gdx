@@ -26,6 +26,7 @@ import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.Graphics.Fonts;
+import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
@@ -181,5 +182,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void onNewBeatmap(Beatmap beatmap) {
 		beatFactory.onNewBeatmap(beatmap);
+	}
+
+	@Override
+	public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+
 	}
 }

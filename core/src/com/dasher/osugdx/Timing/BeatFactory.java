@@ -3,6 +3,7 @@ package com.dasher.osugdx.Timing;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
+import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 
@@ -110,5 +111,10 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         currentTimingPoint = null;
         timeSinceLastBeat = 0;
         beatAccumulator = 0;
+    }
+
+    @Override
+    public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+
     }
 }

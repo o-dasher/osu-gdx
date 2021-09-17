@@ -73,6 +73,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             newBeatmapSet.beatmaps.addAll(loadedBeatmaps);
 
             currentBeatmapSet = newBeatmapSet;
+            this.onNewBeatmapSet(currentBeatmapSet);
             setCurrentMap(currentBeatmapSet.beatmaps.first());
         }
     }
@@ -108,18 +109,19 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         }
 
         Screen gameScreen = game.getScreen();
-
-        if (gameScreen instanceof UIScreen && currentMusic != null) {
-            try {
-                currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
-            } catch (GdxRuntimeException e) {
-                toast.log("Unexpected error while loading beatmap music!");
-                randomizeCurrentBeatmapSet();
-                return;
+        if (currentMusic != null) {
+            if (gameScreen instanceof UIScreen) {
+                try {
+                    currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+                } catch (GdxRuntimeException e) {
+                    toast.log("Unexpected error while loading beatmap music!");
+                    randomizeCurrentBeatmapSet();
+                    return;
+                }
             }
-        }
-        if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
-            audioManager.playMusic(currentMusic);
+            if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
+                audioManager.playMusic(currentMusic);
+            }
         }
     }
 
@@ -167,6 +169,13 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     public void onNewBeatmap(Beatmap beatmap) {
         for (BeatmapManagerListener listener: beatmapManagerListeners) {
             listener.onNewBeatmap(beatmap);
+        }
+    }
+
+    @Override
+    public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+        for (BeatmapManagerListener listener: beatmapManagerListeners) {
+            listener.onNewBeatmapSet(beatMapSet);
         }
     }
 }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
@@ -86,5 +87,10 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         if (!hasBackground) {
             setBackground(defaultTexture);
         }
+    }
+
+    @Override
+    public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+
     }
 }
