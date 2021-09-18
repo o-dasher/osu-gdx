@@ -1,8 +1,8 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
@@ -35,6 +35,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage = new Scrollable<>(viewport, batch);
         beatmapSetSelectorStage.setHeightMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
+        beatmapSetSelectorStage.setAlignX(Align.right);
+        beatmapSetSelectorStage.setWidthMultiplier(0.75f);
+        beatmapSetSelectorStage.setStairCased(true);
         SkinElement beatmapSetSelectorElement = skinManager.getSelectedSkin().menuButtonBG;
         Array<BeatMapSet> beatMapSets = beatMapStore.getBeatMapSets();
         for (BeatMapSet beatMapSet: beatMapSets) {
@@ -43,8 +46,8 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             );
             beatmapSetSelectors.add(beatmapSetSelector);
             beatmapSetSelectorStage.addItem(beatmapSetSelector);
+            beatmapManager.addListener(beatmapSetSelector);
         }
-        beatmapSetSelectorStage.setAlign(Align.right);
         beatmapSetSelectorStage.layout();
         beatmapManager.addListener(this);
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
@@ -62,7 +65,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                                     Actions.moveTo(
                                             beatmapSetSelectorStage.getRoot().getX(),
                                             -beatmapSetSelector.getY() + beatmapSetSelector.getHeight() * 2,
-                                            1
+                                            0.25f, Interpolation.bounce
                                     ),
                                     Actions.run(() -> isScrollingToNextBeatmapSet = false)
                             )
@@ -132,6 +135,6 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
-
+        scrollToSelectedBeatmapSet();
     }
 }

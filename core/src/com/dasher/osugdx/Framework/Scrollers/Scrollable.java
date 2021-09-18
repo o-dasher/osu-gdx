@@ -3,29 +3,35 @@ package com.dasher.osugdx.Framework.Scrollers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IdentityMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Scrollable<T extends Actor> extends Stage implements GestureDetector.GestureListener {
     private final Array<T> items = new Array<>();
-    private final Table table = new Table();
     private float scrollMultiplier = 25;
     private float heightMultiplier = 1;
+    private float widthMultiplier = 1;
     private boolean isXScrollable = true;
     private boolean isYScrollable = true;
-    private int align = Align.center;
+    private boolean isLayouting = true;
+    private boolean isStairCased = false;
+    private int alignX = Align.center;
+    private final IdentityMap<Actor, Float> baseXs = new IdentityMap<>();
+    private float stairCaseMultiplier = 25f;
+    private float stairCaseAdjustTime = 1;
 
     public Scrollable() {
         super();
@@ -48,7 +54,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     private void init() {
-        table.setFillParent(true);
         addListener(new ClickListener() {
             @Override
             public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
@@ -67,40 +72,44 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     public boolean isNotLayouting() {
-        boolean isLayouting = false;
-        for (Actor actor: getActors()) {
-            for (Action action: actor.getActions()) {
-                if (action instanceof MoveByAction) {
-                    isLayouting = true;
-                    break;
-                }
-            }
-        }
         return !isLayouting;
     }
 
-    public void setAlign(int align) {
-        this.align = align;
+    public void setAlignX(int alignX) {
+        this.alignX = alignX;
     }
 
     public void layout() {
+        baseXs.clear();
         for (int i = 0; i < items.size; i++) {
             T currentActor = items.get(i);
-            for (Action action: currentActor.getActions()) {
-                if (action instanceof MoveByAction) {
-                    currentActor.removeAction(action);
-                }
-            }
+            currentActor.clearActions();
             float height = currentActor.getHeight() * heightMultiplier;
-            currentActor.setPosition(
-                    CenteringHelper.getCenterX(currentActor.getWidth()),
-                    CenteringHelper.getCenterY(currentActor.getHeight()) - ((height * i) / 2)
-            );
+            float x;
+            float y = CenteringHelper.getCenterY(currentActor.getHeight()) - height * i / 2;
+            switch (alignX) {
+                case Align.right:
+                    x = getViewport().getWorldWidth() - currentActor.getWidth() * widthMultiplier;
+                    break;
+                case Align.left:
+                    x = -currentActor.getWidth() + currentActor.getWidth() * widthMultiplier;
+                    break;
+                case Align.center:
+                default:
+                    x = CenteringHelper.getCenterX(currentActor.getWidth());
+                    break;
+            }
+            currentActor.setPosition(x, y);
+            baseXs.put(currentActor, x);
             currentActor.addAction(
-                    Actions.moveBy(
-                            0,
-                            height * (items.size - i),
-                            1
+                    Actions.sequence(
+                            Actions.run(() -> isLayouting = true),
+                            Actions.moveBy(
+                                    0,
+                                    height * (items.size - i),
+                                    1
+                            ),
+                            Actions.run(() -> isLayouting = false)
                     )
             );
         }
@@ -108,7 +117,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void addItem(T item) {
         items.add(item);
-        table.add(item).right();
         super.addActor(item);
     }
 
@@ -130,24 +138,72 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
         if (isNotLayouting()) {
             Group root = getRoot();
+            Array<Actor> visibleActors = new Array<>();
 
             float upperBound = 0;
             float lowerBound = 0;
-            for (T actor: items) {
-                upperBound = Math.max(upperBound, actor.getY());
-                lowerBound = Math.min(lowerBound, actor.getY());
+
+            for (int i = 0; i < items.size; i++) {
+                Actor item = items.get(i);
+                upperBound = Math.max(upperBound, item.getY());
+                lowerBound = Math.min(lowerBound, item.getY());
+                item.setDebug(false);
+                if (ActorHelper.actorIsVisible(item) && isStairCased) {
+                    visibleActors.add(item);
+                }
             }
+
+            if (isStairCased) {
+                System.out.println(visibleActors.size);
+                final int midIndex = (visibleActors.size - 1) / 2;
+                if (!(midIndex >= visibleActors.size) && midIndex >= 0) {
+                    Actor centerActor = visibleActors.get(midIndex);
+                    centerActor.setDebug(true);
+                    Array<T> upActors = new Array<>();
+                    Array<T> downActors = new Array<>();
+                    for (T item: items) {
+                        if (item.getY() > centerActor.getY()) {
+                            upActors.add(item);
+                        } else {
+                            downActors.add(item);
+                        }
+                    }
+                    upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
+                    downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
+                    stairCaseEffect(upActors);
+                    stairCaseEffect(downActors);
+                }
+            }
+
             upperBound = -upperBound;
             lowerBound = -lowerBound;
+
             if (currentCorrectionAction != null && !currentCorrectionAction.isComplete()) {
                 root.removeAction(currentCorrectionAction);
             }
+
             // reverted cause of stage logic
             if (root.getY() < upperBound) {
                 root.addAction(updateCorrectionAction(upperBound));
             } else if (root.getY() > lowerBound) {
                 root.addAction(updateCorrectionAction(lowerBound));
             }
+        }
+    }
+
+    private void stairCaseEffect(@NotNull Array<T> itemsPart) {
+        for (int i = 0; i < itemsPart.size; i++) {
+            Actor actor = itemsPart.get(i);
+            actor.addAction(
+                Actions.moveTo(
+                        Math.min(
+                                getViewport().getWorldWidth() - actor.getWidth() * 0.1f,
+                                baseXs.get(actor) + i * stairCaseMultiplier
+                        ),
+                        actor.getY(),
+                        stairCaseAdjustTime
+                )
+            );
         }
     }
 
@@ -207,5 +263,31 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     @Override
     public void pinchStop() {
 
+    }
+
+    public void setWidthMultiplier(float widthMultiplier) {
+        this.widthMultiplier = widthMultiplier;
+    }
+
+    public void setStairCased(boolean stairCased) {
+        isStairCased = stairCased;
+    }
+
+    private void ensureStairCased() {
+        if (!isStairCased) {
+            throw new IllegalStateException(
+                    "You need to set StairCased to true before using this method"
+            );
+        }
+    }
+
+    public void setStairCaseMultiplier(float stairCaseMultiplier) {
+        ensureStairCased();
+        this.stairCaseMultiplier = stairCaseMultiplier;
+    }
+
+    public void setStairCaseAdjustTime(float stairCaseAdjustTime) {
+        ensureStairCased();
+        this.stairCaseAdjustTime = stairCaseAdjustTime;
     }
 }

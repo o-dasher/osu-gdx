@@ -4,13 +4,16 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.SkinElement;
 
 import org.jetbrains.annotations.NotNull;
 
-public class BeatmapSetSelector extends GameImage {
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+
+public class BeatmapSetSelector extends GameImage implements BeatmapManagerListener {
     private final BeatmapManager beatmapManager;
     private final SkinElement element;
     private final SoundSelectScreen soundSelectScreen;
@@ -40,6 +43,7 @@ public class BeatmapSetSelector extends GameImage {
             }
         });
     }
+
     public void adjustColor() {
         if (beatmapManager.getCurrentBeatmapSet() == this.beatMapSet) {
             if (soundSelectScreen.selectedSelector != null) {
@@ -52,5 +56,15 @@ public class BeatmapSetSelector extends GameImage {
         } else {
             setColor(element.getSkin().getSongSelectInactiveTextColor());
         }
+    }
+
+    @Override
+    public void onNewBeatmap(Beatmap beatmap) {
+
+    }
+
+    @Override
+    public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+        adjustColor();
     }
 }
