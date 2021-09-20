@@ -29,18 +29,15 @@ public class BeatMapStore {
     private final FileHandle libCacheFile;
     private final Preferences beatmapStorePrefs;
     private final Json json;
-    private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
     private OSZParser oszParser;
     private boolean finishedLoadingCache = false;
     private boolean loadedAllBeatmaps = false;
     private BeatMapSet mainDefaultBeatmapSet;
-    private boolean logBeatmaps = false;
 
-    public BeatMapStore(@NotNull GameIO gameIO, Json json, PlatformToast toast, BeatmapUtils beatmapUtils) {
+    public BeatMapStore(@NotNull GameIO gameIO, Json json, BeatmapUtils beatmapUtils) {
         this.songsDir = gameIO.getSongsDir();
         this.json = json;
-        this.toast = toast;
         this.beatmapUtils = beatmapUtils;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db.json");
@@ -128,6 +125,7 @@ public class BeatMapStore {
             }
             beatMapSets.addAll(cachedSets);
             tempCachedBeatmaps.addAll(beatMapSets);
+            boolean logBeatmaps = false;
             if (logBeatmaps) {
                 for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
                     for (Beatmap map : beatMapSet.beatmaps) {
@@ -262,11 +260,9 @@ public class BeatMapStore {
             }
             return;
         }
-        if (cacheBeatmapSet == null) {
-            if (isBeatmapSetValid(beatMapSet)) {
-                beatMapSets.add(beatMapSet);
-                System.out.println(logBeatmapSet(beatMapSet));
-            }
+        if (cacheBeatmapSet == null && isBeatmapSetValid(beatMapSet)) {
+            beatMapSets.add(beatMapSet);
+            System.out.println(logBeatmapSet(beatMapSet));
         }
     }
 

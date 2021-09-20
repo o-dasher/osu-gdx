@@ -29,7 +29,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private boolean isLayouting = true;
     private boolean isStairCased = false;
     private int alignX = Align.center;
-    private final IdentityMap<Actor, Float> baseXs = new IdentityMap<>();
+    private final IdentityMap<Actor, Vector2> basePoints = new IdentityMap<>();
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
 
@@ -80,7 +80,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     public void layout() {
-        baseXs.clear();
+        basePoints.clear();
         for (int i = 0; i < items.size; i++) {
             T currentActor = items.get(i);
             currentActor.clearActions();
@@ -99,17 +99,21 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     x = CenteringHelper.getCenterX(currentActor.getWidth());
                     break;
             }
-            currentActor.setPosition(x, y);
-            baseXs.put(currentActor, x);
+            Vector2 vec = new Vector2(x, y);
+            currentActor.setPosition(vec.x, vec.y);
+            basePoints.put(currentActor, vec);
             currentActor.addAction(
                     Actions.sequence(
                             Actions.run(() -> isLayouting = true),
                             Actions.moveBy(
                                     0,
-                                    height * (items.size - i),
-                                    1
+                                    height * (items.size - i)
                             ),
-                            Actions.run(() -> isLayouting = false)
+                            Actions.run(() -> {
+                                isLayouting = false;
+                                vec.x = currentActor.getX();
+                                vec.y = currentActor.getY();
+                            })
                     )
             );
         }
@@ -154,7 +158,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
             }
 
             if (isStairCased) {
-                System.out.println(visibleActors.size);
                 final int midIndex = (visibleActors.size - 1) / 2;
                 if (!(midIndex >= visibleActors.size) && midIndex >= 0) {
                     Actor centerActor = visibleActors.get(midIndex);
@@ -194,11 +197,12 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private void stairCaseEffect(@NotNull Array<T> itemsPart) {
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
+            Vector2 point = basePoints.get(actor);
             actor.addAction(
                 Actions.moveTo(
                         Math.min(
-                                getViewport().getWorldWidth() - actor.getWidth() * 0.1f,
-                                baseXs.get(actor) + i * stairCaseMultiplier
+                                getViewport().getWorldWidth() - actor.getWidth() * 0.05f,
+                                point.x + (i + 1) * stairCaseMultiplier
                         ),
                         actor.getY(),
                         stairCaseAdjustTime

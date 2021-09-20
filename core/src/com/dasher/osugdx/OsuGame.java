@@ -4,20 +4,16 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Config.UIConfig;
@@ -102,7 +98,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		gameIO = new GameIO();
 		gameIO.setup(gameName);
 		beatmapUtils = new BeatmapUtils();
-		beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
+		beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
 		beatmapUtils.setBeatMapStore(beatMapStore);
 		oszParser = new OSZParser(gameIO, beatMapStore);
 		beatMapStore.setOszParser(oszParser);
@@ -111,7 +107,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
 		backgroundStage = new Stage(viewport, batch);
-		skinManager = new SkinManager();
+		skinManager = new SkinManager(this);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 

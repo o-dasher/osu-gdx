@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 
@@ -22,14 +23,12 @@ import lt.ekgame.beatmap_analyzer.beatmap.BreakPeriod;
 
 public class WorkingBackground extends GameImage implements BeatmapManagerListener {
     private final Viewport viewport;
-    private final TextureLoader.TextureParameter textureParameter;
     private boolean isFirstBGChange = true;
     public Texture defaultTexture;
 
     public WorkingBackground(@NotNull OsuGame game, Texture texture) {
         super(game, texture, false);
         defaultTexture = texture;
-        textureParameter = game.assetManager.textures.textureParameter;
         viewport = game.viewport;
         setScaling(Scaling.fill);
         setAlign(Align.center);
@@ -54,7 +53,6 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
             getColor().a = 0;
         }
 
-        texture.setFilter(textureParameter.minFilter, textureParameter.magFilter);
         addAction(
                 Actions.sequence(
                         Actions.fadeOut(time),
@@ -76,11 +74,9 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         boolean hasBackground = false;
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
-                hasBackground = true;
-                FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-                String bgFileName = breakPeriod.getBackgroundFileName();
-                FileHandle bgFile = Gdx.files.external(beatmapFile.parent() + "/" + bgFileName);
-                setBackground(bgFile.exists()? new Texture(bgFile, true) : defaultTexture);
+                Texture backgroundTexture = BeatmapUtils.getBackground(beatmap);
+                hasBackground = backgroundTexture != null;
+                setBackground(hasBackground? backgroundTexture : defaultTexture);
                 break;
             }
         }

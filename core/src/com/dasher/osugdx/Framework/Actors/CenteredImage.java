@@ -1,6 +1,8 @@
 package com.dasher.osugdx.Framework.Actors;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 
@@ -17,6 +19,18 @@ public class CenteredImage extends BuffedImage {
 
     public CenteredImage(Texture texture, boolean forceCenter) {
         super(texture);
+        this.forceCenter = forceCenter;
+        applyCentering();
+    }
+
+    public CenteredImage(TextureRegion region, boolean forceCenter) {
+        super(region);
+        this.forceCenter = forceCenter;
+        applyCentering();
+    }
+
+    public CenteredImage(Drawable drawable, boolean forceCenter) {
+        super(drawable);
         this.forceCenter = forceCenter;
         applyCentering();
     }

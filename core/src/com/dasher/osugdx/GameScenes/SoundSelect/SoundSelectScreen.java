@@ -36,13 +36,12 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setHeightMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
         beatmapSetSelectorStage.setAlignX(Align.right);
-        beatmapSetSelectorStage.setWidthMultiplier(0.75f);
+        beatmapSetSelectorStage.setWidthMultiplier(1);
         beatmapSetSelectorStage.setStairCased(true);
-        SkinElement beatmapSetSelectorElement = skinManager.getSelectedSkin().menuButtonBG;
         Array<BeatMapSet> beatMapSets = beatMapStore.getBeatMapSets();
         for (BeatMapSet beatMapSet: beatMapSets) {
             BeatmapSetSelector beatmapSetSelector = new BeatmapSetSelector(
-                    game, beatmapSetSelectorElement, beatMapSet, beatmapManager, this
+                    game, game.skinManager.getSelectedSkin(), beatMapSet, beatmapManager, this
             );
             beatmapSetSelectors.add(beatmapSetSelector);
             beatmapSetSelectorStage.addItem(beatmapSetSelector);

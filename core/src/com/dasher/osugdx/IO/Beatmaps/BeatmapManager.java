@@ -46,6 +46,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
     public void setCurrentBeatmapSet(BeatMapSet newBeatmapSet) {
         if (newBeatmapSet == null) {
+            randomizeCurrentBeatmapSet();
             return;
         }
 

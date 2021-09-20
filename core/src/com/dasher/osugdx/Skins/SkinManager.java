@@ -2,19 +2,19 @@ package com.dasher.osugdx.Skins;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 public class SkinManager {
+    private final OsuGame game;
     private final FileHandle defaultDir;
     private Skin selectedSkin;
     private final SkinConfigurator skinConfigurator;
 
-    public SkinManager() {
+    public SkinManager(OsuGame game) {
+        this.game = game;
         this.skinConfigurator = new SkinConfigurator();
         this.defaultDir = Gdx.files.local("Skins/Legacy");
         changeSkin(defaultDir);
@@ -69,7 +69,7 @@ public class SkinManager {
 
     private void unloadElements() {
         for (SkinElement element: selectedSkin.elements) {
-            element.getTexture().dispose();
+            element.dispose();
             selectedSkin.elements.removeValue(element, true);
         }
     }
@@ -77,7 +77,7 @@ public class SkinManager {
     @Contract("_, _ -> new")
     private @NotNull SkinElement defaultElement(FileHandle file, ElementString elementString) {
         file = Gdx.files.internal(defaultDir+"/"+file.nameWithoutExtension());
-        return new SkinElement(file, elementString, selectedSkin);
+        return new SkinElement(file, elementString, selectedSkin, game.assetManager.textures.textureParameter);
     }
 
     private SkinElement createElement(FileHandle file, ElementString elementString) {
@@ -85,7 +85,7 @@ public class SkinManager {
         try {
             if (file.exists()) {
                 if (elementString.getExtension().equals("png") || elementString.getExtension().equals("jpg")) {
-                    skinElement = new SkinElement(file, elementString, selectedSkin);
+                    skinElement = new SkinElement(file, elementString, selectedSkin, game.assetManager.textures.textureParameter);
                 }  else {
                     skinElement = defaultElement(file, elementString);
                 }

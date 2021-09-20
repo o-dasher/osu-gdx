@@ -30,7 +30,7 @@ public class ImportOSZ extends Activity {
             Json json = new Json();
             PlatformToast toast = new PlatformToast() {};
             BeatmapUtils beatmapUtils = new BeatmapUtils();
-            BeatMapStore beatMapStore = new BeatMapStore(gameIO, json, toast, beatmapUtils);
+            BeatMapStore beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
             beatmapUtils.setBeatMapStore(beatMapStore);
             OSZParser oszParser = new OSZParser(gameIO, beatMapStore);
             beatMapStore.setOszParser(oszParser);
