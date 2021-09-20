@@ -3,6 +3,7 @@ package com.dasher.osugdx.Timing;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
@@ -15,6 +16,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatListener, BeatmapManagerListener {
     private final BeatmapManager beatmapManager;
     private final Array<BeatListener> listeners = new Array<>();
+    private ClockTask clockTask;
 
     public BeatFactory(BeatmapManager beatmapManager) {
         this.beatmapManager = beatmapManager;
@@ -44,6 +46,10 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
 
         Array<TimingPoint> timingPoints = beatmapManager.getCurrentMap().getTimingPoints();
 
+        if (timingPoints.isEmpty()) {
+            return;
+        }
+
         if (currentTimingPoint == null) {
             for (TimingPoint timingPoint: timingPoints) {
                 if (!timingPoint.isInherited()) {
@@ -62,16 +68,23 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         }
 
         double beatLength = currentTimingPoint.getBeatLength();
-        double timePassedSinceLastBeat = (System.nanoTime() - timeSinceLastBeat) / 1e6;
 
-        if (timePassedSinceLastBeat > beatLength) {
-            timeSinceLastBeat = System.nanoTime();
-            if (beatAccumulator % 4 == 0) {
-                onFourthBeat(currentTimingPoint);
-            } else {
-                onNewBeat(currentTimingPoint);
-            }
-            beatAccumulator++;
+        if (clockTask != null) {
+            clockTask.update();
+        }
+        
+        if (clockTask == null || !clockTask.isWaiting()) {
+            clockTask = new ClockTask ((float) (beatLength / 1000)) {
+                @Override
+                public void run() {
+                    if (beatAccumulator % 4 == 0) {
+                        onFourthBeat(currentTimingPoint);
+                    } else {
+                        onNewBeat(currentTimingPoint);
+                    }
+                    beatAccumulator++;
+                }
+            };
         }
     }
 

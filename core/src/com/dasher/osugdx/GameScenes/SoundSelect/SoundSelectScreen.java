@@ -8,11 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
-import com.dasher.osugdx.Framework.Tasks.PoolTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
@@ -30,6 +28,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public Scrollable<BeatmapSetSelector> beatmapSetSelectorStage;
     public Array<BeatmapSetSelector> beatmapSetSelectors;
     public boolean isScrollingToNextBeatmapSet = true;
+    private final float thumbnailLazyLoadingTime = 0.1f;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -126,7 +125,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                         Texture thumbnailTexture = BeatmapUtils.getBackground(selector.beatMapSet.beatmaps.first());
                         selector.isLazyLoadingThumbnail = true;
                         if (thumbnailTexture != null) {
-                            clockTask = new ClockTask(0.1f) {
+                            clockTask = new ClockTask(thumbnailLazyLoadingTime) {
                                 @Override
                                 public void run() {
                                     selector.isLazyLoadingThumbnail = false;
