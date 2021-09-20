@@ -1,18 +1,25 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
+import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
+import com.dasher.osugdx.Framework.Tasks.PoolTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Input.InputHelper;
 import com.dasher.osugdx.OsuGame;
-import com.dasher.osugdx.Skins.SkinElement;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -79,6 +86,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     }
 
     private boolean scrolledToBeatmapSetAtStart = false;
+    private ClockTask clockTask;
 
     @Override
     public void render(float delta) {
@@ -100,6 +108,53 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         }
 
         renderFade(delta);
+
+        if (clockTask != null) {
+            clockTask.update();
+        }
+
+        if (beatmapSetSelectorStage.isNotLayouting()) {
+            for (BeatmapSetSelector selector: beatmapSetSelectors) {
+                SpriteDrawable thumbDrawable = ((SpriteDrawable) selector.thumbnail.getDrawable());
+                Sprite thumbSprite = thumbDrawable.getSprite();
+                if (selector.getStage() != null && ActorHelper.actorIsVisible(selector)) {
+                    if (
+                            (thumbSprite.getTexture() == null || !selector.isThumbnailTextureLoaded)
+                                    && !selector.isLazyLoadingThumbnail
+                                    && (clockTask == null || !clockTask.isWaiting())
+                    ) {
+                        Texture thumbnailTexture = BeatmapUtils.getBackground(selector.beatMapSet.beatmaps.first());
+                        selector.isLazyLoadingThumbnail = true;
+                        if (thumbnailTexture != null) {
+                            clockTask = new ClockTask(0.1f) {
+                                @Override
+                                public void run() {
+                                    selector.isLazyLoadingThumbnail = false;
+                                    selector.thumbnail.getColor().a = 0;
+                                    if (selector.getStage() != null && ActorHelper.actorIsVisible(selector) && !selector.isThumbnailTextureLoaded) {
+                                        selector.thumbnail.clearActions();
+                                        thumbDrawable.setSprite(new Sprite(thumbnailTexture));
+                                        selector.thumbnail.addAction(Actions.fadeIn(1f));
+                                        selector.isThumbnailTextureLoaded = true;
+                                        if (!selector.addedThumbnail) {
+                                            selector.addedThumbnail = true;
+                                            selector.addActor(selector.thumbnail);
+                                        }
+                                    } else {
+                                        selector.isThumbnailTextureLoaded = false;
+                                    }
+                                }
+                            };
+                        }
+                    }
+                } else if (selector.addedThumbnail && thumbSprite.getTexture() != null && selector.isThumbnailTextureLoaded) {
+                    thumbSprite.getTexture().dispose();
+                    selector.thumbnail.clearActions();
+                    selector.thumbnail.getColor().a = 0;
+                    selector.isThumbnailTextureLoaded = false;
+                }
+            }
+        }
     }
 
     @Override

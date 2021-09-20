@@ -1,9 +1,6 @@
 
 package com.dasher.osugdx.GameScenes;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.loaders.TextureLoader;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;

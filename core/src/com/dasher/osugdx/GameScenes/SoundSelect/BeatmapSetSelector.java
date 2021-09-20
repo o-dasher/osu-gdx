@@ -1,17 +1,14 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
-import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
@@ -22,12 +19,12 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 
 public class BeatmapSetSelector extends Group implements BeatmapManagerListener {
+    public final GameImage thumbnail;
     private final GameImage menuBackground;
-    private final GameImage thumbnail;
     private final Skin skin;
     private final BeatmapManager beatmapManager;
     private final SoundSelectScreen soundSelectScreen;
-    private boolean addedThumbnail = false;
+    public boolean addedThumbnail = false;
     public final BeatMapSet beatMapSet;
 
     public BeatmapSetSelector(
@@ -49,10 +46,14 @@ public class BeatmapSetSelector extends Group implements BeatmapManagerListener 
         this.addActor(menuBackground);
         setSize(w, h);
         setOrigin(Align.right);
-        setScale(0.9f);
         thumbnail.setSize(115, 85);
-        thumbnail.setPosition(18, getHeight() / 2 - thumbnail.getHeight() / 2);
+        float thumbnailX = 18;
+        if (skin.menuButtonBG.isHD()) {
+            thumbnailX /= 2;
+        }
+        thumbnail.setPosition(thumbnailX, getHeight() / 2 - thumbnail.getHeight() / 2);
         menuBackground.setPosition(getWidth() / 2 - w / 2f, getHeight() / 2 - h / 2f);
+        setScale(0.9f);
         addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -68,38 +69,18 @@ public class BeatmapSetSelector extends Group implements BeatmapManagerListener 
         });
     }
 
-    private boolean isThumbnailHidden = true;
+    public boolean isThumbnailTextureLoaded = false;
+    public boolean isLazyLoadingThumbnail = false;
 
     @Override
     public void act(float delta) {
         super.act(delta);
-        SpriteDrawable thumbDrawable = ((SpriteDrawable) thumbnail.getDrawable());
-        Sprite thumbSprite = thumbDrawable.getSprite();
-        if (soundSelectScreen.beatmapSetSelectorStage.isNotLayouting()) {
-            if (ActorHelper.actorIsVisible(this)) {
-                if (thumbSprite.getTexture() == null || isThumbnailHidden) {
-                    Texture thumbnailTexture = BeatmapUtils.getBackground(beatMapSet.beatmaps.first());
-                    if (thumbnailTexture != null) {
-                        isThumbnailHidden = false;
-                        thumbDrawable.setSprite(new Sprite(thumbnailTexture));
-                        if (!addedThumbnail) {
-                            addedThumbnail = true;
-                            addActor(thumbnail);
-                        }
-                    }
-                }
-            } else if (addedThumbnail && thumbSprite.getTexture() != null) {
-                thumbSprite.getTexture().dispose();
-                thumbSprite.getColor().a = 0;
-                isThumbnailHidden = true;
-            }
-        }
     }
 
     public void adjustColor() {
         if (beatmapManager.getCurrentBeatmapSet() == this.beatMapSet) {
             if (soundSelectScreen.selectedSelector != null) {
-                soundSelectScreen.selectedSelector.setColor(skin.getSongSelectInactiveTextColor());
+                soundSelectScreen.selectedSelector.menuBackground.setColor(skin.getSongSelectInactiveTextColor());
             }
             soundSelectScreen.selectedSelector = this;
             menuBackground.setColor(skin.getSongSelectActiveTextColor());

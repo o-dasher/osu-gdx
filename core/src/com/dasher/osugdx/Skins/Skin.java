@@ -46,16 +46,21 @@ public class Skin {
     private static final Color DEFAULT_SPINNER_APPROACH_CIRCLE = new Color(77, 139, 217, 1);
 
     /** The default color of the active text in the song selection menu. */
-    private static final Color DEFAULT_SONG_SELECT_ACTIVE_TEXT = new Color(255, 255, 255, 1);
+    private static final Color DEFAULT_SONG_SELECT_ACTIVE_TEXT = Color.WHITE.cpy();
 
     /** The default color of the inactive text in the song selection menu. */
-    private static final Color DEFAULT_SONG_SELECT_INACTIVE_TEXT = Color.PINK;
+    private static final Color DEFAULT_SONG_SELECT_INACTIVE_TEXT = Color.PINK.cpy();
 
     /** The default color of the stars that fall from the cursor during breaks. */
     private static final Color DEFAULT_STAR_BREAK_ADDITIVE = new Color(255, 182, 193, 1);
 
     /** The default color of the text on the input overlay. */
     private static final Color DEFAULT_INPUT_OVERLAY_TEXT = new Color(0, 0, 0, 1);
+
+    static {
+        DEFAULT_SONG_SELECT_ACTIVE_TEXT.a = 0.75f;
+        DEFAULT_SONG_SELECT_INACTIVE_TEXT.a = 0.75f;
+    }
 
     /** The skin directory. */
     private final FileHandle dir;

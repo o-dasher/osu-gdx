@@ -135,6 +135,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     private MoveToAction currentCorrectionAction = null;
+    public Array<T> visibleActors = new Array<>();
 
     @Override
     public void act(float delta) {
@@ -142,13 +143,13 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
         if (isNotLayouting()) {
             Group root = getRoot();
-            Array<Actor> visibleActors = new Array<>();
+            visibleActors.clear();
 
             float upperBound = 0;
             float lowerBound = 0;
 
             for (int i = 0; i < items.size; i++) {
-                Actor item = items.get(i);
+                T item = items.get(i);
                 upperBound = Math.max(upperBound, item.getY());
                 lowerBound = Math.min(lowerBound, item.getY());
                 item.setDebug(false);
