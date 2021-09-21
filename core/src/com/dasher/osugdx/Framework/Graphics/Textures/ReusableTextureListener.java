@@ -1,5 +1,7 @@
 package com.dasher.osugdx.Framework.Graphics.Textures;
 
+import com.badlogic.gdx.graphics.Texture;
+
 public interface ReusableTextureListener {
-    boolean isAllDisposed();
+    boolean shouldDispose(Texture texture);
 }

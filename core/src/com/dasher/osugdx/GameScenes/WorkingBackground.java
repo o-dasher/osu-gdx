@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
@@ -18,10 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BreakPeriod;
 
-public class WorkingBackground extends GameImage implements BeatmapManagerListener {
+public class WorkingBackground extends GameImage implements BeatmapManagerListener, ReusableTextureListener {
     private final BeatmapUtils beatmapUtils;
     private final Viewport viewport;
     private boolean isFirstBGChange = true;
+    private Texture nextTexture;
     public Texture defaultTexture;
 
     public WorkingBackground(@NotNull OsuGame game, Texture texture) {
@@ -35,6 +37,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
     }
 
     public void setBackground(@NotNull Texture texture) {
+        nextTexture = texture;
         TextureRegionDrawable drawable = (TextureRegionDrawable) getDrawable();
         Texture currentTexture = drawable.getRegion().getTexture();
 
@@ -73,7 +76,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         boolean hasBackground = false;
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
-                Texture backgroundTexture = beatmapUtils.getBackground(beatmap);
+                Texture backgroundTexture = beatmapUtils.getBackground(beatmap, this);
                 hasBackground = backgroundTexture != null;
                 setBackground(hasBackground? backgroundTexture : defaultTexture);
                 break;
@@ -87,5 +90,10 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
 
+    }
+
+    @Override
+    public boolean shouldDispose(Texture texture) {
+        return nextTexture != texture;
     }
 }

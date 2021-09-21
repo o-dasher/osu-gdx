@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
+import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
@@ -159,7 +160,19 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                         if (beatmap == null) {
                             return;
                         }
-                        Texture thumbnailTexture = game.beatmapUtils.getBackground(beatmap);
+                        Texture thumbnailTexture = game.beatmapUtils.getBackground(beatmap, texture -> {
+                            // getActors() to avoid nesting exception
+                            for (Actor selector1: beatmapSetSelectorStage.getActors()) {
+                                if (!(selector1 instanceof Selector)) {
+                                    continue;
+                                }
+                                Sprite currSprite = ((SpriteDrawable) ((Selector) selector1).thumbnail.getDrawable()).getSprite();
+                                if (ActorHelper.actorIsVisible(selector1) && currSprite.getTexture() == texture) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        });
                         selector.isLazyLoadingThumbnail = true;
                         if (thumbnailTexture != null) {
                             clockTask = new ClockTask(thumbnailLazyLoadingTime) {

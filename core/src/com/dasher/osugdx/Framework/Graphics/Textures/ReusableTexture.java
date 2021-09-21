@@ -21,7 +21,7 @@ public class ReusableTexture extends Texture {
 
     @Override
     public void dispose() {
-        if (listener.isAllDisposed()) {
+        if (listener.shouldDispose(this)) {
             super.dispose();
         }
     }
