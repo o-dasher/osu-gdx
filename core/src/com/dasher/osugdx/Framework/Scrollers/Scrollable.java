@@ -64,6 +64,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     float byX = isXScrollable? amountX * scrollMultiplier : 0;
                     float byY = isYScrollable? amountY * scrollMultiplier : 0;
                     addAction(Actions.moveBy(byX, byY, 0.025f));
+                    onScroll();
                 }
                 return false;
             }
@@ -263,6 +264,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
             float byX = isXScrollable? -(deltaX * panScrollMultiplier) : 0;
             float byY = isYScrollable? -(deltaY * panScrollMultiplier) : 0;
             addAction(Actions.moveBy(byX, byY));
+            onScroll();
         }
         return false;
     }
@@ -321,5 +323,9 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 ((Disposable) item).dispose();
             }
         }
+    }
+
+    public void onScroll() {
+
     }
 }
