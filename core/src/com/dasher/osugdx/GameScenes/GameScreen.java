@@ -47,7 +47,6 @@ public abstract class GameScreen implements Screen {
     protected AsyncExecutor asyncExecutor;
     private Screen nextScreen;
 
-
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
         cleanupTime = game.cleanupTime;
@@ -120,9 +119,9 @@ public abstract class GameScreen implements Screen {
 
     public void switchScreen(Screen screen) {
         if (!calledToSwitchScreen) {
+            nextScreen = screen;
             calledToSwitchScreen = true;
             isFadingIn = true;
-            nextScreen = screen;
         }
     }
 }

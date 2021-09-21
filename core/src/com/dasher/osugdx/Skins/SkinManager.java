@@ -17,7 +17,6 @@ public class SkinManager {
         this.game = game;
         this.skinConfigurator = new SkinConfigurator();
         this.defaultDir = Gdx.files.local("Skins/Legacy");
-        changeSkin(defaultDir);
     }
 
     public void changeSkin(@NotNull FileHandle fileHandle) {
@@ -100,5 +99,9 @@ public class SkinManager {
 
     public Skin getSelectedSkin() {
         return selectedSkin;
+    }
+
+    public FileHandle getDefaultDir() {
+        return defaultDir;
     }
 }

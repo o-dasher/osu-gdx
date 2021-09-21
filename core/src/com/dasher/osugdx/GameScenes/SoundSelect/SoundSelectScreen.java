@@ -143,9 +143,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         renderFade(delta);
 
         // TODO: TEST
+        /*
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             return;
         }
+         */
 
         if (clockTask != null) {
             clockTask.update(delta);
@@ -172,7 +174,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                         }
 
                         Texture thumbnailTexture = beatmapUtils.getBackground(beatmap, texture -> {
-                            if (((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() == texture) {
+                            if (
+                                    ((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() == texture
+                                            || isBaseShowing() || !beatmapSetSelectorStage.isNotLayouting() || isScrollingToNextBeatmapSet
+                            ) {
                                 return false;
                             }
                             // getActors() to avoid nesting exception
@@ -185,6 +190,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                                     return false;
                                 }
                             }
+                            unloadSelectorThumbnail(selector);
                             return true;
                         });
                         selector.isLazyLoadingThumbnail = true;
@@ -212,9 +218,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                     }
                 } else if (selector.addedThumbnail && thumbSprite.getTexture() != null && selector.isThumbnailTextureLoaded) {
                     thumbSprite.getTexture().dispose();
-                    selector.thumbnail.clearActions();
-                    selector.thumbnail.getColor().a = 0;
-                    selector.isThumbnailTextureLoaded = false;
+                    unloadSelectorThumbnail(selector);
                 }
             }
         }
@@ -222,6 +226,12 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         if (InputHelper.isBackPressed()) {
             this.switchScreen(new MenuScreen(game));
         }
+    }
+
+    private void unloadSelectorThumbnail(@NotNull Selector selector) {
+        selector.thumbnail.clearActions();
+        selector.thumbnail.getColor().a = 0;
+        selector.isThumbnailTextureLoaded = false;
     }
 
     @Override
@@ -249,10 +259,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         for (Selector selector: beatmapSetSelectorStage.getItems()) {
             SpriteDrawable drawable =  ((SpriteDrawable) selector.thumbnail.getDrawable());
             ReusableTexture texture =  ((ReusableTexture) drawable.getSprite().getTexture());
-            if (selector.isThisMapSelected()) {
-                continue;
-            }
-            if (texture != null && !texture.isDisposed()) {
+            if (
+                    texture != null
+                    && !texture.isDisposed()
+                    && (((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() != texture)
+            ) {
                 texture.forceDispose();
             }
         }

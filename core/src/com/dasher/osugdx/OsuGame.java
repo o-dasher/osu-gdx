@@ -66,8 +66,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public SkinManager skinManager;
 	public float cleanupTime;
 
-	private final int WORLD_WIDTH = 800;
-	private final int WORLD_HEIGHT = 600;
+	private int WORLD_WIDTH;
+	private int WORLD_HEIGHT;
 
 	public OsuGame(PlatformToast toast) {
 		this.toast = toast;
@@ -81,6 +81,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void create () {
 		gameName = "osu!gdx";
+		WORLD_WIDTH = 800;
+		WORLD_HEIGHT = 600;
 		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
@@ -106,8 +108,15 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatFactory = new BeatFactory(beatmapManager);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
+		asyncExecutor.submit(() -> {
+			oszParser.parseImportDirectory();
+			beatMapStore.loadCache();
+			beatMapStore.loadAllBeatmaps();
+			return null;
+		});
 		backgroundStage = new Stage(viewport, batch);
 		skinManager = new SkinManager(this);
+		skinManager.changeSkin(skinManager.getDefaultDir());
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 
@@ -143,13 +152,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				workingBackground = new WorkingBackground(this, bgTexture);
 				backgroundStage.addActor(workingBackground);
 				beatmapManager.addListener(workingBackground);
-				asyncExecutor.submit(() -> {
-					oszParser.parseImportDirectory();
-					beatMapStore.loadCache();
-					beatMapStore.loadAllBeatmaps();
-					Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
-					return null;
-				});
+				beatmapManager.randomizeCurrentBeatmapSet();
 				setScreen(new IntroScreen(this));
 			}
 		}
