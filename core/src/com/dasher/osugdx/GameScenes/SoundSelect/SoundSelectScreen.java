@@ -1,6 +1,6 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
-import com.badlogic.gdx.Application;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -19,11 +19,8 @@ import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
-import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Input.InputHelper;
 import com.dasher.osugdx.OsuGame;
 
@@ -38,7 +35,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public Array<BeatmapSetSelector> beatmapSetSelectors;
     public boolean isScrollingToNextBeatmapSet = true;
     private boolean isBaseShowing = false;
-    private final float thumbnailLazyLoadingTime = 0.5f;
+    private final float thumbnailLazyLoadingTime = 0.25f;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -182,11 +179,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                             }
                             // getActors() to avoid nesting exception
                             for (Actor selector1: beatmapSetSelectorStage.getActors()) {
-                                if (!(selector1 instanceof Selector)) {
-                                    continue;
-                                }
-                                Sprite currSprite = ((SpriteDrawable) ((Selector) selector1).thumbnail.getDrawable()).getSprite();
-                                if (ActorHelper.actorIsVisible(selector1) && currSprite.getTexture() == texture) {
+                                if (ActorHelper.actorIsVisible(selector1) && selector1 instanceof Selector) {
                                     return false;
                                 }
                             }
