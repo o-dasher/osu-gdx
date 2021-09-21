@@ -14,6 +14,8 @@ import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
+import org.jetbrains.annotations.NotNull;
+
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener {
@@ -64,20 +66,25 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             randomizeCurrentBeatmapSet();
         } else {
             System.out.println("Selected mapSet: " + newBeatmapSet.toString());
-
-            Array<Beatmap> loadedBeatmaps = new Array<>();
-            for (Beatmap beatmap: newBeatmapSet.beatmaps) {
-                FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-                loadedBeatmaps.add(beatmapUtils.createMap(beatmapFile));
-            }
-
-            newBeatmapSet.beatmaps.clear();
-            newBeatmapSet.beatmaps.addAll(loadedBeatmaps);
-
+            reInitBeatmapSet(newBeatmapSet);
             currentBeatmapSet = newBeatmapSet;
             this.onNewBeatmapSet(currentBeatmapSet);
-            setCurrentMap(currentBeatmapSet.beatmaps.first());
+            if (currentBeatmapSet.beatmaps.isEmpty()) {
+                handleEmptyBeatmapSet();
+            } else {
+                setCurrentMap(currentBeatmapSet.beatmaps.first());
+            }
         }
+    }
+
+    private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
+        Array<Beatmap> loadedBeatmaps = new Array<>();
+        for (Beatmap beatmap: beatMapSet.beatmaps) {
+            FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
+            loadedBeatmaps.add(beatmapUtils.createMap(beatmapFile));
+        }
+        beatMapSet.beatmaps.clear();
+        beatMapSet.beatmaps.addAll(loadedBeatmaps);
     }
 
     private void setupMusic(Beatmap newMap) {
@@ -142,15 +149,20 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         return currentMap;
     }
 
+    private void handleEmptyBeatmapSet() {
+        beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
+        randomizeCurrentBeatmapSet();
+        if (game.getScreen() instanceof SoundSelectScreen) {
+            game.getScreen().show();
+        }
+    }
+
     public void setCurrentMap(Beatmap newMap) {
         if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
             toast.log("Abnormal beatmap selected!");
             beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
-                randomizeCurrentBeatmapSet();
-                if (game.getScreen() instanceof SoundSelectScreen) {
-                   game.getScreen().show();
-                }
+                handleEmptyBeatmapSet();
             } else {
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }

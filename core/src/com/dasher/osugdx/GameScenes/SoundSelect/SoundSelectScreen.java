@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
-import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
@@ -66,7 +66,6 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectors.sort((a, b) -> a.beatMapSet.getTitle().compareTo(b.beatMapSet.getTitle()));
         scrolledToBeatmapSetAtStart = false;
         beatmapSetSelectorStage.getItems().clear();
-        beatmapSetSelectorStage.act(Gdx.graphics.getDeltaTime());
         for (Actor actor: beatmapSetSelectorStage.getActors()) {
             actor.addAction(Actions.removeActor());
         }
@@ -83,28 +82,28 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         inputMultiplexer.clear();
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
         inputMultiplexer.addProcessor(beatmapSetSelectorStage);
-        beatmapSetSelectorStage.setHeightMultiplier(0.5f);
+        beatmapSetSelectorStage.setyMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
         beatmapSetSelectorStage.setAlignX(Align.right);
-        beatmapSetSelectorStage.setWidthMultiplier(1);
+        beatmapSetSelectorStage.setxMultiplier(0.975f);
         beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.layout();
         isBaseShowing = false;
     }
 
     public boolean scrollToSelectedBeatmapSet() {
-        BeatMapSet currentSelectedBeatmap = beatmapManager.getCurrentBeatmapSet();
+        BeatMapSet currentSelectedBeatmapSet = beatmapManager.getCurrentBeatmapSet();
         if (beatmapSetSelectorStage.isNotLayouting()) {
             for (BeatmapSetSelector beatmapSetSelector: beatmapSetSelectors) {
-                if (beatmapSetSelector.beatMapSet == currentSelectedBeatmap) {
+                if (beatmapSetSelector.beatMapSet == currentSelectedBeatmapSet) {
+                    Vector2 pos = new Vector2(
+                            beatmapSetSelectorStage.getRoot().getX(),
+                            -beatmapSetSelector.getY() + beatmapSetSelector.getHeight() * 2
+                    );
                     beatmapSetSelectorStage.addAction(
                             Actions.sequence(
                                     Actions.run(() -> isScrollingToNextBeatmapSet = true),
-                                    Actions.moveTo(
-                                            beatmapSetSelectorStage.getRoot().getX(),
-                                            -beatmapSetSelector.getY() + beatmapSetSelector.getHeight() * 2,
-                                            0.25f, Interpolation.bounce
-                                    ),
+                                    Actions.moveTo(pos.x, pos.y, 0.25f, Interpolation.bounce),
                                     Actions.run(() -> isScrollingToNextBeatmapSet = false)
                             )
 

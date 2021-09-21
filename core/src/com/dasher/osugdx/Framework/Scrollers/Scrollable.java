@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 public class Scrollable<T extends Actor> extends Stage implements GestureDetector.GestureListener {
     private final Array<T> items = new Array<>();
     private float scrollMultiplier = 25;
-    private float heightMultiplier = 1;
-    private float widthMultiplier = 1;
+    private float yMultiplier = 1;
+    private float xMultiplier = 1;
     private boolean isXScrollable = true;
     private boolean isYScrollable = true;
     private boolean isLayouting = true;
@@ -70,8 +70,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         });
     }
 
-    public void setHeightMultiplier(float heightMultiplier) {
-        this.heightMultiplier = heightMultiplier;
+    public void setyMultiplier(float yMultiplier) {
+        this.yMultiplier = yMultiplier;
     }
 
     public boolean isNotLayouting() {
@@ -87,15 +87,15 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         for (int i = 0; i < items.size; i++) {
             T currentActor = items.get(i);
             currentActor.clearActions();
-            float height = currentActor.getHeight() * heightMultiplier;
+            float height = currentActor.getHeight() * yMultiplier;
             float x;
             float y = CenteringHelper.getCenterY(currentActor.getHeight()) - height * i / 2;
             switch (alignX) {
                 case Align.right:
-                    x = getViewport().getWorldWidth() - currentActor.getWidth() * widthMultiplier;
+                    x = getViewport().getWorldWidth() - currentActor.getWidth() * xMultiplier;
                     break;
                 case Align.left:
-                    x = -currentActor.getWidth() + currentActor.getWidth() * widthMultiplier;
+                    x = -currentActor.getWidth() + currentActor.getWidth() * xMultiplier;
                     break;
                 case Align.center:
                 default:
@@ -196,7 +196,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         }
     }
 
-    private Vector2 nextStairCaseCoordinate = new Vector2();
+    private final Vector2 nextStairCaseCoordinate = new Vector2();
 
     private void stairCaseEffect(@NotNull Array<T> itemsPart) {
         float realAdjustTime = stairCaseAdjustTime;
@@ -287,8 +287,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     }
 
-    public void setWidthMultiplier(float widthMultiplier) {
-        this.widthMultiplier = widthMultiplier;
+    public void setxMultiplier(float xMultiplier) {
+        this.xMultiplier = xMultiplier;
     }
 
     public void setStairCased(boolean stairCased) {
