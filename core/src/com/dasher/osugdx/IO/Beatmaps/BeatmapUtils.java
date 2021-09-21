@@ -49,7 +49,7 @@ public class BeatmapUtils {
         this.beatMapStore = beatMapStore;
     }
 
-    public static @Nullable Texture getBackground(@NotNull Beatmap beatmap) {
+    public @Nullable Texture getBackground(@NotNull Beatmap beatmap) {
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
                 FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);

@@ -76,6 +76,11 @@ public abstract class GameScreen implements Screen {
     private static boolean isFadingIn = false;
     private static boolean isFadingOut = false;
 
+    @Override
+    public void show() {
+        inputMultiplexer.clear();
+    }
+
     protected void renderFade(float delta) {
         if (calledToSwitchScreen) {
             if (isFirstFadeRender) {
@@ -91,7 +96,7 @@ public abstract class GameScreen implements Screen {
                         game.getScreen().dispose();
                         game.setScreen(nextScreen);
                     }
-                } else if (isFadingOut) {
+                } else {
                     fadeBlockColor.a = Math.max(0, fadeBlockColor.a - delta / cleanupTime);
                     if (fadeBlockColor.a <= 0) {
                         isFadingOut = false;
@@ -111,7 +116,6 @@ public abstract class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-
     }
 
     public void switchScreen(Screen screen) {

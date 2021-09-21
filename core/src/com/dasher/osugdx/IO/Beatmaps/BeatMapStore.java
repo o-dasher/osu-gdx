@@ -148,21 +148,39 @@ public class BeatMapStore {
         System.out.println("Cache was read completely, found " + tempCachedBeatmaps.size + " beatmapSets in cache");
     }
 
-    protected void deleteBeatmapFile(@Null BeatMapSet beatMapSet, @NotNull FileHandle beatmapFile) {
-        if (beatmapFile.exists()) {
+    protected void deleteBeatmapFile(@Null BeatMapSet beatMapSet, @Null FileHandle beatmapFile) {
+        if (beatmapFile != null && beatmapFile.exists()) {
             if (beatmapFile.delete()) {
-                System.out.println("Deleted the beatmap to save resources");
+                for (BeatMapSet tempSet: beatMapSets) {
+                    if (removeInvalidBeatmap(tempSet, beatmapFile.path())) {
+                        System.out.println("Deleted the beatmap to save resources");
+                        break;
+                    }
+                }
             } else {
                 System.out.println("Couldn't deleted beatmap to save resources");
             }
         }
+
         if (beatMapSet != null) {
-            for (Beatmap beatmap: beatMapSet.beatmaps) {
-                if (beatmap.beatmapFilePath.equals(beatmapFile.path())) {
-                    beatMapSet.beatmaps.removeValue(beatmap, true);
-                }
+            removeInvalidBeatmap(beatMapSet, beatmapFile == null? null : beatmapFile.path());
+        }
+
+        saveCache();
+    }
+
+    private boolean removeInvalidBeatmap(BeatMapSet beatMapSet, @Null String invalidPath) {
+        for (Beatmap beatmap: beatMapSet.beatmaps) {
+            if (beatmap.beatmapFilePath.equals(invalidPath)) {
+                beatMapSet.beatmaps.removeValue(beatmap, true);
+                return true;
             }
         }
+        if (beatMapSet.beatmaps.isEmpty() || invalidPath == null) {
+            Gdx.files.external(beatMapSet.beatmapSetFolderPath).delete();
+            beatMapSets.removeValue(beatMapSet, true);
+        }
+        return false;
     }
 
     private boolean verifyIfMapIsLoadedInCache(BeatMapSet beatMapSet, FileHandle beatmapFile) {

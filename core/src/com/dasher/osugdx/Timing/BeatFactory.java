@@ -70,11 +70,11 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         double beatLength = currentTimingPoint.getBeatLength();
 
         if (clockTask != null) {
-            clockTask.update();
+            clockTask.update(delta);
         }
-        
-        if (clockTask == null || !clockTask.isWaiting()) {
-            clockTask = new ClockTask ((float) (beatLength / 1000)) {
+
+        if (clockTask == null || clockTask.isCancelled()) {
+            clockTask = new ClockTask((float) (beatLength / 1000)) {
                 @Override
                 public void run() {
                     if (beatAccumulator % 4 == 0) {

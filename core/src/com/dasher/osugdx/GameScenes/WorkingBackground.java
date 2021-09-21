@@ -19,6 +19,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BreakPeriod;
 
 public class WorkingBackground extends GameImage implements BeatmapManagerListener {
+    private final BeatmapUtils beatmapUtils;
     private final Viewport viewport;
     private boolean isFirstBGChange = true;
     public Texture defaultTexture;
@@ -27,6 +28,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         super(game, texture, false);
         defaultTexture = texture;
         viewport = game.viewport;
+        beatmapUtils = game.beatmapUtils;
         setScaling(Scaling.fill);
         setAlign(Align.center);
         setOrigin(Align.center);
@@ -71,7 +73,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         boolean hasBackground = false;
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
-                Texture backgroundTexture = BeatmapUtils.getBackground(beatmap);
+                Texture backgroundTexture = beatmapUtils.getBackground(beatmap);
                 hasBackground = backgroundTexture != null;
                 setBackground(hasBackground? backgroundTexture : defaultTexture);
                 break;

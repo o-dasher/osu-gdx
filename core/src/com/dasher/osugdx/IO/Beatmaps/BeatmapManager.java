@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
+import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
@@ -85,6 +86,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         }
 
         String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
+        if (newMap.getGenerals() == null) {
+            beatMapStore.deleteBeatmapFile(null, Gdx.files.external(newMap.beatmapFilePath));
+            if (game.getScreen() instanceof SoundSelectScreen) {
+                game.getScreen().show();
+            }
+            return;
+        }
+
         String newMusicPath = folder + newMap.getGenerals().getAudioFileName();
         String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
                 folder + currentMap.getGenerals().getAudioFileName() : "";
@@ -107,6 +116,9 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             System.out.println("New music: " + newMusicPath);
         } else {
             System.out.println("Replaying beatmap music: " + newMap.toString());
+            if (game.getScreen() instanceof UIScreen && currentMusic.isPlaying()) {
+                return;
+            }
         }
 
         Screen gameScreen = game.getScreen();
@@ -133,7 +145,15 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     public void setCurrentMap(Beatmap newMap) {
         if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
             toast.log("Abnormal beatmap selected!");
-            setCurrentMap(currentBeatmapSet.beatmaps.first());
+            beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
+            if (currentBeatmapSet.beatmaps.isEmpty()) {
+                randomizeCurrentBeatmapSet();
+                if (game.getScreen() instanceof SoundSelectScreen) {
+                   game.getScreen().show();
+                }
+            } else {
+                setCurrentMap(currentBeatmapSet.beatmaps.first());
+            }
         }
         setupMusic(newMap);
         currentMap = newMap;

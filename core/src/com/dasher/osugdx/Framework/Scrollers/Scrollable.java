@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IdentityMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
@@ -28,6 +29,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private boolean isYScrollable = true;
     private boolean isLayouting = true;
     private boolean isStairCased = false;
+    private boolean isFirstStairCaseX = true;
+    private boolean isFirstStairCaseY = true;
     private int alignX = Align.center;
     private final IdentityMap<Actor, Vector2> basePoints = new IdentityMap<>();
     private float stairCaseMultiplier = 25f;
@@ -140,7 +143,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     @Override
     public void act(float delta) {
         super.act(delta);
-
         if (isNotLayouting()) {
             Group root = getRoot();
             visibleActors.clear();
@@ -162,7 +164,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 final int midIndex = (visibleActors.size - 1) / 2;
                 if (!(midIndex >= visibleActors.size) && midIndex >= 0) {
                     Actor centerActor = visibleActors.get(midIndex);
-                    centerActor.setDebug(true);
                     Array<T> upActors = new Array<>();
                     Array<T> downActors = new Array<>();
                     for (T item: items) {
@@ -195,21 +196,37 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         }
     }
 
+    private Vector2 nextStairCaseCoordinate = new Vector2();
+
     private void stairCaseEffect(@NotNull Array<T> itemsPart) {
+        float realAdjustTime = stairCaseAdjustTime;
+        if (isFirstStairCaseX || isFirstStairCaseY) {
+            realAdjustTime = 0;
+            if (isFirstStairCaseX) {
+                isFirstStairCaseX = false;
+            }
+            if (isFirstStairCaseY) {
+                isFirstStairCaseY = false;
+            }
+        }
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
             Vector2 point = basePoints.get(actor);
-            actor.addAction(
-                Actions.moveTo(
-                        Math.min(
-                                getViewport().getWorldWidth() - actor.getWidth() * 0.05f,
-                                point.x + (i + 1) * stairCaseMultiplier
-                        ),
-                        actor.getY(),
-                        stairCaseAdjustTime
-                )
+            if (point == null) {
+                return;
+            }
+            nextStairCaseCoordinate.set(
+                    Math.min(
+                            getViewport().getWorldWidth() - actor.getWidth() * 0.05f,
+                            point.x + (i + 1) * stairCaseMultiplier
+                    ), actor.getY()
             );
+            actor.addAction(Actions.moveTo(nextStairCaseCoordinate.x, nextStairCaseCoordinate.y, realAdjustTime));
         }
+    }
+
+    public Array<T> getItems() {
+        return items;
     }
 
     private MoveToAction updateCorrectionAction(float bound) {
@@ -294,5 +311,15 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     public void setStairCaseAdjustTime(float stairCaseAdjustTime) {
         ensureStairCased();
         this.stairCaseAdjustTime = stairCaseAdjustTime;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        for (T item: items) {
+            if (item instanceof Disposable) {
+                ((Disposable) item).dispose();
+            }
+        }
     }
 }

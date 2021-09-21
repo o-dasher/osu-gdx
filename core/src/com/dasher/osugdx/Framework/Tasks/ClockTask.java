@@ -1,7 +1,6 @@
 package com.dasher.osugdx.Framework.Tasks;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Pools;
+
 
 public abstract class ClockTask {
     private boolean isCancelled = false;
@@ -13,10 +12,10 @@ public abstract class ClockTask {
         this.period = period;
     }
 
-    public void update() {
+    public void update(float delta) {
         if (!isCancelled) {
-            timeSeconds += Gdx.graphics.getDeltaTime();
-            if (!isWaiting()) {
+            timeSeconds += delta;
+            if (timeSeconds > period) {
                 run();
                 if (isRepeating) {
                     timeSeconds -= period;
@@ -25,10 +24,6 @@ public abstract class ClockTask {
                 }
             }
         }
-    }
-
-    public boolean isWaiting() {
-        return timeSeconds < period;
     }
 
     public abstract void run();
@@ -41,6 +36,9 @@ public abstract class ClockTask {
         isCancelled = true;
         timeSeconds = 0;
         period = 0;
-        Pools.free(this);
+    }
+
+    public boolean isCancelled() {
+        return isCancelled;
     }
 }

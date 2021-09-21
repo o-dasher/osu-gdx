@@ -36,7 +36,7 @@ public class AndroidLauncher extends AndroidApplication {
 					Toast.makeText(this, "You must supply the permission if you want the game to work properly on android 11!", Toast.LENGTH_LONG).show();
 				}
 			}
-		} else {
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
 				requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 			}

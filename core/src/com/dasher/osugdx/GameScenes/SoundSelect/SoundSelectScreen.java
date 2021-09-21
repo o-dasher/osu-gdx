@@ -1,9 +1,11 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -15,7 +17,6 @@ import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Input.InputHelper;
 import com.dasher.osugdx.OsuGame;
 
@@ -24,11 +25,13 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class SoundSelectScreen extends UIScreen implements BeatmapManagerListener {
-    public BeatmapSetSelector selectedSelector;
-    public Scrollable<BeatmapSetSelector> beatmapSetSelectorStage;
+    public BeatmapSetSelector selectedBeatmapSet;
+    public BeatmapSelector selectedBeatmap;
+    public Scrollable<Selector> beatmapSetSelectorStage;
     public Array<BeatmapSetSelector> beatmapSetSelectors;
     public boolean isScrollingToNextBeatmapSet = true;
-    private final float thumbnailLazyLoadingTime = 0.1f;
+    private boolean isBaseShowing = false;
+    private final float thumbnailLazyLoadingTime = 0.25f;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -37,26 +40,55 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void show() {
         super.show();
-        beatmapSetSelectors = new Array<>();
-        beatmapSetSelectorStage = new Scrollable<>(viewport, batch);
-        beatmapSetSelectorStage.setHeightMultiplier(0.5f);
-        beatmapSetSelectorStage.setScrollable(false, true);
-        beatmapSetSelectorStage.setAlignX(Align.right);
-        beatmapSetSelectorStage.setWidthMultiplier(1);
-        beatmapSetSelectorStage.setStairCased(true);
+        beatmapSetSelectorStage = new Scrollable<>(viewport);
+        resetSelectors();
+        beatmapManager.addListener(this);
+    }
+
+    public void resetSelectors() {
         Array<BeatMapSet> beatMapSets = beatMapStore.getBeatMapSets();
+        beatmapSetSelectors = new Array<>();
         for (BeatMapSet beatMapSet: beatMapSets) {
             BeatmapSetSelector beatmapSetSelector = new BeatmapSetSelector(
                     game, game.skinManager.getSelectedSkin(), beatMapSet, beatmapManager, this
             );
             beatmapSetSelectors.add(beatmapSetSelector);
-            beatmapSetSelectorStage.addItem(beatmapSetSelector);
-            beatmapManager.addListener(beatmapSetSelector);
         }
-        beatmapSetSelectorStage.layout();
-        beatmapManager.addListener(this);
+        rearrangeSelectors();
+    }
+
+    public void rearrangeSelectors() {
+        if (isBaseShowing) {
+            return;
+        }
+        isBaseShowing = true;
+        beatmapSetSelectors.sort((a, b) -> a.beatMapSet.getTitle().compareTo(b.beatMapSet.getTitle()));
+        scrolledToBeatmapSetAtStart = false;
+        beatmapSetSelectorStage.getItems().clear();
+        beatmapSetSelectorStage.act(Gdx.graphics.getDeltaTime());
+        for (Actor actor: beatmapSetSelectorStage.getActors()) {
+            actor.addAction(Actions.removeActor());
+        }
+        beatmapSetSelectorStage.act(Gdx.graphics.getDeltaTime());
+        for (BeatmapSetSelector beatmapSetSelector: beatmapSetSelectors) {
+            if (!beatmapSetSelectorStage.getItems().contains(beatmapSetSelector, true)) {
+                beatmapSetSelectorStage.addItem(beatmapSetSelector);
+                beatmapManager.addListener(beatmapSetSelector);
+            }
+            if (beatmapSetSelector.isThisMapSelected()) {
+                beatmapSetSelector.layoutBeatmaps();
+            }
+        }
+        inputMultiplexer.clear();
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
         inputMultiplexer.addProcessor(beatmapSetSelectorStage);
+        beatmapSetSelectorStage.setHeightMultiplier(0.5f);
+        beatmapSetSelectorStage.setScrollable(false, true);
+        beatmapSetSelectorStage.setAlignX(Align.right);
+        beatmapSetSelectorStage.setWidthMultiplier(1);
+        beatmapSetSelectorStage.setStairCased(true);
+        beatmapSetSelectorStage.layout();
+        isBaseShowing = false;
     }
 
     public boolean scrollToSelectedBeatmapSet() {
@@ -102,27 +134,32 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.act(delta);
         beatmapSetSelectorStage.draw();
 
-        if (InputHelper.isBackPressed()) {
-            this.switchScreen(new MenuScreen(game));
-        }
-
         renderFade(delta);
 
         if (clockTask != null) {
-            clockTask.update();
+            clockTask.update(delta);
         }
 
         if (beatmapSetSelectorStage.isNotLayouting()) {
-            for (BeatmapSetSelector selector: beatmapSetSelectors) {
+            for (Selector selector: beatmapSetSelectorStage.getItems()) {
                 SpriteDrawable thumbDrawable = ((SpriteDrawable) selector.thumbnail.getDrawable());
                 Sprite thumbSprite = thumbDrawable.getSprite();
                 if (selector.getStage() != null && ActorHelper.actorIsVisible(selector)) {
                     if (
                             (thumbSprite.getTexture() == null || !selector.isThumbnailTextureLoaded)
                                     && !selector.isLazyLoadingThumbnail
-                                    && (clockTask == null || !clockTask.isWaiting())
+                                    && (clockTask == null || clockTask.isCancelled())
                     ) {
-                        Texture thumbnailTexture = BeatmapUtils.getBackground(selector.beatMapSet.beatmaps.first());
+                        Beatmap beatmap = null;
+                        if (selector instanceof BeatmapSetSelector) {
+                            beatmap = ((BeatmapSetSelector) selector).beatMapSet.beatmaps.first();
+                        } else if (selector instanceof BeatmapSelector) {
+                            beatmap = ((BeatmapSelector) selector).beatmap;
+                        }
+                        if (beatmap == null) {
+                            return;
+                        }
+                        Texture thumbnailTexture = game.beatmapUtils.getBackground(beatmap);
                         selector.isLazyLoadingThumbnail = true;
                         if (thumbnailTexture != null) {
                             clockTask = new ClockTask(thumbnailLazyLoadingTime) {
@@ -153,6 +190,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                     selector.isThumbnailTextureLoaded = false;
                 }
             }
+        }
+
+        if (InputHelper.isBackPressed()) {
+            this.switchScreen(new MenuScreen(game));
         }
     }
 
@@ -189,5 +230,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
         scrollToSelectedBeatmapSet();
+    }
+
+    public boolean isBaseShowing() {
+        return isBaseShowing;
     }
 }
