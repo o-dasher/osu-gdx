@@ -42,4 +42,9 @@ public class BeatmapSelector extends Selector {
         disableSelector(soundSelectScreen.selectedBeatmap);
         soundSelectScreen.selectedBeatmap = this;
     }
+
+    @Override
+    public Selector getSelectedSelector() {
+        return soundSelectScreen.selectedBeatmap;
+    }
 }

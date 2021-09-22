@@ -24,10 +24,18 @@ public class ReusableTexture extends Texture implements Listenable<ReusableTextu
 
     @Override
     public void dispose() {
+        boolean shouldDispose = true;
+
+        // dispose only if all listeners agree in doing so
         for (ReusableTextureListener listener: listeners) {
-            if (listener.shouldDispose(this)) {
-                forceDispose();
+            if (!listener.shouldDispose(this)) {
+                shouldDispose = false;
+                break;
             }
+        }
+
+        if (shouldDispose) {
+            forceDispose();
         }
     }
 

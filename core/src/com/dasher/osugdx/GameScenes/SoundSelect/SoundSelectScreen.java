@@ -45,6 +45,16 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public void show() {
         super.show();
         beatmapSetSelectorStage = new Scrollable<>(viewport);
+        inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
+        inputMultiplexer.addProcessor(beatmapSetSelectorStage);
+        beatmapSetSelectorStage.setYMultiplier(0.5f);
+        beatmapSetSelectorStage.setScrollable(false, true);
+        beatmapSetSelectorStage.setAlignX(Align.right);
+        beatmapSetSelectorStage.setXMultiplier(0.95f);
+        beatmapSetSelectorStage.setStairCased(true);
+        beatmapSetSelectorStage.setStairCaseAdjustTime(0.5f);
+        beatmapSetSelectorStage.setHoverAbleItems(true);
+        beatmapSetSelectorStage.setHoverXMultiplier(0.075f);
         resetSelectors();
         beatmapManager.addListener(this);
     }
@@ -68,8 +78,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         isBaseShowing = true;
         beatmapSetSelectors.sort((a, b) -> a.beatMapSet.getTitle().compareTo(b.beatMapSet.getTitle()));
         scrolledToBeatmapSetAtStart = false;
+        beatmapSetSelectorStage.resetItemPositionsToBase();
         beatmapSetSelectorStage.getItems().clear();
         for (Actor actor: beatmapSetSelectorStage.getActors()) {
+            actor.clearActions();
             actor.addAction(Actions.removeActor());
         }
         beatmapSetSelectorStage.act(Gdx.graphics.getDeltaTime());
@@ -82,14 +94,6 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                 beatmapSetSelector.layoutBeatmaps();
             }
         }
-        inputMultiplexer.clear();
-        inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
-        inputMultiplexer.addProcessor(beatmapSetSelectorStage);
-        beatmapSetSelectorStage.setyMultiplier(0.5f);
-        beatmapSetSelectorStage.setScrollable(false, true);
-        beatmapSetSelectorStage.setAlignX(Align.right);
-        beatmapSetSelectorStage.setxMultiplier(0.975f);
-        beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.layout();
         isBaseShowing = false;
     }
@@ -173,15 +177,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                         Texture thumbnailTexture = beatmapUtils.getBackground(beatmap, texture -> {
                             if (
                                     ((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() == texture
-                                            || isBaseShowing() || !beatmapSetSelectorStage.isNotLayouting() || isScrollingToNextBeatmapSet
+                                            || isMovingSelectors()
+                                            || selectedBeatmap == selector
+                                            || selector.getStage() != null && ActorHelper.actorIsVisible(selector)
                             ) {
                                 return false;
-                            }
-                            // getActors() to avoid nesting exception
-                            for (Actor selector1: beatmapSetSelectorStage.getActors()) {
-                                if (ActorHelper.actorIsVisible(selector1) && selector1 instanceof Selector) {
-                                    return false;
-                                }
                             }
                             unloadSelectorThumbnail(selector);
                             return true;
@@ -203,13 +203,16 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                                             selector.addActor(selector.thumbnail);
                                         }
                                     } else {
-                                        selector.isThumbnailTextureLoaded = false;
+                                        if (!isMovingSelectors()) {
+                                            selector.isThumbnailTextureLoaded = false;
+                                            unloadSelectorThumbnail(selector);
+                                        }
                                     }
                                 }
                             };
                         }
                     }
-                } else if (selector.addedThumbnail && thumbSprite.getTexture() != null && selector.isThumbnailTextureLoaded) {
+                } else if (selector.addedThumbnail && thumbSprite.getTexture() != null && selector.isThumbnailTextureLoaded && !isMovingSelectors()) {
                     thumbSprite.getTexture().dispose();
                     unloadSelectorThumbnail(selector);
                 }
@@ -220,6 +223,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             this.switchScreen(new MenuScreen(game));
         }
     }
+
+    private boolean isMovingSelectors() {
+        return !beatmapSetSelectorStage.isNotLayouting() || isScrollingToNextBeatmapSet || isBaseShowing;
+    }
+
 
     private void unloadSelectorThumbnail(@NotNull Selector selector) {
         selector.thumbnail.clearActions();

@@ -3,11 +3,13 @@ package com.dasher.osugdx.Framework.Scrollers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -25,14 +27,17 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private float scrollMultiplier = 25;
     private float yMultiplier = 1;
     private float xMultiplier = 1;
+    private float hoverXMultiplier = 0;
+    private float hoverYMultiplier = 0;
     private boolean isXScrollable = true;
     private boolean isYScrollable = true;
     private boolean isLayouting = true;
     private boolean isStairCased = false;
     private boolean isFirstStairCaseX = true;
     private boolean isFirstStairCaseY = true;
+    private boolean isHoverAbleItems = false;
     private int alignX = Align.center;
-    private final IdentityMap<Actor, Vector2> basePoints = new IdentityMap<>();
+    private final IdentityMap<Actor, ScrollItemData> baseData = new IdentityMap<>();
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
 
@@ -71,7 +76,11 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         });
     }
 
-    public void setyMultiplier(float yMultiplier) {
+    public void resetItemPositionsToBase() {
+
+    }
+
+    public void setYMultiplier(float yMultiplier) {
         this.yMultiplier = yMultiplier;
     }
 
@@ -84,7 +93,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     public void layout() {
-        basePoints.clear();
+        baseData.clear();
         for (int i = 0; i < items.size; i++) {
             T currentActor = items.get(i);
             currentActor.clearActions();
@@ -103,9 +112,12 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     x = CenteringHelper.getCenterX(currentActor.getWidth());
                     break;
             }
-            Vector2 vec = new Vector2(x, y);
-            currentActor.setPosition(vec.x, vec.y);
-            basePoints.put(currentActor, vec);
+
+            ScrollItemData scrollItemData = new ScrollItemData();
+            scrollItemData.baseVec.x = x;
+            scrollItemData.baseVec.y = y;
+            currentActor.setPosition(x, y);
+            baseData.put(currentActor, scrollItemData);
             currentActor.addAction(
                     Actions.sequence(
                             Actions.run(() -> isLayouting = true),
@@ -115,8 +127,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                             ),
                             Actions.run(() -> {
                                 isLayouting = false;
-                                vec.x = currentActor.getX();
-                                vec.y = currentActor.getY();
+                                scrollItemData.baseVec.x = currentActor.getX();
+                                scrollItemData.baseVec.y = currentActor.getY();
                             })
                     )
             );
@@ -125,6 +137,26 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void addItem(T item) {
         items.add(item);
+        if (isHoverAbleItems) {
+            item.addListener(new ClickListener() {
+                @Override
+                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                    if (baseData.containsKey(item)) {
+                        ScrollItemData data = baseData.get(item);
+                        data.extraVec.x = -(item.getWidth() * hoverXMultiplier);
+                        data.isHovered = true;
+                    }
+                }
+                @Override
+                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    if (baseData.containsKey(item)) {
+                        ScrollItemData data = baseData.get(item);
+                        data.extraVec.x = 0;
+                        data.isHovered = false;
+                    }
+                }
+            });
+        }
         super.addActor(item);
     }
 
@@ -212,16 +244,18 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         }
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
-            Vector2 point = basePoints.get(actor);
-            if (point == null) {
+            ScrollItemData itemData = baseData.get(actor);
+            if (itemData.baseVec == null) {
                 return;
             }
+
             nextStairCaseCoordinate.set(
                     Math.min(
                             getViewport().getWorldWidth() - actor.getWidth() * 0.05f,
-                            point.x + (i + 1) * stairCaseMultiplier
-                    ), actor.getY()
+                            itemData.baseVec.x + (i + 1) * stairCaseMultiplier + itemData.extraVec.x
+                    ), actor.getY() + itemData.extraVec.y
             );
+
             actor.addAction(Actions.moveTo(nextStairCaseCoordinate.x, nextStairCaseCoordinate.y, realAdjustTime));
         }
     }
@@ -289,7 +323,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     }
 
-    public void setxMultiplier(float xMultiplier) {
+    public void setXMultiplier(float xMultiplier) {
         this.xMultiplier = xMultiplier;
     }
 
@@ -327,5 +361,17 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void onScroll() {
 
+    }
+
+    public void setHoverAbleItems(boolean hoverAbleItems) {
+        this.isHoverAbleItems = hoverAbleItems;
+    }
+
+    public void setHoverXMultiplier(float hoverXMultiplier) {
+        this.hoverXMultiplier = hoverXMultiplier;
+    }
+
+    public void setHoverYMultiplier(float hoverYMultiplier) {
+        this.hoverYMultiplier = hoverYMultiplier;
     }
 }

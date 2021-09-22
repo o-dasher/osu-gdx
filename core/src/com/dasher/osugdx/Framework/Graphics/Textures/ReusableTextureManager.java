@@ -28,6 +28,9 @@ public class ReusableTextureManager {
                 nextTexture = newTexture(file, useMipMaps, listener);
             } else {
                 nextTexture = loadedTexture;
+                if (!nextTexture.getListeners().contains(listener, true)) {
+                    nextTexture.getListeners().add(listener);
+                }
             }
         } else {
             nextTexture = newTexture(file, useMipMaps, listener);

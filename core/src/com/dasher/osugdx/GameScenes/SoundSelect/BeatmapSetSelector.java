@@ -31,7 +31,7 @@ public class BeatmapSetSelector extends Selector {
     }
 
     public void layoutBeatmaps() {
-        changeSelectedSelector();
+        safeChangeSelectedSelector();
         for (Beatmap beatmap: beatMapSet.beatmaps) {
             BeatmapSelector beatmapSelector =  new BeatmapSelector(
                     game, skin, beatmapManager, soundSelectScreen, beatMapSet, beatmap
@@ -63,5 +63,10 @@ public class BeatmapSetSelector extends Selector {
     public void changeSelectedSelector() {
         disableSelector(soundSelectScreen.selectedBeatmapSet);
         soundSelectScreen.selectedBeatmapSet = this;
+    }
+
+    @Override
+    public Selector getSelectedSelector() {
+        return soundSelectScreen.selectedBeatmapSet;
     }
 }

@@ -70,7 +70,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             currentBeatmapSet = newBeatmapSet;
             this.onNewBeatmapSet(currentBeatmapSet);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
-                handleEmptyBeatmapSet();
+                handleEmptyBeatmapSet(currentBeatmapSet);
             } else {
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
@@ -81,18 +81,19 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         Array<Beatmap> loadedBeatmaps = new Array<>();
         for (Beatmap beatmap: beatMapSet.beatmaps) {
             FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-            loadedBeatmaps.add(beatmapUtils.createMap(beatmapFile));
+            if (beatmapFile.exists()) {
+                loadedBeatmaps.add(beatmapUtils.createMap(beatmapFile));
+            } else {
+                handleEmptyBeatmapSet(beatMapSet);
+            }
         }
         beatMapSet.beatmaps.clear();
         beatMapSet.beatmaps.addAll(loadedBeatmaps);
     }
 
-    private void setupMusic(Beatmap newMap) {
-        if (currentMusic != null && currentMusic.isPlaying() && !newMap.equals(currentMap)) {
-            currentMusic.dispose();
-        }
-
+    private void setupMusic(@NotNull Beatmap newMap) {
         String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
+
         if (newMap.getGenerals() == null) {
             beatMapStore.deleteBeatmapFile(null, Gdx.files.external(newMap.beatmapFilePath));
             if (game.getScreen() instanceof SoundSelectScreen) {
@@ -105,8 +106,18 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
                 folder + currentMap.getGenerals().getAudioFileName() : "";
 
+        if (currentMusic != null && !newMap.equals(currentMap)) {
+            // WE DON'T RESTART MUSIC IF ITS SAME MAP ON UI SCREEN
+            if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen) || !currentMusic.isPlaying()) {
+                currentMusic.dispose();
+            }
+        }
+
+        boolean isReplayingBeatmapMusic;
+
         // WE DON'T WANT TO RELOAD THE MUSIC IF IT'S THE SAME MUSIC REPLAYING
         if (!newMusicPath.equals(currentMusicPath)) {
+            isReplayingBeatmapMusic = false;
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
                 currentMusic = Gdx.audio.newMusic(musicFile);
@@ -122,15 +133,13 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             }
             System.out.println("New music: " + newMusicPath);
         } else {
+            isReplayingBeatmapMusic = true;
             System.out.println("Replaying beatmap music: " + newMap.toString());
-            if (game.getScreen() instanceof UIScreen && currentMusic.isPlaying()) {
-                return;
-            }
         }
 
         Screen gameScreen = game.getScreen();
         if (currentMusic != null) {
-            if (gameScreen instanceof UIScreen) {
+            if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
                 try {
                     currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
                 } catch (GdxRuntimeException e) {
@@ -149,8 +158,8 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         return currentMap;
     }
 
-    private void handleEmptyBeatmapSet() {
-        beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
+    private void handleEmptyBeatmapSet(BeatMapSet beatMapSet) {
+        beatMapStore.deleteBeatmapFile(beatMapSet, null);
         randomizeCurrentBeatmapSet();
         if (game.getScreen() instanceof SoundSelectScreen) {
             game.getScreen().show();
@@ -162,7 +171,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             toast.log("Abnormal beatmap selected!");
             beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
-                handleEmptyBeatmapSet();
+                handleEmptyBeatmapSet(currentBeatmapSet);
             } else {
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
