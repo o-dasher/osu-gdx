@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Null;
 import com.dasher.osugdx.IO.GameIO;
-import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -124,6 +123,12 @@ public class BeatMapStore {
                 cachedSets.removeValue(beatMapSet, true);
             }
             beatMapSets.addAll(cachedSets);
+            for (BeatMapSet beatMapSet: beatMapSets) {
+                if (!isBeatmapSetValid(beatMapSet)) {
+                    deleteBeatmapFile(beatMapSet, null);
+                    beatMapSets.removeValue(beatMapSet, true);
+                }
+            }
             tempCachedBeatmaps.addAll(beatMapSets);
             boolean logBeatmaps = false;
             if (logBeatmaps) {
@@ -152,7 +157,7 @@ public class BeatMapStore {
         if (beatmapFile != null && beatmapFile.exists()) {
             if (beatmapFile.delete()) {
                 for (BeatMapSet tempSet: beatMapSets) {
-                    if (removeInvalidBeatmap(tempSet, beatmapFile.path())) {
+                    if (removeInvalidBeatmapSet(tempSet, beatmapFile.path())) {
                         System.out.println("Deleted the beatmap to save resources");
                         break;
                     }
@@ -163,13 +168,13 @@ public class BeatMapStore {
         }
 
         if (beatMapSet != null) {
-            removeInvalidBeatmap(beatMapSet, beatmapFile == null? null : beatmapFile.path());
+            removeInvalidBeatmapSet(beatMapSet, beatmapFile == null? null : beatmapFile.path());
         }
 
         saveCache();
     }
 
-    private boolean removeInvalidBeatmap(BeatMapSet beatMapSet, @Null String invalidPath) {
+    private boolean removeInvalidBeatmapSet(@NotNull BeatMapSet beatMapSet, @Null String invalidPath) {
         for (Beatmap beatmap: beatMapSet.beatmaps) {
             if (beatmap.beatmapFilePath.equals(invalidPath)) {
                 beatMapSet.beatmaps.removeValue(beatmap, true);

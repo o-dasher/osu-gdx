@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
+import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
@@ -43,6 +44,7 @@ public abstract class GameScreen implements Screen {
     protected final Stage backgroundStage;
     protected final OSZParser oszParser;
     protected final SkinManager skinManager;
+    protected final Fonts fonts;
     protected float cleanupTime;
     protected AsyncExecutor asyncExecutor;
     private Screen nextScreen;
@@ -52,6 +54,7 @@ public abstract class GameScreen implements Screen {
         cleanupTime = game.cleanupTime;
         assetManager = game.assetManager;
         audioManager = game.audioManager;
+        fonts = game.fonts;
         uiConfig = game.uiConfig;
         batch = game.batch;
         viewport = game.viewport;

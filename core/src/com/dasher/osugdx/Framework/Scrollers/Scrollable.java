@@ -76,10 +76,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         });
     }
 
-    public void resetItemPositionsToBase() {
-
-    }
-
     public void setYMultiplier(float yMultiplier) {
         this.yMultiplier = yMultiplier;
     }
@@ -144,6 +140,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     if (baseData.containsKey(item)) {
                         ScrollItemData data = baseData.get(item);
                         data.extraVec.x = -(item.getWidth() * hoverXMultiplier);
+                        data.extraVec.y = -(item.getHeight() * hoverYMultiplier);
                         data.isHovered = true;
                     }
                 }
@@ -151,7 +148,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
                     if (baseData.containsKey(item)) {
                         ScrollItemData data = baseData.get(item);
-                        data.extraVec.x = 0;
+                        data.extraVec.set(0, 0);
                         data.isHovered = false;
                     }
                 }

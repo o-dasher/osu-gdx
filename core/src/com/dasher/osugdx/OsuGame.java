@@ -108,15 +108,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatFactory = new BeatFactory(beatmapManager);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
-		asyncExecutor.submit(() -> {
-			oszParser.parseImportDirectory();
-			beatMapStore.loadCache();
-			beatMapStore.loadAllBeatmaps();
-			return null;
-		});
 		backgroundStage = new Stage(viewport, batch);
 		skinManager = new SkinManager(this);
-		skinManager.changeSkin(skinManager.getDefaultDir());
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
 
@@ -152,7 +145,14 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				workingBackground = new WorkingBackground(this, bgTexture);
 				backgroundStage.addActor(workingBackground);
 				beatmapManager.addListener(workingBackground);
-				beatmapManager.randomizeCurrentBeatmapSet();
+				skinManager.changeSkin(skinManager.getDefaultDir());
+				asyncExecutor.submit(() -> {
+					oszParser.parseImportDirectory();
+					beatMapStore.loadCache();
+					beatMapStore.loadAllBeatmaps();
+					Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
+					return null;
+				});
 				setScreen(new IntroScreen(this));
 			}
 		}

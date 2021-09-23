@@ -7,11 +7,11 @@ import com.badlogic.gdx.utils.ObjectMap;
 import org.jetbrains.annotations.NotNull;
 
 public class ReusableTextureManager {
-    private final ObjectMap<String, ReusableTexture> textures = new ObjectMap<>();
+    private final ObjectMap<Integer, ReusableTexture> textures = new ObjectMap<>();
 
     private @NotNull ReusableTexture newTexture(FileHandle file, boolean useMipMaps, ReusableTextureListener listener) {
         ReusableTexture newTexture = new ReusableTexture(file, useMipMaps, listener);
-        textures.put(file.name(), newTexture);
+        textures.put(file.hashCode(), newTexture);
         return newTexture;
     }
 
@@ -21,10 +21,10 @@ public class ReusableTextureManager {
 
     public ReusableTexture getTexture(@NotNull FileHandle file, boolean useMipMaps, ReusableTextureListener listener) {
         ReusableTexture nextTexture;
-        if (textures.containsKey(file.name())) {
-            ReusableTexture loadedTexture = textures.get(file.name());
+        if (textures.containsKey(file.hashCode())) {
+            ReusableTexture loadedTexture = textures.get(file.hashCode());
             if (loadedTexture.isDisposed()) {
-                textures.remove(file.name());
+                textures.remove(file.hashCode());
                 nextTexture = newTexture(file, useMipMaps, listener);
             } else {
                 nextTexture = loadedTexture;

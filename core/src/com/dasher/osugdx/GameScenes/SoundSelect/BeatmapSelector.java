@@ -1,5 +1,7 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.OsuGame;
@@ -7,17 +9,28 @@ import com.dasher.osugdx.Skins.Skin;
 
 import org.jetbrains.annotations.NotNull;
 
+
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
 public class BeatmapSelector extends Selector {
-    public Beatmap beatmap;
-    public BeatMapSet beatmapSet;
+    protected Beatmap beatmap;
+    protected BeatMapSet beatmapSet;
 
-    public BeatmapSelector(OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager, SoundSelectScreen soundSelectScreen, BeatMapSet beatmapSet, Beatmap beatmap) {
-        super(game, skin, beatmapManager, soundSelectScreen);
+    public BeatmapSelector(OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager, SoundSelectScreen soundSelectScreen, BitmapFont font, BeatMapSet beatmapSet, @NotNull Beatmap beatmap) {
+        super(game, skin, beatmapManager, soundSelectScreen, font);
         this.beatmap = beatmap;
         this.beatmapSet = beatmapSet;
+        initLabels();
+        Label diffLabel = new Label(metadata().getVersion(), labelStyle);
+        diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - font.getXHeight() * 2);
+        addActor(diffLabel);
         adjustColor();
+    }
+
+    @Override
+    public BeatmapMetadata metadata() {
+        return beatmap.getMetadata();
     }
 
     @Override
