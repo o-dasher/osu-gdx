@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
@@ -93,6 +94,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             actor.addAction(Actions.removeActor());
         }
         for (BeatmapSetSelector beatmapSetSelector: beatmapSetSelectors) {
+            if (beatmapSetSelector.beatMapSet == beatMapStore.getMainDefaultBeatmapSet()) {
+                continue;
+            }
             if (beatmapSetSelector.isThisMapSelected()) {
                 beatmapSetSelector.layoutBeatmaps();
             } else if (!beatmapSetSelectorStage.getItems().contains(beatmapSetSelector, true)) {
@@ -157,6 +161,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.WebGL) {
             updateSelectorThumbnails(delta);
         }
+
 
         if (InputHelper.isBackPressed()) {
             this.switchScreen(new MenuScreen(game));
@@ -290,6 +295,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
         scrollToSelectedBeatmapSet();
+        rearrangeSelectors();
     }
 
     public boolean isBaseShowing() {

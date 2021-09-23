@@ -58,9 +58,8 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 beatmap.freeResources();
             }
         }
-
-        Beatmap beatmapSetFirstMap = newBeatmapSet.beatmaps.first();
-        if (beatmapSetFirstMap == null) {
+        
+        if (newBeatmapSet.beatmaps.isEmpty()) {
             newBeatmapSet.getFolder().delete();
             beatMapStore.getBeatMapSets().removeValue(newBeatmapSet, true);
             randomizeCurrentBeatmapSet();
@@ -139,17 +138,12 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
         Screen gameScreen = game.getScreen();
         if (currentMusic != null) {
-            if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
-                try {
-                    currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
-                } catch (GdxRuntimeException e) {
-                    toast.log("Unexpected error while loading beatmap music!");
-                    randomizeCurrentBeatmapSet();
-                    return;
-                }
-            }
             if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
                 audioManager.playMusic(currentMusic);
+                if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
+                    currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+
+                }
             }
         }
     }

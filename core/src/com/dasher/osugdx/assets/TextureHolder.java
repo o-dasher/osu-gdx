@@ -21,9 +21,8 @@ public class TextureHolder extends AssetHolder<Texture> {
     public TextureHolder(@NotNull AssetPaths assetPaths) {
         super(assetPaths.textures.path());
 
-        textureParameter.genMipMaps = true;
-        textureParameter.minFilter = Texture.TextureFilter.MipMapLinearLinear;
-        textureParameter.magFilter = Texture.TextureFilter.MipMapLinearLinear;
+        textureParameter.minFilter = Texture.TextureFilter.Linear;
+        textureParameter.magFilter = Texture.TextureFilter.Linear;
 
         logo = addAsset(assetPaths.textures.menu + "logo.png", Texture.class, textureParameter);
         playButton = addAsset(assetPaths.textures.menu + "play.png", Texture.class, textureParameter);

@@ -3,6 +3,7 @@ package com.dasher.osugdx.IO.Beatmaps;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureManager;
@@ -30,11 +31,13 @@ public class BeatmapUtils {
     private BeatMapStore beatMapStore;
 
     public Beatmap createMap(@NotNull FileHandle mapFile) {
+        long time = TimeUtils.millis();
         InputStream reader = mapFile.read();
         Beatmap beatmap = null;
 
         try {
             beatmap = beatmapParser.parse(reader);
+            System.out.println(TimeUtils.timeSinceMillis(time));
         } catch (BeatmapException e) {
             beatMapStore.deleteBeatmapFile(null, mapFile);
             e.printStackTrace();
@@ -66,7 +69,7 @@ public class BeatmapUtils {
                 } else {
                     texture.setFilter(
                             Texture.TextureFilter.MipMapLinearLinear,
-                            Texture.TextureFilter.MipMapLinearLinear
+                            Texture.TextureFilter.Linear
                     );
                     return texture;
                 }
