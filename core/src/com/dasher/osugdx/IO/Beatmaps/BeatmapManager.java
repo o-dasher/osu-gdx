@@ -77,17 +77,15 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
-        Array<Beatmap> loadedBeatmaps = new Array<>();
-        for (Beatmap beatmap: beatMapSet.beatmaps) {
+        for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
+            Beatmap beatmap = beatMapSet.beatmaps.get(i);
             FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
             if (beatmapFile.exists()) {
-                loadedBeatmaps.add(beatmapUtils.createMap(beatmapFile));
+                beatMapSet.beatmaps.set(i, beatmapUtils.createMap(beatmapFile));
             } else {
                 handleEmptyBeatmapSet(beatMapSet);
             }
         }
-        beatMapSet.beatmaps.clear();
-        beatMapSet.beatmaps.addAll(loadedBeatmaps);
     }
 
     private void setupMusic(@NotNull Beatmap newMap) {
