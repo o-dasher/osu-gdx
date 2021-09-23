@@ -34,13 +34,13 @@ public abstract class Beatmap {
 	}
 
 	public void freeResources() {
-		timingPoints.clear();
 		getHitObjects().clear();
 		for (BreakPeriod breakPeriod: breaks) {
 			if (!breakPeriod.isBackground()) {
 				breaks.removeValue(breakPeriod, true);
 			}
 		}
+		timingPoints = null;
 		editorState = null;
 		generals = null;
 	}
