@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -37,6 +38,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public boolean isScrollingToNextBeatmapSet = true;
     private boolean isBaseShowing = false;
     private float thumbnailLazyLoadingTime;
+    private Label.LabelStyle selectorLabelStyle;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -45,7 +47,8 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void show() {
         super.show();
-        thumbnailLazyLoadingTime = 0.1f;
+        selectorLabelStyle = new Label.LabelStyle(fonts.allerFont, null);
+        thumbnailLazyLoadingTime = 0.25f;
         beatmapSetSelectorStage = new Scrollable<>(viewport);
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
         inputMultiplexer.addProcessor(beatmapSetSelectorStage);
@@ -67,7 +70,8 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectors = new Array<>();
         for (BeatMapSet beatMapSet: beatMapSets) {
             BeatmapSetSelector beatmapSetSelector = new BeatmapSetSelector(
-                    game, game.skinManager.getSelectedSkin(), beatMapSet, beatmapManager, fonts.baseBitmapFont, this
+                    game, game.skinManager.getSelectedSkin(), beatMapSet,
+                    beatmapManager, fonts.baseBitmapFont, selectorLabelStyle, this
             );
             beatmapSetSelectors.add(beatmapSetSelector);
         }

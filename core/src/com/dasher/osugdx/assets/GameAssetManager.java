@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 public class GameAssetManager extends AssetManager {
     private final Array<AssetHolder<?>> holders = new Array<>();
 
+    public final AssetPaths assetPaths;
     public final TextureHolder textures;
     public final SoundsHolder sounds;
     public final MusicHolder musics;
@@ -15,7 +16,7 @@ public class GameAssetManager extends AssetManager {
     public final FontHolder fonts;
 
     public GameAssetManager() {
-        AssetPaths assetPaths = new AssetPaths();
+        assetPaths = new AssetPaths();
         holders.add(textures = new TextureHolder(assetPaths));
         holders.add(sounds = new SoundsHolder(assetPaths));
         holders.add(musics = new MusicHolder(assetPaths));

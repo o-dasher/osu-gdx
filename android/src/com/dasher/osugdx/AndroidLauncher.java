@@ -1,6 +1,7 @@
 package com.dasher.osugdx;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -16,12 +17,18 @@ import android.widget.Toast;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.badlogic.gdx.backends.android.AndroidAudio;
+
+import barsoosayque.libgdxoboe.OboeAudio;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class AndroidLauncher extends AndroidApplication {
-
+	@Override
+	public AndroidAudio createAudio(Context context, AndroidApplicationConfiguration config) {
+		return new OboeAudio(context.getAssets());
+	}
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {

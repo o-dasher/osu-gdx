@@ -1,10 +1,18 @@
 package com.dasher.osugdx.Skins;
 
 public enum SkinElementNames {
-    CURSOR("cursor", new String[]{"png"}),
-    CURSOR_MIDDLE ("cursormiddle", new String[]{"png"}),
-    CURSOR_TRAIL ("cursortrail", new String[]{"png"}),
-    MENU_BUTTON_BG ("menu-button-background", new String[]{"png"});
+    CURSOR("cursor", Extensions.pngOnly),
+    CURSOR_MIDDLE("cursormiddle", Extensions.pngOnly),
+    CURSOR_TRAIL("cursortrail", Extensions.pngOnly),
+    MENU_BUTTON_BG("menu-button-background", Extensions.pngOnly),
+    STAR("star", Extensions.pngOnly),
+    STAR2("star2",  Extensions.pngOnly),
+    STAR3("star3", Extensions.pngOnly);
+
+    private static class Extensions {
+        public static final String png = "png";
+        public static final String[] pngOnly = new String[]{png};
+    }
 
     public final String name;
     public final String[] names;

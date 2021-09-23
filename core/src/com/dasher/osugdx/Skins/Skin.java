@@ -364,4 +364,7 @@ public class Skin {
     public SkinElement cursorMiddle;
     public SkinElement cursorTrail;
     public SkinElement menuButtonBG;
+    public SkinElement star1;
+    public SkinElement star2;
+    public SkinElement star3;
 }

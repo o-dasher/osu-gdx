@@ -57,6 +57,15 @@ public class SkinManager {
                             selectedSkin.menuButtonBG = createdElement;
                             break;
                         }
+                        case STAR:
+                            selectedSkin.star1 = createdElement;
+                            break;
+                        case STAR2:
+                            selectedSkin.star2 = createdElement;
+                            break;
+                        case STAR3:
+                            selectedSkin.star3 = createdElement;
+                            break;
                         default:
                             break;
                     }

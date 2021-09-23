@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -39,9 +40,11 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
 
     public Selector(
             OsuGame game, @NotNull Skin skin,
-            BeatmapManager beatmapManager, SoundSelectScreen soundSelectScreen, BitmapFont font
+            BeatmapManager beatmapManager, SoundSelectScreen soundSelectScreen,
+            BitmapFont font, Label.LabelStyle labelStyle
     ) {
         super();
+        this.labelStyle = labelStyle;
         this.game = game;
         this.font = font;
         Sprite menuButtonBG = skin.menuButtonBG.getSprite();
@@ -89,13 +92,13 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
 
     public void initLabels() {
         BeatmapMetadata metadata = metadata();
-        labelStyle = new Label.LabelStyle(font, null);
         titleLabel = new Label(metadata.getTitle(), labelStyle);
         titleLabel.setPosition(getWidth() * 0.2f, getHeight() * 0.7f);
-        titleLabel.setFontScale(1);
+        titleLabel.setTouchable(Touchable.disabled);
         addActor(titleLabel);
         middleLabel = new Label(metadata.getArtistRomanized() + "//" + metadata.getCreator(), labelStyle);
         middleLabel.setPosition(titleLabel.getX(), titleLabel.getY() - font.getXHeight() * 2);
+        middleLabel.setTouchable(Touchable.disabled);
         addActor(middleLabel);
     }
 
