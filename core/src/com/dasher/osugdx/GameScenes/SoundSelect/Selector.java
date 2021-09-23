@@ -76,7 +76,7 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
         addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (mapChangeCondition()) {
+                if (mapChangeCondition() && !soundSelectScreen.isMovingSelectors()) {
                     changeMap();
                     adjustColor();
                 }

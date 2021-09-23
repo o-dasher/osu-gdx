@@ -240,10 +240,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         }
     }
 
-    private boolean isMovingSelectors() {
+    protected boolean isMovingSelectors() {
         return !beatmapSetSelectorStage.isNotLayouting() || isScrollingToNextBeatmapSet || isBaseShowing;
     }
-
 
     private void unloadSelectorThumbnail(@NotNull Selector selector) {
         selector.thumbnail.clearActions();
