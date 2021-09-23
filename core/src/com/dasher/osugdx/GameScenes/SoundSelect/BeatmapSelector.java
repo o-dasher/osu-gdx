@@ -1,9 +1,11 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
@@ -21,34 +23,35 @@ public class BeatmapSelector extends Selector {
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
     private final Label diffLabel;
+    private final Color inactiveColor;
 
     public BeatmapSelector(
             OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager,
             SoundSelectScreen soundSelectScreen,
             BitmapFont font, Label.LabelStyle labelStyle,
-            BeatMapSet beatmapSet, @NotNull Beatmap beatmap
+            BeatMapSet beatmapSet, @NotNull Beatmap beatmap, Color inactiveColor
     ) {
         super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle);
         this.beatmap = beatmap;
         this.beatmapSet = beatmapSet;
+        this.inactiveColor = inactiveColor;
         initLabels();
-        diffLabel = new Label(metadata().getVersion(), labelStyle);
-        diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - font.getXHeight() * 2);
-        diffLabel.setTouchable(Touchable.disabled);
-        addActor(diffLabel);
+        diffLabel = createLabel(metadata().getVersion());
+        diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - middleLabel.getHeight() * labelScale);
         generateStars();
         adjustColor();
     }
 
     private void generateStars() {
         float starX = diffLabel.getX();
-        float maxStars = Math.min(10, (int) beatmap.getDifficulty().getStars());
+        // 10 - 1 to account for last star which can be floated
+        float maxStars = Math.min(10 - 1, (int) beatmap.getDifficulty().getStars());
         float starScale = 0.25f;
-        for (int i = 0; i < maxStars; i++) {
+        for (int i = 0; i < maxStars + 1; i++) {
             Sprite starSprite = skin.star1.getSprite();
-            if (i == maxStars - 1) {
+            if (i == maxStars) {
                 // Last star can be "float"
-                float floatingStar = (float) (beatmap.getDifficulty().getStars() - i - 1);
+                float floatingStar = (float) (beatmap.getDifficulty().getStars() - i);
                 TextureRegion region = new TextureRegion(
                         starSprite.getTexture(),
                         0, 0,
@@ -58,7 +61,10 @@ public class BeatmapSelector extends Selector {
             }
             GameImage star = new GameImage(game, starSprite, false);
             star.setScale(starScale);
-            star.setPosition(starX, diffLabel.getY() - star.getHeight() * starScale);
+            star.setPosition(
+                    starX,
+                    diffLabel.getY() - star.getHeight() * starScale * labelScale
+            );
             star.setTouchable(Touchable.disabled);
             starX += star.getWidth() * starScale;
             addActor(star);
@@ -84,6 +90,36 @@ public class BeatmapSelector extends Selector {
     public void changeMap() {
         if (beatmapManager.getCurrentBeatmapSet() == beatmapSet) {
             beatmapManager.setCurrentMap(beatmap);
+        }
+    }
+
+    @Override
+    public void adjustColor() {
+        super.adjustColor();
+        if (isThisMapSelected()) {
+            for (Label label: labels) {
+                label.addAction(Actions.color(skin.getSongSelectActiveTextColor()));
+            }
+        }
+    }
+
+    @Override
+    public Color activeColor() {
+        return Color.WHITE;
+    }
+
+    @Override
+    public Color inactiveColor() {
+        return inactiveColor;
+    }
+
+    @Override
+    public void disableSelector(Selector selector) {
+        if (selector != null) {
+            super.disableSelector(selector);
+            for (Label label: selector.labels) {
+                label.addAction(Actions.color(skin.getSongSelectInactiveTextColor(), colorSelectTime));
+            }
         }
     }
 

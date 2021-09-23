@@ -93,12 +93,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             actor.addAction(Actions.removeActor());
         }
         for (BeatmapSetSelector beatmapSetSelector: beatmapSetSelectors) {
-            if (!beatmapSetSelectorStage.getItems().contains(beatmapSetSelector, true)) {
-                beatmapSetSelectorStage.addItem(beatmapSetSelector);
-                beatmapManager.addListener(beatmapSetSelector);
-            }
             if (beatmapSetSelector.isThisMapSelected()) {
                 beatmapSetSelector.layoutBeatmaps();
+            } else if (!beatmapSetSelectorStage.getItems().contains(beatmapSetSelector, true)) {
+                beatmapSetSelectorStage.addItem(beatmapSetSelector);
+                beatmapManager.addListener(beatmapSetSelector);
             }
         }
         beatmapSetSelectorStage.layout();

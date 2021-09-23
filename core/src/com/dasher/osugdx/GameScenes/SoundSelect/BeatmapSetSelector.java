@@ -1,6 +1,7 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
@@ -11,6 +12,8 @@ import com.dasher.osugdx.Skins.Skin;
 
 import org.jetbrains.annotations.NotNull;
 
+
+import java.util.Comparator;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
@@ -36,6 +39,16 @@ public class BeatmapSetSelector extends Selector {
     }
 
     @Override
+    public Color activeColor() {
+        return Color.PINK;
+    }
+
+    @Override
+    public Color inactiveColor() {
+        return Color.PINK;
+    }
+
+    @Override
     public BeatmapMetadata metadata() {
         return beatMapSet.beatmaps.first().getMetadata();
     }
@@ -48,14 +61,16 @@ public class BeatmapSetSelector extends Selector {
     public void layoutBeatmaps() {
         safeChangeSelectedSelector();
         Array<BeatmapSelector> beatmapSelectors = new Array<>();
+        Color inactiveBeatmapColor = new Color(0xadd8e6ff);
         for (Beatmap beatmap: beatMapSet.beatmaps) {
-            BeatmapSelector beatmapSelector =  new BeatmapSelector(
-                    game, skin, beatmapManager, soundSelectScreen, font, labelStyle, beatMapSet, beatmap
+            BeatmapSelector beatmapSelector = new BeatmapSelector(
+                    game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
+                        beatMapSet, beatmap, inactiveBeatmapColor
             );
             beatmapSelectors.add(beatmapSelector);
         }
-        beatmapSelectors.sort((a, b) ->
-                (int) ((float) a.beatmap.getDifficulty().getStars() - (float) b.beatmap.getDifficulty().getStars())
+        beatmapSelectors.sort((o1, o2) ->
+            (int) (o1.beatmap.getDifficulty().getStars() - o2.beatmap.getDifficulty().getStars())
         );
         for (BeatmapSelector beatmapSelector: beatmapSelectors) {
             soundSelectScreen.beatmapSetSelectorStage.addItem(beatmapSelector);

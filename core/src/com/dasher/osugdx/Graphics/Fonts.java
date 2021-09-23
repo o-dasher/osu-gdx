@@ -17,7 +17,7 @@ public class Fonts {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
                 Gdx.files.internal(
                         assetManager.assetPaths.fontsPath.path()
-                                + assetManager.assetPaths.fontsPath.aller + "AllerDisplay.ttf"
+                                + assetManager.assetPaths.fontsPath.aller + "Aller_Rg.ttf"
                 )
         );
         FreeTypeFontGenerator.FreeTypeFontParameter parameter =
@@ -25,6 +25,7 @@ public class Fonts {
         parameter.minFilter = Texture.TextureFilter.MipMapLinearLinear;
         parameter.magFilter = Texture.TextureFilter.MipMapLinearLinear;
         parameter.genMipMaps = true;
+        parameter.size = 32;
         allerFont = generator.generateFont(parameter);
         generator.dispose();
     }

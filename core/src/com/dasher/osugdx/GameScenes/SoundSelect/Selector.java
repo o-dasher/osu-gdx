@@ -1,5 +1,6 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Null;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
@@ -36,7 +39,9 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
     protected Label.LabelStyle labelStyle;
     protected Label titleLabel;
     protected Label middleLabel;
-    private final float colorSelectTime = 0.25f;
+    protected final Array<Label> labels = new Array<>();
+    protected final float labelScale = 0.5f;
+    protected final float colorSelectTime = 0.25f;
 
     public Selector(
             OsuGame game, @NotNull Skin skin,
@@ -92,14 +97,10 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
 
     public void initLabels() {
         BeatmapMetadata metadata = metadata();
-        titleLabel = new Label(metadata.getTitle(), labelStyle);
-        titleLabel.setPosition(getWidth() * 0.2f, getHeight() * 0.7f);
-        titleLabel.setTouchable(Touchable.disabled);
-        addActor(titleLabel);
-        middleLabel = new Label(metadata.getArtistRomanized() + "//" + metadata.getCreator(), labelStyle);
-        middleLabel.setPosition(titleLabel.getX(), titleLabel.getY() - font.getXHeight() * 2);
-        middleLabel.setTouchable(Touchable.disabled);
-        addActor(middleLabel);
+        titleLabel = createLabel(metadata.getTitleRomanized());
+        titleLabel.setPosition(getWidth() * 0.2f, getHeight() - titleLabel.getHeight());
+        middleLabel = createLabel(metadata.getArtistRomanized() + " // " + metadata.getCreator());
+        middleLabel.setPosition(titleLabel.getX(), titleLabel.getY() - titleLabel.getHeight() * labelScale);
     }
 
     public abstract BeatmapMetadata metadata();
@@ -110,6 +111,15 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
     public boolean isThumbnailTextureLoaded = false;
     public boolean isLazyLoadingThumbnail = false;
 
+    protected Label createLabel(@Null CharSequence text) {
+        Label label = new Label(text, labelStyle);
+        label.setTouchable(Touchable.disabled);
+        label.setFontScale(labelScale);
+        labels.add(label);
+        addActor(label);
+        return label;
+    }
+
     @Override
     public void act(float delta) {
         super.act(delta);
@@ -119,18 +129,23 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
         if (isThisMapSelected()) {
             if (getColor() != skin.getSongSelectActiveTextColor()) {
                 safeChangeSelectedSelector();
-                menuBackground.addAction(Actions.color(skin.getSongSelectActiveTextColor(), colorSelectTime));
+                menuBackground.addAction(Actions.color(activeColor(), colorSelectTime));
             }
         } else {
             disableSelector(this);
         }
     }
 
+    public abstract Color activeColor();
+    public abstract Color inactiveColor();
+
     public void disableSelector(Selector selector) {
         if (selector != null) {
-            selector.menuBackground.addAction(
-                    Actions.color(skin.getSongSelectInactiveTextColor(), colorSelectTime)
-            );
+            if (selector.inactiveColor() != null) {
+                selector.menuBackground.addAction(
+                        Actions.color(selector.inactiveColor(), colorSelectTime)
+                );
+            }
         }
     }
 
