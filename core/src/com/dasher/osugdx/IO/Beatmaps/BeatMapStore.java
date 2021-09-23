@@ -18,7 +18,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 35;
+    private final int VERSION = 38;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -82,7 +82,7 @@ public class BeatMapStore {
 
     private boolean isBeatmapSetValid(@NotNull BeatMapSet beatMapSet) {
         FileHandle folder = beatMapSet.getFolder();
-        return !beatMapSet.beatmaps.isEmpty() && folder.exists() && folder.isDirectory();
+        return beatMapSet.beatmaps.notEmpty() && folder.exists() && folder.isDirectory();
     }
 
     @SuppressWarnings("unchecked")
@@ -126,11 +126,20 @@ public class BeatMapStore {
             for (BeatMapSet beatMapSet: beatMapSets) {
                 if (!isBeatmapSetValid(beatMapSet)) {
                     deleteBeatmapFile(beatMapSet, null);
-                    beatMapSets.removeValue(beatMapSet, true);
+                } else {
+                    for (Beatmap beatmap: beatMapSet.beatmaps) {
+                        FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
+                        if (!beatmapFile.exists()) {
+                            beatMapSet.beatmaps.removeValue(beatmap, true);
+                        }
+                    }
+                    if (!isBeatmapSetValid(beatMapSet)) {
+                        deleteBeatmapFile(beatMapSet, null);
+                    }
                 }
             }
             tempCachedBeatmaps.addAll(beatMapSets);
-            boolean logBeatmaps = false;
+            boolean logBeatmaps = true;
             if (logBeatmaps) {
                 for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
                     for (Beatmap map : beatMapSet.beatmaps) {
@@ -169,6 +178,7 @@ public class BeatMapStore {
 
         if (beatMapSet != null) {
             removeInvalidBeatmapSet(beatMapSet, beatmapFile == null? null : beatmapFile.path());
+            beatMapSets.removeValue(beatMapSet, true);
         }
 
         saveCache();
