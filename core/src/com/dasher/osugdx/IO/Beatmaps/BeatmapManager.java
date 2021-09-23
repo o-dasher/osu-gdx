@@ -137,11 +137,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         Screen gameScreen = game.getScreen();
         if (currentMusic != null) {
             if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
-                audioManager.playMusic(currentMusic);
-                if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
-                    currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
+                game.asyncExecutor.submit(() -> {
+                    audioManager.playMusic(currentMusic);
+                    if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
+                        currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
 
-                }
+                    }
+                    return null;
+                });
             }
         }
     }
