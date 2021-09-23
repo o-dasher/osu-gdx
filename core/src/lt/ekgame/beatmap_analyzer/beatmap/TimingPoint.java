@@ -39,6 +39,10 @@ public class TimingPoint {
 	public double getTimestamp() {
 		return timestamp;
 	}
+	public double getTimestampS() {
+		return timestamp / 1000;
+	}
+
 
 	public double getBeatLength() {
 		return beatLength;

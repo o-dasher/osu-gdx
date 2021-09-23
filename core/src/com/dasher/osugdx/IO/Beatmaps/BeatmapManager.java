@@ -5,7 +5,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
@@ -17,11 +16,14 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.BeatmapGenerals;
+import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 
 public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener {
     private final BeatMapStore beatMapStore;
     private BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
+    private String previousBeatmapSetFolder = "";
     private Music currentMusic;
     private long timeLastMap;
     private final OsuGame game;
@@ -77,20 +79,11 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
-        for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
-            Beatmap beatmap = beatMapSet.beatmaps.get(i);
-            FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-            if (beatmapFile.exists()) {
-                beatMapSet.beatmaps.set(i, beatmapUtils.createMap(beatmapFile));
-            } else {
-                handleEmptyBeatmapSet(beatMapSet);
-            }
-        }
+
     }
 
     private void setupMusic(@NotNull Beatmap newMap) {
-        String folder = currentBeatmapSet.beatmapSetFolderPath + "/";
-
+        String newFolder = currentBeatmapSet.beatmapSetFolderPath + "/";
         if (newMap.getGenerals() == null) {
             beatMapStore.deleteBeatmapFile(null, Gdx.files.external(newMap.beatmapFilePath));
             if (game.getScreen() instanceof SoundSelectScreen) {
@@ -99,9 +92,9 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             return;
         }
 
-        String newMusicPath = folder + newMap.getGenerals().getAudioFileName();
+        String newMusicPath = newFolder + newMap.getGenerals().getAudioFileName();
         String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
-                folder + currentMap.getGenerals().getAudioFileName() : "";
+                previousBeatmapSetFolder + currentMap.getGenerals().getAudioFileName() : "";
 
         if (currentMusic != null && !newMap.equals(currentMap)) {
             // WE DON'T RESTART MUSIC IF ITS SAME MAP ON UI SCREEN
@@ -131,22 +124,17 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             System.out.println("New music: " + newMusicPath);
         } else {
             isReplayingBeatmapMusic = true;
-            System.out.println("Replaying beatmap music: " + newMap.toString());
+            System.out.println("Replaying beatmap music: " + newMusicPath);
         }
 
         Screen gameScreen = game.getScreen();
         if (currentMusic != null) {
             if (gameScreen != null && !(gameScreen instanceof IntroScreen)) {
-                game.asyncExecutor.submit(() -> {
-                    audioManager.playMusic(currentMusic);
-                    if (gameScreen instanceof UIScreen && !isReplayingBeatmapMusic) {
-                        currentMusic.setPosition(newMap.getGenerals().getPreviewTime());
-
-                    }
-                    return null;
-                });
+                startMusicPlaying(newMap, isReplayingBeatmapMusic);
             }
         }
+
+        previousBeatmapSetFolder = newFolder;
     }
 
     public Beatmap getCurrentMap() {
@@ -180,8 +168,27 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     public void startMusicPlaying() {
+        startMusicPlaying(currentMap, false);
+    }
+
+    public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
       if (currentMusic != null) {
-            audioManager.playMusic(currentMusic);
+          game.asyncExecutor.submit(() -> {
+              audioManager.playMusic(currentMusic);
+              if (game.getScreen() instanceof UIScreen && !isReplayingBeatmapMusic) {
+                  BeatmapGenerals generals = beatmap.getGenerals();
+                  float offset = 0;
+                  for (TimingPoint timingPoint: beatmap.getTimingPoints()) {
+                      if (!timingPoint.isInherited()) {
+                          offset = (float) timingPoint.getTimestampS();
+                          break;
+                      }
+                  }
+                  System.out.println(offset);
+                  currentMusic.setPosition(generals.getPreviewTime() + offset);
+              }
+              return null;
+          });
         }
     }
 

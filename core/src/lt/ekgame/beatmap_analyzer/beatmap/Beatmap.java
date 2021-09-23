@@ -1,6 +1,7 @@
 package lt.ekgame.beatmap_analyzer.beatmap;
 
 import com.badlogic.gdx.utils.Array;
+import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +41,7 @@ public abstract class Beatmap {
 				breaks.removeValue(breakPeriod, true);
 			}
 		}
-		timingPoints = null;
 		editorState = null;
-		generals = null;
 	}
 
 	public boolean isResourcesFree() {
