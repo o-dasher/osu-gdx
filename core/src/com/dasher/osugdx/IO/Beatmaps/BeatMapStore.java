@@ -91,10 +91,16 @@ public class BeatMapStore {
     @SuppressWarnings("unchecked")
     public Array<BeatMapSet> getCache() {
         Array<BeatMapSet> cachedSets = new Array<>();
-        try {
-            cachedSets = json.fromJson(Array.class, BeatMapSet.class, new BufferedInputStream(libCacheFile.read()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (libCacheFile.exists()) {
+            try {
+                cachedSets = json.fromJson(
+                        Array.class, BeatMapSet.class, new BufferedInputStream(libCacheFile.read())
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+                clearCache();
+            }
+        } else {
             clearCache();
         }
         return cachedSets;
@@ -302,7 +308,7 @@ public class BeatMapStore {
     private void saveCache() {
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
-        libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
+        libCacheFile.writeString(json.toJson(beatMapSets, Array.class, BeatMapSet.class), false);
     }
 
     public void loadAllBeatmaps() {
