@@ -19,6 +19,7 @@
     private Stage introStage;
     private Music seeyaSound;
     private Music welcomeSound;
+    private Texture logoTexture;
     private LogoActor osuLogo;
     private boolean canSwitchScreen;
 
@@ -29,8 +30,7 @@
     @Override
     public void show() {
         super.show();
-
-        Texture logoTexture = assetManager.get(assetManager.textures.logo);
+        logoTexture = new Texture(Gdx.files.internal(assetManager.textures.logo.fileName));
         osuLogo = new LogoActor(game, logoTexture, cleanupTime);
         float scale = osuLogo.getBaseScale() / 2;
         osuLogo.addAction(
@@ -56,6 +56,9 @@
         super.render(delta);
         viewport.apply(true);
 
+        if (backgroundStage != null) {
+            backgroundStage.act(delta);
+        }
         introStage.act(delta);
         introStage.draw();
 
@@ -98,6 +101,7 @@
 
     @Override
     public void dispose() {
+        logoTexture.dispose();
         introStage.dispose();
         seeyaSound.dispose();
         welcomeSound.dispose();

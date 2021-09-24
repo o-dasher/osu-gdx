@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -74,6 +73,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public AudioFactory audioFactory;
 	public boolean calledToSwitchScreen;
 	public boolean canSwitchIntroScreen;
+	public boolean loadedAllAssets;
 	public ClockTask setSwitchFromIntroScreenTask;
 
 	private int WORLD_WIDTH;
@@ -108,7 +108,9 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		cleanupTime = 0.25f;
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+		Gdx.input.setInputProcessor(inputMultiplexer);
 		assetManager.load();
+		setScreen(new IntroScreen(this));
 	}
 
 	@Override
@@ -124,8 +126,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		if (shapeRenderer != null) {
 			shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		}
-
-		Gdx.input.setInputProcessor(inputMultiplexer);
 
 		if (beatmapManager != null) {
 			Music currentMusic = beatmapManager.getCurrentMusic();
@@ -150,64 +150,60 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		super.render();
 
 		if (assetManager.update()) {
+			loadedAllAssets = true;
 			Screen currentScreen = getScreen();
-			if (currentScreen == null) {
-				setScreen(new IntroScreen(this));
-			} else {
-				if (currentScreen instanceof IntroScreen && canSwitchIntroScreen) {
-					canSwitchIntroScreen = false;
-					float delta = Gdx.graphics.getDeltaTime();
-					json = new Json();
-					random = new Random();
-					gameIO = new GameIO();
-					gameIO.setup(gameName);
-					beatmapUtils = new BeatmapUtils();
-					beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
-					beatmapUtils.setBeatMapStore(beatMapStore);
-					oszParser = new OSZParser(gameIO, beatMapStore);
-					beatMapStore.setOszParser(oszParser);
-					beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
-					asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
-					backgroundStage = new Stage(viewport, batch);
-					skinManager = new SkinManager(this);
-					shapeRenderer = new BuffedShapeRenderer();
-					fadeBlock = new FadeBlock(Color.BLACK, shapeRenderer, viewport) {
-						@Override
-						public void onFadeIn() {
-							getScreen().dispose();
-							setScreen(nextScreen);
-						}
-						@Override
-						public void onFadeOut() {
-							calledToSwitchScreen = false;
-						}
-					};
-					uiConfig = new UIConfig();
-					glyphLayout = new GlyphLayout();
-					fadeBlock.setAlphaIncreaseDivisor(cleanupTime);
-					fonts = new Fonts(assetManager);
-					Texture bgTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
-					workingBackground = new WorkingBackground(this, bgTexture);
-					beatFactory = new BeatFactory(beatmapManager);
-					backgroundStage.addActor(workingBackground);
-					beatmapManager.addListener(workingBackground);
-					beatmapManager.addListener(beatFactory);
-					asyncExecutor.submit(() -> {
-						oszParser.parseImportDirectory();
-						beatMapStore.loadCache();
-						beatMapStore.loadAllBeatmaps();
-						Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
-						return null;
-					});
-					skinManager.changeSkin(skinManager.getDefaultDir());
-					System.out.println("W");
-					setSwitchFromIntroScreenTask = new ClockTask(delta * 2) {
-						@Override
-						public void run() {
-							((IntroScreen) currentScreen).setCanSwitchScreen(true);
-						}
-					};
-				}
+			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen) {
+				canSwitchIntroScreen = false;
+				float delta = Gdx.graphics.getDeltaTime();
+				json = new Json();
+				random = new Random();
+				gameIO = new GameIO();
+				gameIO.setup(gameName);
+				beatmapUtils = new BeatmapUtils();
+				beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
+				beatmapUtils.setBeatMapStore(beatMapStore);
+				oszParser = new OSZParser(gameIO, beatMapStore);
+				beatMapStore.setOszParser(oszParser);
+				beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
+				asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
+				backgroundStage = new Stage(viewport, batch);
+				skinManager = new SkinManager(this);
+				shapeRenderer = new BuffedShapeRenderer();
+				fadeBlock = new FadeBlock(Color.BLACK, shapeRenderer, viewport) {
+					@Override
+					public void onFadeIn() {
+						getScreen().dispose();
+						setScreen(nextScreen);
+					}
+					@Override
+					public void onFadeOut() {
+						calledToSwitchScreen = false;
+					}
+				};
+				uiConfig = new UIConfig();
+				glyphLayout = new GlyphLayout();
+				fadeBlock.setAlphaIncreaseDivisor(cleanupTime);
+				fonts = new Fonts(assetManager);
+				Texture bgTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
+				workingBackground = new WorkingBackground(this, bgTexture);
+				beatFactory = new BeatFactory(beatmapManager);
+				backgroundStage.addActor(workingBackground);
+				beatmapManager.addListener(workingBackground);
+				beatmapManager.addListener(beatFactory);
+				asyncExecutor.submit(() -> {
+					oszParser.parseImportDirectory();
+					beatMapStore.loadCache();
+					beatMapStore.loadAllBeatmaps();
+					Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
+					return null;
+				});
+				skinManager.changeSkin(skinManager.getDefaultDir());
+				setSwitchFromIntroScreenTask = new ClockTask(delta) {
+					@Override
+					public void run() {
+						((IntroScreen) currentScreen).setCanSwitchScreen(true);
+					}
+				};
 			}
 		}
 	}

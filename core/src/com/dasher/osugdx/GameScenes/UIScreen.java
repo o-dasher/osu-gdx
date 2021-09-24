@@ -28,14 +28,16 @@ public abstract class UIScreen extends GameScreen {
     @Override
     public void show() {
         super.show();
-        buttonBackSelect = assetManager.get(assetManager.sounds.buttonBackSelect);
-        buttonDirectSelect = assetManager.get(assetManager.sounds.buttonDirectSelect);
-        buttonEditSelect = assetManager.get(assetManager.sounds.buttonEditSelect);
-        buttonGenericSelect = assetManager.get(assetManager.sounds.buttonGenericSelect);
-        buttonPlaySelect = assetManager.get(assetManager.sounds.buttonPlaySelect);
-        buttonSoloSelect = assetManager.get(assetManager.sounds.buttonSoloSelect);
-        osuLogoDownBeat = assetManager.get(assetManager.sounds.osuLogoDownBeat);
-        osuLogoHeartBeat = assetManager.get(assetManager.sounds.osuLogoHeartBeat);
-        osuLogoSelect = assetManager.get(assetManager.sounds.osuLogoSelect);
+        if (game.loadedAllAssets) {
+            buttonBackSelect = assetManager.get(assetManager.sounds.buttonBackSelect);
+            buttonDirectSelect = assetManager.get(assetManager.sounds.buttonDirectSelect);
+            buttonEditSelect = assetManager.get(assetManager.sounds.buttonEditSelect);
+            buttonGenericSelect = assetManager.get(assetManager.sounds.buttonGenericSelect);
+            buttonPlaySelect = assetManager.get(assetManager.sounds.buttonPlaySelect);
+            buttonSoloSelect = assetManager.get(assetManager.sounds.buttonSoloSelect);
+            osuLogoDownBeat = assetManager.get(assetManager.sounds.osuLogoDownBeat);
+            osuLogoHeartBeat = assetManager.get(assetManager.sounds.osuLogoHeartBeat);
+            osuLogoSelect = assetManager.get(assetManager.sounds.osuLogoSelect);
+        }
     }
 }
