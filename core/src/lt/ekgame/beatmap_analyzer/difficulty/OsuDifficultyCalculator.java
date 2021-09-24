@@ -1,20 +1,14 @@
 package lt.ekgame.beatmap_analyzer.difficulty;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
-import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuSpinner;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+
 
 public class OsuDifficultyCalculator implements DifficultyCalculator {
 
@@ -118,17 +112,15 @@ public class OsuDifficultyCalculator implements DifficultyCalculator {
 		
 		private OsuObject object;
 		private double[] strains = {1, 1};
-		private Vec2 normStart;//, normEnd;
+		private Vector2 normStart;//, normEnd;
 		
 		DifficultyObject(OsuObject object, double radius) {
 			this.object = object;
 			
-			double scalingFactor = 52/radius;
+			float scalingFactor = (float) (52/radius);
 			if (radius < CIRCLE_SIZE_BUFF_TRESHOLD)
 				scalingFactor *= 1 + Math.min(CIRCLE_SIZE_BUFF_TRESHOLD - radius, 5) / 50;
-			
-			normStart = object.getPosition().scale(scalingFactor);
-			//normEnd = normStart;
+			normStart = new Vector2(object.getPosition()).scl(scalingFactor, scalingFactor);
 		}
 		
 		private void calculateStrains(DifficultyObject previous, double timeRate) {
@@ -143,7 +135,7 @@ public class OsuDifficultyCalculator implements DifficultyCalculator {
 			double scaling = WEIGHT_SCALING[difficultyType];
 			
 			if (!(object instanceof OsuSpinner)) {
-				double distance = normStart.distance(previous.normStart);
+				double distance = normStart.dst(previous.normStart);
 				res = spacingWeight(distance, difficultyType)*scaling;
 			}
 			

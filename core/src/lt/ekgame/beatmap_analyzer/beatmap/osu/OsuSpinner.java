@@ -1,15 +1,19 @@
 package lt.ekgame.beatmap_analyzer.beatmap.osu;
 
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+import com.badlogic.gdx.math.Vector2;
+
 
 public class OsuSpinner extends OsuObject {
+	private OsuSpinner() {
+		super(null, 0, 0, 0, false);
+	}
 	
-	public OsuSpinner(Vec2 position, int startTime, int endTime, int hitSound, boolean isNewCombo) {
+	public OsuSpinner(Vector2 position, int startTime, int endTime, int hitSound, boolean isNewCombo) {
 		super(position, startTime, endTime, hitSound, isNewCombo);
 	}
 
 	@Override
 	public OsuObject clone() {
-		return new OsuSpinner(position.clone(), startTime, endTime, hitSound, isNewCombo);
+		return new OsuSpinner(new Vector2(position), startTime, endTime, hitSound, isNewCombo);
 	}
 }

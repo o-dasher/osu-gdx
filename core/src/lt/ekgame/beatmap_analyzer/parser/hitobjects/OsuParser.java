@@ -1,20 +1,18 @@
 package lt.ekgame.beatmap_analyzer.parser.hitobjects;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import lt.ekgame.beatmap_analyzer.beatmap.*;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.*;
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
 
 public class OsuParser extends HitObjectParser<OsuObject> {
 
 	@Override
 	public OsuObject parse(String line) {
 		String[] args = line.split(",");
-		Vec2 position = new Vec2(
+		Vector2 position = new Vector2(
 			Integer.parseInt(args[0].trim()),
 			Integer.parseInt(args[1].trim())
 		);
@@ -32,11 +30,11 @@ public class OsuParser extends HitObjectParser<OsuObject> {
 			char sliderTypeChar = sliderData[0].charAt(0);
 			OsuSlider.SliderType sliderType = OsuSlider.SliderType.fromChar(sliderTypeChar);
 			
-			Array<Vec2> sliderPoints = new Array<>();
+			Array<Vector2> sliderPoints = new Array<>();
 			
 			for (int i = 1; i < sliderData.length; i++) {
 				String[] pointData = sliderData[i].split(":");
-				sliderPoints.add(new Vec2(
+				sliderPoints.add(new Vector2(
 					Integer.parseInt(pointData[0]),
 					Integer.parseInt(pointData[1])
 				));

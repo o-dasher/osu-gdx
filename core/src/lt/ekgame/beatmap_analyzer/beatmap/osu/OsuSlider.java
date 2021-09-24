@@ -1,24 +1,27 @@
 package lt.ekgame.beatmap_analyzer.beatmap.osu;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+
 
 public class OsuSlider extends OsuObject {
+	private OsuSlider() {
+		super(null, 0, 0, 0, false);
+	}
 	
 	private SliderType sliderType;
-	private Array<Vec2> sliderPoints;
+	private Array<Vector2> sliderPoints;
 	private int repetitions;
 	private double pixelLength;
 	private int combo;
 
-	public OsuSlider(Vec2 position, int startTime, int hitSound, boolean isNewCombo, SliderType sliderType, Array<Vec2> sliderPoints, int repetitions, double pixelLength) {
+	public OsuSlider(Vector2 position, int startTime, int hitSound, boolean isNewCombo, SliderType sliderType, Array<Vector2> sliderPoints, int repetitions, double pixelLength) {
 		super(position, startTime, startTime, hitSound, isNewCombo);
 		this.sliderType = sliderType;
 		this.sliderPoints = sliderPoints;
@@ -28,7 +31,7 @@ public class OsuSlider extends OsuObject {
 	
 	@Override
 	public OsuObject clone() {
-		return new OsuSlider(position.clone(), startTime, hitSound, isNewCombo, sliderType, cloneSliderPoints(), repetitions, pixelLength);
+		return new OsuSlider(new Vector2(position), startTime, hitSound, isNewCombo, sliderType, cloneSliderPoints(), repetitions, pixelLength);
 	}
 	
 	@Override
@@ -52,10 +55,10 @@ public class OsuSlider extends OsuObject {
 		return combo;
 	}
 	
-	private Array<Vec2> cloneSliderPoints() {
-		Array<Vec2> cloned = new Array<>();
-		for (Vec2 point: sliderPoints) {
-			cloned.add(point.clone());
+	private @NotNull Array<Vector2> cloneSliderPoints() {
+		Array<Vector2> cloned = new Array<>();
+		for (Vector2 point: sliderPoints) {
+			cloned.add(new Vector2(point));
 		}
 		return cloned;
 	}
@@ -64,7 +67,7 @@ public class OsuSlider extends OsuObject {
 		return sliderType;
 	}
 
-	public Array<Vec2> getSliderPoints() {
+	public Array<Vector2> getSliderPoints() {
 		return sliderPoints;
 	}
 

@@ -1,19 +1,18 @@
 package lt.ekgame.beatmap_analyzer.parser.hitobjects;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-
-import java.util.List;
 
 import lt.ekgame.beatmap_analyzer.beatmap.*;
 import lt.ekgame.beatmap_analyzer.beatmap.mania.*;
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+
 
 public class ManiaParser extends HitObjectParser<ManiaObject> {
 
 	@Override
 	public ManiaObject parse(String line) {
 		String[] args = line.split(",");
-		Vec2 position = new Vec2(
+		Vector2 position = new Vector2(
 			Integer.parseInt(args[0].trim()),
 			Integer.parseInt(args[1].trim())
 		);

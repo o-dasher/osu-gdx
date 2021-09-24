@@ -1,15 +1,16 @@
 package lt.ekgame.beatmap_analyzer.beatmap;
 
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+import com.badlogic.gdx.math.Vector2;
+
+
 
 public abstract class HitObject {
-
-	protected Vec2 position;
+	protected Vector2 position;
 	protected int startTime, endTime;
 	protected int hitSound;
 	protected boolean isNewCombo;
 	
-	public HitObject(Vec2 position, int startTime, int endTime, int hitSound) {
+	public HitObject(Vector2 position, int startTime, int endTime, int hitSound) {
 		this.position = position;
 		this.startTime = startTime;
 		this.endTime = endTime;
@@ -43,7 +44,7 @@ public abstract class HitObject {
 	 * The position of this object.
 	 * @return Vec2 object.
 	 */
-	public Vec2 getPosition() {
+	public Vector2 getPosition() {
 		return position;
 	}
 
@@ -67,7 +68,7 @@ public abstract class HitObject {
 		return hitSound;
 	}
 
-	public void setPosition(Vec2 position) {
+	public void setPosition(Vector2 position) {
 		this.position = position;
 	}
 

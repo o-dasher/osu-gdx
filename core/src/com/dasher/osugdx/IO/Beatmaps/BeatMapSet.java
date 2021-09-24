@@ -3,12 +3,8 @@ package com.dasher.osugdx.IO.Beatmaps;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.github.francesco149.koohii.Koohii;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.Serializable;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 

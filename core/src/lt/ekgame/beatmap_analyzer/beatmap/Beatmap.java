@@ -35,7 +35,6 @@ public abstract class Beatmap {
 	}
 
 	public void freeResources() {
-		getHitObjects().clear();
 		for (BreakPeriod breakPeriod: breaks) {
 			if (!breakPeriod.isBackground()) {
 				breaks.removeValue(breakPeriod, true);

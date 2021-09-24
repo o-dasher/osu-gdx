@@ -1,16 +1,16 @@
 package lt.ekgame.beatmap_analyzer.beatmap.ctb;
 
-import lt.ekgame.beatmap_analyzer.utils.Vec2;
+import com.badlogic.gdx.math.Vector2;
 
 public class CatchBananas extends CatchObject {
 
-	public CatchBananas(Vec2 position, int startTime, int endTime, int hitSound) {
+	public CatchBananas(Vector2 position, int startTime, int endTime, int hitSound) {
 		super(position, startTime, endTime, hitSound, false);
 	}
 
 	@Override
 	public CatchObject clone() {
-		return new CatchBananas(position.clone(), startTime, endTime, hitSound);
+		return new CatchBananas(new Vector2(position), startTime, endTime, hitSound);
 	}
 
 }

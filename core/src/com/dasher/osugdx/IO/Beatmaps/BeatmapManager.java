@@ -68,6 +68,15 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         } else {
             System.out.println("Selected mapSet: " + newBeatmapSet.toString());
             currentBeatmapSet = newBeatmapSet;
+            for (BeatMapSet beatMapSet: beatMapStore.getCache()) {
+                if (
+                        beatMapSet.beatmapSetFolderPath.hashCode()
+                                == newBeatmapSet.beatmapSetFolderPath.hashCode()
+                ) {
+                    currentBeatmapSet.beatmaps = beatMapSet.beatmaps;
+                    break;
+                }
+            }
             this.onNewBeatmapSet(currentBeatmapSet);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
                 handleEmptyBeatmapSet(currentBeatmapSet);
@@ -171,16 +180,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
           game.asyncExecutor.submit(() -> {
               audioManager.playMusic(currentMusic);
               if (game.getScreen() instanceof UIScreen && !isReplayingBeatmapMusic) {
-                  BeatmapGenerals generals = beatmap.getGenerals();
-                  float offset = 0;
-                  for (TimingPoint timingPoint: beatmap.getTimingPoints()) {
-                      if (!timingPoint.isInherited()) {
-                          offset = (float) timingPoint.getTimestampS();
-                          break;
-                      }
-                  }
-                  System.out.println(offset);
-                  currentMusic.setPosition(generals.getPreviewTime() + offset);
+                  currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
               }
               return null;
           });

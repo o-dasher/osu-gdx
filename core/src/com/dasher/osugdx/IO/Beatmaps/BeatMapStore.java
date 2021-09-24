@@ -6,19 +6,22 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.Null;
 import com.dasher.osugdx.IO.GameIO;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.util.Objects;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 42;
+    private final int VERSION = 51;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -39,7 +42,7 @@ public class BeatMapStore {
         this.json = json;
         this.beatmapUtils = beatmapUtils;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
-        libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db.json");
+        libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db");
         beatmapStoreCreationTime = System.nanoTime();
         specialFiles.add(libCacheFile.name());
         setupCaching();
@@ -86,6 +89,17 @@ public class BeatMapStore {
     }
 
     @SuppressWarnings("unchecked")
+    public Array<BeatMapSet> getCache() {
+        Array<BeatMapSet> cachedSets = new Array<>();
+        try {
+            cachedSets = json.fromJson(Array.class, BeatMapSet.class, new BufferedInputStream(libCacheFile.read()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            clearCache();
+        }
+        return cachedSets;
+    }
+
     public void loadCache() {
         if (isFinishedLoadingCache()) {
             return;
@@ -93,53 +107,44 @@ public class BeatMapStore {
 
         System.out.println("Started reading cache");
 
-        Array<BeatMapSet> cachedSets = null;
-        try {
-            cachedSets = json.fromJson(Array.class, BeatMapSet.class, libCacheFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-            clearCache();
+        Array<BeatMapSet> cachedSets = getCache();
+        Array<BeatMapSet> invalidSets = new Array<>();
+        Array<Beatmap> invalidBeatmaps = new Array<>();
+        for (BeatMapSet cachedSet: cachedSets) {
+            for (Beatmap beatmap: cachedSet.beatmaps) {
+                FileHandle file = Gdx.files.external(beatmap.beatmapFilePath);
+                if (!file.exists()) {
+                    invalidBeatmaps.add(beatmap);
+                }
+            }
+            for (Beatmap beatmap: invalidBeatmaps) {
+                cachedSet.beatmaps.removeValue(beatmap, true);
+            }
+            invalidBeatmaps.clear();
+            if (cachedSet.beatmaps.isEmpty()) {
+                invalidSets.add(cachedSet);
+            }
         }
-
-        if (cachedSets != null) {
-            Array<BeatMapSet> invalidSets = new Array<>();
-            Array<Beatmap> invalidBeatmaps = new Array<>();
-            for (BeatMapSet cachedSet: cachedSets) {
-                for (Beatmap beatmap: cachedSet.beatmaps) {
-                    FileHandle file = Gdx.files.external(beatmap.beatmapFilePath);
-                    if (!file.exists()) {
-                        invalidBeatmaps.add(beatmap);
-                    }
-                }
-                for (Beatmap beatmap: invalidBeatmaps) {
-                    cachedSet.beatmaps.removeValue(beatmap, true);
-                }
-                invalidBeatmaps.clear();
-                if (cachedSet.beatmaps.isEmpty()) {
-                    invalidSets.add(cachedSet);
-                }
+        for (BeatMapSet beatMapSet: invalidSets) {
+            cachedSets.removeValue(beatMapSet, true);
+        }
+        beatMapSets.addAll(cachedSets);
+        for (BeatMapSet beatMapSet: beatMapSets) {
+            if (!isBeatmapSetValid(beatMapSet)) {
+                deleteBeatmapFile(beatMapSet, null);
+                beatMapSets.removeValue(beatMapSet, true);
             }
-            for (BeatMapSet beatMapSet: invalidSets) {
-                cachedSets.removeValue(beatMapSet, true);
-            }
-            beatMapSets.addAll(cachedSets);
-            for (BeatMapSet beatMapSet: beatMapSets) {
-                if (!isBeatmapSetValid(beatMapSet)) {
-                    deleteBeatmapFile(beatMapSet, null);
-                    beatMapSets.removeValue(beatMapSet, true);
-                }
-            }
-            tempCachedBeatmaps.addAll(beatMapSets);
-            boolean logBeatmaps = false;
-            if (logBeatmaps) {
-                for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
-                    for (Beatmap map : beatMapSet.beatmaps) {
-                        System.out.print("CACHE DB: ");
-                        logBeatmapLoaded(map);
-                    }
+        }
+        tempCachedBeatmaps.addAll(beatMapSets);
+        boolean logBeatmaps = false;
+        if (logBeatmaps) {
+            for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
+                for (Beatmap map : beatMapSet.beatmaps) {
                     System.out.print("CACHE DB: ");
-                    System.out.println(logBeatmapSet(beatMapSet));
+                    logBeatmapLoaded(map);
                 }
+                System.out.print("CACHE DB: ");
+                System.out.println(logBeatmapSet(beatMapSet));
             }
         }
 
@@ -356,6 +361,14 @@ public class BeatMapStore {
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
+
+        for (BeatMapSet beatMapSet: beatMapSets) {
+            for (Beatmap beatmap: beatMapSet.beatmaps) {
+                beatmap.getHitObjects().clear();
+                beatmap.getTimingPoints().clear();
+            }
+        }
+
         loadedAllBeatmaps = true;
     }
 

@@ -116,7 +116,7 @@ public class ManiaDifficultyCalculator implements DifficultyCalculator {
 
 			individualStrains = new double[collumns];
 			heldUntil = new double[collumns];
-			collumn = MathUtils.calculateManiaCollumn(object.getPosition().getX(), collumns);
+			collumn = MathUtils.calculateManiaCollumn(object.getPosition().x, collumns);
 		}
 
 		private void calculateStrains(DifficultyObject previous, double timeRate, int collumns) {
