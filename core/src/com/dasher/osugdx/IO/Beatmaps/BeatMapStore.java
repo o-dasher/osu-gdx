@@ -20,7 +20,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 57;
+    private final int VERSION = 60;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -232,14 +232,18 @@ public class BeatMapStore {
             System.out.println("Library changed, map not found in cache!");
         }
 
-        Beatmap beatMap = beatmapUtils.createMap(beatmapFile);
+        Beatmap beatMap = beatmapUtils.createMap(
+                beatmapFile,
+                true, true, true,
+                true, true, true
+        );
 
         if (beatMap == null) {
-            deleteBeatmapFile(beatMapSet, beatmapFile);
+            deleteBeatmapFile(null, beatmapFile);
         } else {
             if (beatMap.getGamemode() != GameMode.OSU) {
                 System.out.println("Found beatmap with wrong game mode deleting it...");
-                deleteBeatmapFile(beatMapSet, beatmapFile);
+                deleteBeatmapFile(null, beatmapFile);
                 return;
             }
             beatMap.freeResources();

@@ -41,14 +41,14 @@ public class BeatmapParser {
 	}
 
 	public Beatmap parse(File file) throws FileNotFoundException, BeatmapException {
-		return parse(new FileInputStream(file));
+		return parse(new FileInputStream(file), true, true, true, true, true, true);
 	}
 	
 	public Beatmap parse(String string) throws BeatmapException {
-		return parse(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
+		return parse(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)), true, true, true, true, true, true);
 	}
 	
-	public Beatmap parse(InputStream stream) throws BeatmapException {
+	public Beatmap parse(InputStream stream, boolean parseGeneral, boolean parseObjects, boolean parseTimingPoints, boolean parseEditor, boolean parseDifficulties, boolean parseMetadata) throws BeatmapException {
 		try (Scanner scanner = new Scanner(stream)) {
 			Map<String, FilePart> parts = new HashMap<>();
 			
@@ -71,23 +71,28 @@ public class BeatmapParser {
 				if (!parts.containsKey(reqiredTag))
 					throw new BeatmapException("Couldn't find required \"" + reqiredTag + "\" tag found.");
 			
-			BeatmapGenerals generalSettings = new BeatmapGenerals(parts.get("General"));
-			HitObjectParser<?> parser = PARSERS.get(generalSettings.getGamemode());
-			// TODO: parse other gamemodes
-			if (parser == null)
+			BeatmapGenerals generalSettings = parseGeneral? new BeatmapGenerals(parts.get("General")) : null;
+			HitObjectParser<?> parser;
+			if (generalSettings != null) {
+				parser = PARSERS.get(generalSettings.getGamemode());
+				// TODO: parse other gamemodes
+				if (parser == null)
+					return null;
+			} else {
 				return null;
-			
-			BeatmapMetadata metadata = new BeatmapMetadata(parts.get("Metadata"));
-			BeatmapDifficulties difficulties = new BeatmapDifficulties(parts.get("Difficulty"));
+			}
+
+			BeatmapMetadata metadata = parseMetadata? new BeatmapMetadata(parts.get("Metadata")) : null;
+			BeatmapDifficulties difficulties = parseDifficulties? new BeatmapDifficulties(parts.get("Difficulty")) : null;
 			BeatmapEditorState editorState = null;
 			
 			// Older formats don't have the "Editor" tag
-			if (parts.containsKey("Editor"))
+			if (parts.containsKey("Editor") && parseEditor)
 				editorState = new BeatmapEditorState(parts.get("Editor"));
 
 			Array<BreakPeriod> breaks = parseBreaks(parts.get("Events"));
-			Array<TimingPoint> timingPoints = parseTimePoints(parts.get("TimingPoints"));
-			Array<String> rawObjects = parts.get("HitObjects").getLines();
+			Array<TimingPoint> timingPoints = parseTimingPoints? parseTimePoints(parts.get("TimingPoints")) : new Array<>();
+			Array<String> rawObjects = parseObjects? parts.get("HitObjects").getLines() : new Array<>();
 			IOHelper.close(stream);
 			
 			return parser.buildBeatmap(generalSettings, editorState, metadata, difficulties, breaks, timingPoints, rawObjects);

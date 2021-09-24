@@ -221,8 +221,12 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void dispose () {
 		assetManager.dispose();
-		batch.dispose();
-		shapeRenderer.dispose();
+		if (batch != null) {
+			batch.dispose();
+		}
+		if (shapeRenderer != null) {
+			shapeRenderer.dispose();
+		}
 	}
 
 

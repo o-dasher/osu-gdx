@@ -64,6 +64,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             if (currentBeatmapSet.beatmaps.isEmpty()) {
                 handleEmptyBeatmapSet(currentBeatmapSet);
             } else {
+                System.out.println(currentBeatmapSet.beatmaps.first().getMetadata().getTitle());
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
         }
@@ -73,11 +74,22 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
     }
 
-    private Beatmap reInitBeatmap(@NotNull Beatmap beatmap) {
+    private Beatmap reInitBeatmap(@NotNull Beatmap beatmap, boolean partial) {
         Beatmap newMap = null;
         FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
         if (beatmapFile.exists()) {
-            newMap = beatmapUtils.createMap(beatmapFile);
+            boolean parseTimingPoints = true;
+            if (partial) {
+                parseTimingPoints = false;
+            }
+            newMap = beatmapUtils.createMap(
+                    beatmapFile,
+                    true, false, parseTimingPoints,
+                    true, true,true
+            );
+            if (newMap == null) {
+                newMap = beatmap;
+            }
         }
         return newMap;
     }
@@ -86,11 +98,10 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         Array<String> invalidPaths = new Array<>();
         for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
             Beatmap beatmap = beatMapSet.beatmaps.get(i);
-            Beatmap newMap = reInitBeatmap(beatmap);
+            Beatmap newMap = reInitBeatmap(beatmap, true);
             if (newMap == null) {
                 invalidPaths.add(beatmap.beatmapFilePath);
             } else {
-                clearUnusedBeatmapResources(newMap);
                 beatMapSet.beatmaps.set(i, newMap);
             }
         }
@@ -99,10 +110,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 beatMapSet.beatmaps.removeValue(beatmap, true);
             }
         }
-    }
-
-    private void clearUnusedBeatmapResources(@NotNull Beatmap beatmap) {
-        beatmap.getTimingPoints().clear();
     }
 
     private void setupMusic(@NotNull Beatmap newMap) {
@@ -174,11 +181,11 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
         }
-        setupMusic(newMap);
         if (currentMap != null) {
-            clearUnusedBeatmapResources(currentMap);
+            currentMap.getTimingPoints().clear();
         }
-        currentMap = reInitBeatmap(newMap);
+        setupMusic(newMap);
+        currentMap = reInitBeatmap(newMap, false);
         if (currentMap == null) {
             randomizeCurrentBeatmapSet();
         }

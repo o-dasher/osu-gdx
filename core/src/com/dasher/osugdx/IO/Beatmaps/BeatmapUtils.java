@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 import java.io.InputStream;
+import java.util.NoSuchElementException;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BreakPeriod;
@@ -35,12 +36,21 @@ public class BeatmapUtils {
         textureParameter.magFilter = Texture.TextureFilter.Linear;
     }
 
-    public Beatmap createMap(@NotNull FileHandle mapFile) {
+    public Beatmap createMap(
+            @NotNull FileHandle mapFile,
+            boolean parseGeneral, boolean parseObjects, boolean parseTimingPoints,
+            boolean parseEditor, boolean parseDifficulties, boolean parseMetadata
+    ) {
         InputStream reader = mapFile.read();
         Beatmap beatmap = null;
 
         try {
-            beatmap = beatmapParser.parse(reader);
+            beatmap = beatmapParser.parse(
+                    reader, parseGeneral, parseObjects, parseTimingPoints,
+                    parseEditor, parseDifficulties, parseMetadata
+            );
+        } catch (NoSuchElementException e) {
+            return beatmap;
         } catch (BeatmapException e) {
             beatMapStore.deleteBeatmapFile(null, mapFile);
             e.printStackTrace();

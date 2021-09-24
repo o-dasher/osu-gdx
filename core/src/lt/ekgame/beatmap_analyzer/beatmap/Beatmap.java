@@ -22,8 +22,8 @@ public abstract class Beatmap {
 	protected Array<BreakPeriod> breaks;
 	protected Array<TimingPoint> timingPoints;
 	private boolean calculatedBaseDiff;  // Easy queries.
-	protected double baseStars;
-	protected double baseCombo;
+	protected double baseStars = 0;
+	protected double baseCombo = 0;
 
 	protected Beatmap(BeatmapGenerals generals, BeatmapEditorState editorState,
 		BeatmapMetadata metadata, BeatmapDifficulties difficulties,
@@ -47,8 +47,10 @@ public abstract class Beatmap {
 	}
 
 	public void freeResources() {
-		calculateBase();
-		getHitObjects().clear();
+		if (getHitObjects() != null) {
+			calculateBase();
+			getHitObjects().clear();
+		}
 		for (BreakPeriod breakPeriod: breaks) {
 			if (!breakPeriod.isBackground()) {
 				breaks.removeValue(breakPeriod, true);
@@ -72,8 +74,16 @@ public abstract class Beatmap {
 	}
 	
 	protected void finalizeObjects(Array<? extends HitObject> objects) {
+		if (timingPoints.isEmpty()) {
+			return;
+		}
+		if (objects.isEmpty()) {
+			return;
+		}
+
 		List<TimingPoint> timingPointList = new ArrayList<>();
 		List<HitObject> objectsList = new ArrayList<>();
+
 
 		for (TimingPoint tp: timingPoints) {
 			timingPointList.add(tp);
