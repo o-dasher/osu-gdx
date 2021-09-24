@@ -38,6 +38,10 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         playButtonTex = assetManager.get(assetManager.textures.playButton);
         optionsButtonTex = assetManager.get(assetManager.textures.optionsButton);
         exitButtonTex = assetManager.get(assetManager.textures.exitButton);
+        asyncExecutor.submit(() -> {
+            oszParser.parseImportDirectory();
+            return null;
+        });
     }
 
     @Override
@@ -74,7 +78,9 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     }
 
     public void toSoundSelectScreen() {
-        this.switchScreen(new SoundSelectScreen(game));
+        if (!oszParser.isImportingImportDirectory()) {
+            this.switchScreen(new SoundSelectScreen(game));
+        }
     }
 
     @Override

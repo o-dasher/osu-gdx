@@ -23,6 +23,7 @@ public class OSZParser {
     private final BeatMapStore beatMapStore;
     private final FileHandle beatmapsFolder;
     private final FileHandle importsFolder;
+    private boolean isImportingImportDirectory;
 
     public OSZParser(@NotNull GameIO gameIO, BeatMapStore beatMapStore) {
         this.beatmapsFolder = gameIO.getSongsDir();
@@ -31,12 +32,14 @@ public class OSZParser {
     }
 
     public void parseImportDirectory() {
+        isImportingImportDirectory = true;
         for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
             System.out.println("Importing: " + file.nameWithoutExtension());
             if (parseOSZ(file) != null) {
                 System.out.println(file.nameWithoutExtension() + " imported!");
             }
         }
+        isImportingImportDirectory = false;
     }
 
     public String getFolderPathFor(@NotNull FileHandle oszFile) {
@@ -105,5 +108,9 @@ public class OSZParser {
         }
 
         return folderFile;
+    }
+
+    public boolean isImportingImportDirectory() {
+        return isImportingImportDirectory;
     }
 }

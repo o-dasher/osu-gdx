@@ -84,7 +84,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             }
             newMap = beatmapUtils.createMap(
                     beatmapFile,
-                    true, false, parseTimingPoints,
+                    true, true, parseTimingPoints,
                     true, true,true
             );
             if (newMap == null) {
