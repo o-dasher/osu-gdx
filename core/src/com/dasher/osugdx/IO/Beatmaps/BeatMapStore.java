@@ -82,7 +82,7 @@ public class BeatMapStore {
 
     private boolean isBeatmapSetValid(@NotNull BeatMapSet beatMapSet) {
         FileHandle folder = beatMapSet.getFolder();
-        return beatMapSet.beatmaps.notEmpty() && folder.exists() && folder.isDirectory();
+        return !beatMapSet.beatmaps.isEmpty() && folder.exists() && folder.isDirectory();
     }
 
     @SuppressWarnings("unchecked")
@@ -126,20 +126,11 @@ public class BeatMapStore {
             for (BeatMapSet beatMapSet: beatMapSets) {
                 if (!isBeatmapSetValid(beatMapSet)) {
                     deleteBeatmapFile(beatMapSet, null);
-                } else {
-                    for (Beatmap beatmap: beatMapSet.beatmaps) {
-                        FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-                        if (!beatmapFile.exists()) {
-                            beatMapSet.beatmaps.removeValue(beatmap, true);
-                        }
-                    }
-                    if (!isBeatmapSetValid(beatMapSet)) {
-                        deleteBeatmapFile(beatMapSet, null);
-                    }
+                    beatMapSets.removeValue(beatMapSet, true);
                 }
             }
             tempCachedBeatmaps.addAll(beatMapSets);
-            boolean logBeatmaps = true;
+            boolean logBeatmaps = false;
             if (logBeatmaps) {
                 for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
                     for (Beatmap map : beatMapSet.beatmaps) {
@@ -178,7 +169,6 @@ public class BeatMapStore {
 
         if (beatMapSet != null) {
             removeInvalidBeatmapSet(beatMapSet, beatmapFile == null? null : beatmapFile.path());
-            beatMapSets.removeValue(beatMapSet, true);
         }
 
         saveCache();
