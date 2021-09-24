@@ -4,7 +4,7 @@ import com.badlogic.gdx.audio.Music;
 
 import org.jetbrains.annotations.NotNull;
 
-public class GameMusic implements Music {
+class GameMusic implements Music {
     private final float musicVolume = 1;
     private final Music music;
 

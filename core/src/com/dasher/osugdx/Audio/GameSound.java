@@ -3,7 +3,7 @@ package com.dasher.osugdx.Audio;
 
 import com.badlogic.gdx.audio.Sound;
 
-public class GameSound implements Sound {
+class GameSound implements Sound {
     private final float soundVolume = 1;
     private final Sound sound;
 

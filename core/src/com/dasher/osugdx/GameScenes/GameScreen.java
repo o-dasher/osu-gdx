@@ -1,20 +1,15 @@
 package com.dasher.osugdx.GameScenes;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.dasher.osugdx.Audio.AudioManager;
+import com.dasher.osugdx.Audio.AudioFactory;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
-import com.dasher.osugdx.Framework.Graphics.Shaperendering.FadeBlock;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
 import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
@@ -30,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 public abstract class GameScreen implements Screen {
     protected final OsuGame game;
     protected final GameAssetManager assetManager;
-    protected final AudioManager audioManager;
     protected final UIConfig uiConfig;
     protected final Batch batch;
     protected final Viewport viewport;
@@ -47,13 +41,13 @@ public abstract class GameScreen implements Screen {
     protected final SkinManager skinManager;
     protected final Fonts fonts;
     protected float cleanupTime;
-    protected AsyncExecutor asyncExecutor;
+    protected final AsyncExecutor asyncExecutor;
+    protected final AudioFactory audioFactory;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
         cleanupTime = game.cleanupTime;
         assetManager = game.assetManager;
-        audioManager = game.audioManager;
         fonts = game.fonts;
         uiConfig = game.uiConfig;
         batch = game.batch;
@@ -70,6 +64,7 @@ public abstract class GameScreen implements Screen {
         asyncExecutor = game.asyncExecutor;
         skinManager = game.skinManager;
         oszParser = game.oszParser;
+        audioFactory = game.audioFactory;
     }
 
     @Override

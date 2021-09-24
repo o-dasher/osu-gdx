@@ -1,9 +1,9 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.dasher.osugdx.Audio.GameSound;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.*;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
@@ -19,10 +19,10 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private Stage overlayStage;
     private Stage buttonsStage;
     private final Texture logoTexture;
-    private final GameSound heartBeat;
-    private final GameSound downBeat;
-    private final GameSound hover;
-    private final GameSound logoSelect;
+    private final Sound heartBeat;
+    private final Sound downBeat;
+    private final Sound hover;
+    private final Sound logoSelect;
     private final Texture playButtonTex;
     private final Texture optionsButtonTex;
     private final Texture exitButtonTex;
@@ -31,10 +31,10 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     public MenuScreen(@NotNull OsuGame game) {
         super(game);
         logoTexture = assetManager.get(assetManager.textures.logo);
-        heartBeat = new GameSound(assetManager.get(assetManager.sounds.osuLogoHeartBeat));
-        downBeat = new GameSound(assetManager.get(assetManager.sounds.osuLogoDownBeat));
-        hover = new GameSound(assetManager.get(assetManager.sounds.buttonHover));
-        logoSelect = new GameSound(assetManager.get(assetManager.sounds.osuLogoSelect.fileName));
+        heartBeat = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoHeartBeat));
+        downBeat = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoDownBeat));
+        hover = game.audioFactory.newSound(assetManager.get(assetManager.sounds.buttonHover));
+        logoSelect = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoSelect.fileName));
         playButtonTex = assetManager.get(assetManager.textures.playButton);
         optionsButtonTex = assetManager.get(assetManager.textures.optionsButton);
         exitButtonTex = assetManager.get(assetManager.textures.exitButton);

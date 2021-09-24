@@ -1,6 +1,7 @@
 
 package com.dasher.osugdx.GameScenes;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -53,14 +54,13 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
 
         if (isFirstBGChange) {
             isFirstBGChange = false;
-            getColor().a = 0;
         }
 
         addAction(
                 Actions.sequence(
-                        Actions.fadeOut(time),
+                        Actions.color(Color.CLEAR, time),
                         Actions.run(() -> drawable.getRegion().setTexture(texture)),
-                        Actions.fadeIn(time)
+                        Actions.color(Color.WHITE, time)
                 )
         );
     }

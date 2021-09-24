@@ -37,7 +37,7 @@
         seeyaSound = Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.seeya.fileName));
         welcomeSound = Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.welcome.fileName));
 
-        audioManager.playMusic(welcomeSound);
+        welcomeSound.play();
     }
 
     @Override

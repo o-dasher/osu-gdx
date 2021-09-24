@@ -5,7 +5,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
@@ -16,8 +15,6 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
-import lt.ekgame.beatmap_analyzer.beatmap.BeatmapGenerals;
-import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 
 public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener {
     private final BeatMapStore beatMapStore;
@@ -29,16 +26,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     private final OsuGame game;
     private final PlatformToast toast;
     private final BeatmapUtils beatmapUtils;
-    private final AudioManager audioManager;
     private boolean isFirstBeatmapLoaded = false;
     private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
 
-    public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils, AudioManager audioManager) {
+    public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.game = game;
         this.beatMapStore = beatMapStore;
         this.toast = toast;
         this.beatmapUtils = beatmapUtils;
-        this.audioManager = audioManager;
     }
 
     public BeatMapSet getCurrentBeatmapSet() {
@@ -183,7 +178,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
       if (currentMusic != null) {
           // Playing audio on render thread simply because
           // spawning multiple submits for music play will cause memory leaks eventually
-          audioManager.playMusic(currentMusic);
+          currentMusic.play();
           currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
         }
     }

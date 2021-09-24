@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.dasher.osugdx.Audio.AudioManager;
+import com.dasher.osugdx.Audio.AudioFactory;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.FadeBlock;
@@ -48,7 +48,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public SpriteBatch batch;
 	public Viewport viewport;
 	public GameAssetManager assetManager;
-	public AudioManager audioManager;
 	public UIConfig uiConfig;
 	public InputMultiplexer inputMultiplexer;
 	public BuffedShapeRenderer shapeRenderer;
@@ -71,6 +70,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public float cleanupTime;
 	public FadeBlock fadeBlock;
 	public Screen nextScreen;
+	public AudioFactory audioFactory;
 	public boolean calledToSwitchScreen;
 
 	private int WORLD_WIDTH;
@@ -100,10 +100,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
 		cleanupTime = 0.25f;
 		json = new Json();
+		audioFactory = new AudioFactory();
 		batch = new SpriteBatch();
 		shapeRenderer = new BuffedShapeRenderer();
 		assetManager = new GameAssetManager();
-		audioManager = new AudioManager();
 		glyphLayout = new GlyphLayout();
 		uiConfig = new UIConfig();
 		random = new Random();
@@ -116,7 +116,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatmapUtils.setBeatMapStore(beatMapStore);
 		oszParser = new OSZParser(gameIO, beatMapStore);
 		beatMapStore.setOszParser(oszParser);
-		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
+		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
 		beatFactory = new BeatFactory(beatmapManager);
 		beatmapManager.addListener(this);
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
