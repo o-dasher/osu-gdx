@@ -119,7 +119,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils, audioManager);
 		beatFactory = new BeatFactory(beatmapManager);
 		beatmapManager.addListener(this);
-		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
+		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
 		backgroundStage = new Stage(viewport, batch);
 		skinManager = new SkinManager(this);
 		fadeBlock = new FadeBlock(Color.BLACK, shapeRenderer, viewport) {

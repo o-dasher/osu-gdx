@@ -21,6 +21,9 @@ public abstract class Beatmap {
 	protected BeatmapDifficulties difficulties;
 	protected Array<BreakPeriod> breaks;
 	protected Array<TimingPoint> timingPoints;
+	private boolean calculatedBaseDiff = false;  // Easy queries.
+	protected double baseStars;
+	protected double baseCombo;
 
 	protected Beatmap(BeatmapGenerals generals, BeatmapEditorState editorState,
 		BeatmapMetadata metadata, BeatmapDifficulties difficulties,
@@ -35,6 +38,13 @@ public abstract class Beatmap {
 	}
 
 	public void freeResources() {
+		if (!calculatedBaseDiff) {
+			Difficulty baseDifficulty = getDifficulty();
+			baseStars = baseDifficulty.getStars();
+			baseCombo = baseDifficulty.getMaxCombo();
+			calculatedBaseDiff = true;
+		}
+
 		getHitObjects().clear();
 		for (BreakPeriod breakPeriod: breaks) {
 			if (!breakPeriod.isBackground()) {
@@ -45,9 +55,9 @@ public abstract class Beatmap {
 		editorState = null;
 		timingPoints = null;
 		difficulties = null;
-		metadata.setTags(null);
 		metadata.setBeatmapId(null);
 		metadata.setBeatmapSetId(null);
+
 	}
 
 	public boolean isResourcesFree() {
@@ -134,6 +144,14 @@ public abstract class Beatmap {
 	
 	public Array<TimingPoint> getTimingPoints() {
 		return timingPoints;
+	}
+
+	public double getBaseCombo() {
+		return baseCombo;
+	}
+
+	public double getBaseStars() {
+		return baseStars;
 	}
 
 	@Override

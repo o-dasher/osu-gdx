@@ -3,12 +3,17 @@ package com.dasher.osugdx.Audio;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.dasher.osugdx.Framework.Audio.AudioHandler;
+import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.NotNull;
 
 public class AudioManager implements AudioHandler {
     private float currentMusicVolume = 1;
     private float currentSFXVolume = 1;
+
+    public AudioManager(OsuGame game) {
+
+    }
 
     public void playSound(@NotNull Sound sound) {
         sound.play(currentSFXVolume);

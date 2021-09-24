@@ -71,7 +71,7 @@ public class BeatmapSetSelector extends Selector {
             beatmapSelectors.add(beatmapSelector);
         }
         beatmapSelectors.sort((o1, o2) ->
-            (int) (o1.beatmap.getDifficulty().getStars() - o2.beatmap.getDifficulty().getStars())
+            (int) (o1.beatmap.getBaseStars() - o2.beatmap.getBaseStars())
         );
         for (BeatmapSelector beatmapSelector: beatmapSelectors) {
             soundSelectScreen.beatmapSetSelectorStage.addItem(beatmapSelector);

@@ -84,10 +84,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             return;
         }
         isBaseShowing = true;
-        beatmapSetSelectors.sort((a, b) ->
-                b.beatMapSet.beatmaps.get(b.beatMapSet.beatmaps.size - 1).getMetadata().getTitle()
-                        .compareTo(a.beatMapSet.beatmaps.get(a.beatMapSet.beatmaps.size - 1).getMetadata().getTitle())
-        );
+        //beatmapSetSelectors.sort((a, b) ->
+        //        (int) (b.beatMapSet.beatmaps.get(b.beatMapSet.beatmaps.size - 1).getBaseStars()
+        //                - a.beatMapSet.beatmaps.get(a.beatMapSet.beatmaps.size - 1).getBaseStars())
+        //);
         beatmapSetSelectorStage.getItems().clear();
         for (Actor actor: beatmapSetSelectorStage.getActors()) {
             actor.clearActions();

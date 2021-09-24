@@ -4,7 +4,7 @@ package com.dasher.osugdx.Audio;
 import com.badlogic.gdx.audio.Sound;
 
 public class GameSound implements Sound {
-    private final int soundVolume = 1;
+    private final float soundVolume = 1;
     private final Sound sound;
 
     public GameSound(Sound sound) {
@@ -28,7 +28,7 @@ public class GameSound implements Sound {
 
     @Override
     public long loop() {
-        return sound.loop();
+        return sound.loop(soundVolume);
     }
 
     @Override
