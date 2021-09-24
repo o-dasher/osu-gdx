@@ -162,7 +162,6 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             updateSelectorThumbnails(delta);
         }
 
-
         if (InputHelper.isBackPressed()) {
             this.switchScreen(new MenuScreen(game));
         }

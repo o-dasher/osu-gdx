@@ -1,6 +1,7 @@
 package com.dasher.osugdx.IO.Beatmaps;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -24,7 +25,15 @@ import lt.ekgame.beatmap_analyzer.parser.BeatmapParser;
 public class BeatmapUtils {
     private final BeatmapParser beatmapParser = new BeatmapParser();
     private final ReusableTextureManager reusableTextureManager = new ReusableTextureManager();
+    private final TextureLoader.TextureParameter textureParameter;
     private BeatMapStore beatMapStore;
+
+    public BeatmapUtils() {
+        textureParameter = new TextureLoader.TextureParameter();
+        textureParameter.genMipMaps = true;
+        textureParameter.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+        textureParameter.magFilter = Texture.TextureFilter.Linear;
+    }
 
     public Beatmap createMap(@NotNull FileHandle mapFile) {
         InputStream reader = mapFile.read();
@@ -56,17 +65,7 @@ public class BeatmapUtils {
                 FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
                 String bgFileName = breakPeriod.getBackgroundFileName();
                 FileHandle bgFile = Gdx.files.external(beatmapFile.parent() + "/" + bgFileName);
-                ReusableTexture texture = bgFile.exists()?
-                        reusableTextureManager.getTexture(bgFile, true, listener) : null;
-                if (texture == null) {
-                    return null;
-                } else {
-                    texture.setFilter(
-                            Texture.TextureFilter.MipMapLinearLinear,
-                            Texture.TextureFilter.Linear
-                    );
-                    return texture;
-                }
+                return bgFile.exists()? reusableTextureManager.getTexture(bgFile, textureParameter, listener) : null;
             }
         }
         return null;

@@ -2,6 +2,7 @@ package com.dasher.osugdx.Audio;
 
 import com.badlogic.gdx.audio.Music;
 
+
 import org.jetbrains.annotations.NotNull;
 
 class GameMusic implements Music {
@@ -76,5 +77,10 @@ class GameMusic implements Music {
     @Override
     public void setOnCompletionListener(OnCompletionListener listener) {
         music.setOnCompletionListener(listener);
+    }
+
+    @Override
+    public int hashCode() {
+        return music.hashCode();
     }
 }

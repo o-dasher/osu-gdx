@@ -23,29 +23,33 @@ import com.dasher.osugdx.assets.GameAssetManager;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class GameScreen implements Screen {
-    protected final OsuGame game;
-    protected final GameAssetManager assetManager;
-    protected final UIConfig uiConfig;
-    protected final Batch batch;
-    protected final Viewport viewport;
-    protected final BuffedShapeRenderer shapeRenderer;
-    protected final  GlyphLayout glyphLayout;
-    protected final BeatMapStore beatMapStore;
-    protected final BeatmapManager beatmapManager;
-    protected final BeatmapUtils beatmapUtils;
-    protected final BeatFactory beatFactory;
-    protected final WorkingBackground workingBackground;
-    protected final InputMultiplexer inputMultiplexer;
-    protected final Stage backgroundStage;
-    protected final OSZParser oszParser;
-    protected final SkinManager skinManager;
-    protected final Fonts fonts;
+    protected OsuGame game;
+    protected GameAssetManager assetManager;
+    protected UIConfig uiConfig;
+    protected Batch batch;
+    protected Viewport viewport;
+    protected BuffedShapeRenderer shapeRenderer;
+    protected GlyphLayout glyphLayout;
+    protected BeatMapStore beatMapStore;
+    protected BeatmapManager beatmapManager;
+    protected BeatmapUtils beatmapUtils;
+    protected BeatFactory beatFactory;
+    protected WorkingBackground workingBackground;
+    protected InputMultiplexer inputMultiplexer;
+    protected Stage backgroundStage;
+    protected OSZParser oszParser;
+    protected SkinManager skinManager;
+    protected Fonts fonts;
     protected float cleanupTime;
-    protected final AsyncExecutor asyncExecutor;
-    protected final AudioFactory audioFactory;
+    protected AsyncExecutor asyncExecutor;
+    protected AudioFactory audioFactory;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
+        resetGlobals();
+    }
+
+    public void resetGlobals() {
         cleanupTime = game.cleanupTime;
         assetManager = game.assetManager;
         fonts = game.fonts;

@@ -18,16 +18,16 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener {
     private final BeatMapStore beatMapStore;
+    private final OsuGame game;
+    private final PlatformToast toast;
+    private final BeatmapUtils beatmapUtils;
+    private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
     private BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
     private String previousBeatmapSetFolder = "";
     private Music currentMusic;
     private long timeLastMap;
-    private final OsuGame game;
-    private final PlatformToast toast;
-    private final BeatmapUtils beatmapUtils;
     private boolean isFirstBeatmapLoaded = false;
-    private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
 
     public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils) {
         this.game = game;
@@ -40,10 +40,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         return currentBeatmapSet;
     }
 
-    public void randomizeCurrentBeatmapSet() {
-        setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
-    }
-
     public void setCurrentBeatmapSet(BeatMapSet newBeatmapSet) {
         if (newBeatmapSet == null) {
             randomizeCurrentBeatmapSet();
@@ -51,11 +47,11 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         }
 
         if (currentBeatmapSet != null) {
-            for (Beatmap beatmap: currentBeatmapSet.beatmaps) {
+            for (Beatmap beatmap : currentBeatmapSet.beatmaps) {
                 beatmap.freeResources();
             }
         }
-        
+
         if (newBeatmapSet.beatmaps.isEmpty()) {
             newBeatmapSet.getFolder().delete();
             beatMapStore.getBeatMapSets().removeValue(newBeatmapSet, true);
@@ -73,16 +69,40 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         }
     }
 
+    public void randomizeCurrentBeatmapSet() {
+        setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
+    }
+
+    private Beatmap reInitBeatmap(@NotNull Beatmap beatmap) {
+        Beatmap newMap = null;
+        FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
+        if (beatmapFile.exists()) {
+            newMap = beatmapUtils.createMap(beatmapFile);
+        }
+        return newMap;
+    }
+
     private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
+        Array<String> invalidPaths = new Array<>();
         for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
             Beatmap beatmap = beatMapSet.beatmaps.get(i);
-            FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-            if (beatmapFile.exists()) {
-                beatMapSet.beatmaps.set(i, beatmapUtils.createMap(beatmapFile));
+            Beatmap newMap = reInitBeatmap(beatmap);
+            if (newMap == null) {
+                invalidPaths.add(beatmap.beatmapFilePath);
             } else {
-                handleEmptyBeatmapSet(beatMapSet);
+                clearUnusedBeatmapResources(newMap);
+                beatMapSet.beatmaps.set(i, newMap);
             }
         }
+        for (Beatmap beatmap : beatMapSet.beatmaps) {
+            if (invalidPaths.contains(beatmap.beatmapFilePath, false)) {
+                beatMapSet.beatmaps.removeValue(beatmap, true);
+            }
+        }
+    }
+
+    private void clearUnusedBeatmapResources(@NotNull Beatmap beatmap) {
+        beatmap.getTimingPoints().clear();
     }
 
     private void setupMusic(@NotNull Beatmap newMap) {
@@ -96,7 +116,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         }
 
         String newMusicPath = newFolder + newMap.getGenerals().getAudioFileName();
-        String currentMusicPath = currentMap != null && currentMap.getGenerals() != null?
+        String currentMusicPath = currentMap != null && currentMap.getGenerals() != null ?
                 previousBeatmapSetFolder + currentMap.getGenerals().getAudioFileName() : "";
 
         if (currentMusic != null && !newMap.equals(currentMap)) {
@@ -113,10 +133,10 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             isReplayingBeatmapMusic = false;
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
-                currentMusic = Gdx.audio.newMusic(musicFile);
+                currentMusic = game.audioFactory.newMusic(Gdx.audio.newMusic(musicFile));
                 currentMusic.setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
-                    if (currentMusic == music) {
+                    if (currentMusic.hashCode() == music.hashCode()) {
                         randomizeCurrentBeatmapSet();
                     }
                 });
@@ -144,14 +164,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         return currentMap;
     }
 
-    private void handleEmptyBeatmapSet(BeatMapSet beatMapSet) {
-        beatMapStore.deleteBeatmapFile(beatMapSet, null);
-        randomizeCurrentBeatmapSet();
-        if (game.getScreen() instanceof SoundSelectScreen) {
-            game.getScreen().show();
-        }
-    }
-
     public void setCurrentMap(Beatmap newMap) {
         if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
             toast.log("Abnormal beatmap selected!");
@@ -163,11 +175,25 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             }
         }
         setupMusic(newMap);
-        currentMap = newMap;
+        if (currentMap != null) {
+            clearUnusedBeatmapResources(currentMap);
+        }
+        currentMap = reInitBeatmap(newMap);
+        if (currentMap == null) {
+            randomizeCurrentBeatmapSet();
+        }
         timeLastMap = System.nanoTime();
         onNewBeatmap(currentMap);
         System.out.println("Selected map: " + currentMap.toString());
         isFirstBeatmapLoaded = true;
+    }
+
+    private void handleEmptyBeatmapSet(BeatMapSet beatMapSet) {
+        beatMapStore.deleteBeatmapFile(beatMapSet, null);
+        randomizeCurrentBeatmapSet();
+        if (game.getScreen() instanceof SoundSelectScreen) {
+            game.getScreen().show();
+        }
     }
 
     public void startMusicPlaying() {
@@ -175,11 +201,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
-      if (currentMusic != null) {
-          // Playing audio on render thread simply because
-          // spawning multiple submits for music play will cause memory leaks eventually
-          currentMusic.play();
-          currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+        if (currentMusic != null && !isReplayingBeatmapMusic) {
+            currentMusic.play();
+            if (game.getScreen() instanceof UIScreen) {
+                game.asyncExecutor.submit(() -> {
+                    currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                    return currentMusic;
+                });
+            }
         }
     }
 
@@ -202,14 +231,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
     @Override
     public void onNewBeatmap(Beatmap beatmap) {
-        for (BeatmapManagerListener listener: beatmapManagerListeners) {
+        for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onNewBeatmap(beatmap);
         }
     }
 
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
-        for (BeatmapManagerListener listener: beatmapManagerListeners) {
+        for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onNewBeatmapSet(beatMapSet);
         }
     }

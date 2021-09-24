@@ -95,4 +95,9 @@ class GameSound implements Sound {
     public void setPan(long soundId, float pan, float volume) {
         sound.setPan(soundId, pan, volume);
     }
+
+    @Override
+    public int hashCode() {
+        return sound.hashCode();
+    }
 }

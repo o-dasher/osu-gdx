@@ -17,8 +17,6 @@ public class LogoActor extends GameImage implements ScreenSwitchListener {
         setOrigin(Align.center);
         setBaseScale(1);
         applyCentering();
-        float scale = getBaseScale() / 2;
-        addAction(Actions.scaleTo(scale, scale, cleanupTime, Interpolation.smooth));
     }
 
     @Override
