@@ -63,7 +63,10 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         buttonsStage.addActor(optionsButton);
         buttonsStage.addActor(exitButton);
 
-        beatmapManager.startMusicPlaying();
+        if (!beatmapManager.getCurrentMusic().isPlaying()) {
+            beatmapManager.startMusicPlaying();
+        }
+
         beatFactory.addListener(menuLogo);
 
         inputMultiplexer.addProcessor(buttonsStage);

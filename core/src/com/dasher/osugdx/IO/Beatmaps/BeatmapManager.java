@@ -67,7 +67,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             randomizeCurrentBeatmapSet();
         } else {
             System.out.println("Selected mapSet: " + newBeatmapSet.toString());
-            reInitBeatmapSet(newBeatmapSet);
             currentBeatmapSet = newBeatmapSet;
             this.onNewBeatmapSet(currentBeatmapSet);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
@@ -76,10 +75,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
         }
-    }
-
-    private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
-
     }
 
     private void setupMusic(@NotNull Beatmap newMap) {

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioManager;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
+import com.dasher.osugdx.Framework.Graphics.Shaperendering.FadeBlock;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.WorkingBackground;
@@ -67,6 +69,9 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public AsyncExecutor asyncExecutor;
 	public SkinManager skinManager;
 	public float cleanupTime;
+	public FadeBlock fadeBlock;
+	public Screen nextScreen;
+	public boolean calledToSwitchScreen;
 
 	private int WORLD_WIDTH;
 	private int WORLD_HEIGHT;
@@ -117,6 +122,18 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors());
 		backgroundStage = new Stage(viewport, batch);
 		skinManager = new SkinManager(this);
+		fadeBlock = new FadeBlock(Color.BLACK, shapeRenderer, viewport) {
+			@Override
+			public void onFadeIn() {
+				getScreen().dispose();
+				setScreen(nextScreen);
+			}
+			@Override
+			public void onFadeOut() {
+				calledToSwitchScreen = false;
+			}
+		};
+		fadeBlock.setAlphaIncreaseDivisor(cleanupTime);
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 	}
