@@ -23,7 +23,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 52;
+    private final int VERSION = 53;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -144,7 +144,7 @@ public class BeatMapStore {
             }
         }
         tempCachedBeatmaps.addAll(beatMapSets);
-        boolean logBeatmaps = false;
+        boolean logBeatmaps = true;
         if (logBeatmaps) {
             for (BeatMapSet beatMapSet : tempCachedBeatmaps) {
                 for (Beatmap map : beatMapSet.beatmaps) {
@@ -312,7 +312,7 @@ public class BeatMapStore {
     private void saveCache() {
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
-        libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
+        libCacheFile.writeString(json.toJson(beatMapSets), false);
     }
 
     public void loadAllBeatmaps() {
@@ -371,13 +371,6 @@ public class BeatMapStore {
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
-
-        for (BeatMapSet beatMapSet: beatMapSets) {
-            for (Beatmap beatmap: beatMapSet.beatmaps) {
-                beatmap.getHitObjects().clear();
-                beatmap.getTimingPoints().clear();
-            }
-        }
 
         loadedAllBeatmaps = true;
     }

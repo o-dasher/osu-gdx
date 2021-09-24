@@ -68,20 +68,24 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         } else {
             System.out.println("Selected mapSet: " + newBeatmapSet.toString());
             currentBeatmapSet = newBeatmapSet;
-            for (BeatMapSet beatMapSet: beatMapStore.getCache()) {
-                if (
-                        beatMapSet.beatmapSetFolderPath.hashCode()
-                                == newBeatmapSet.beatmapSetFolderPath.hashCode()
-                ) {
-                    currentBeatmapSet.beatmaps = beatMapSet.beatmaps;
-                    break;
-                }
-            }
+            reInitBeatmapSet(currentBeatmapSet);
             this.onNewBeatmapSet(currentBeatmapSet);
             if (currentBeatmapSet.beatmaps.isEmpty()) {
                 handleEmptyBeatmapSet(currentBeatmapSet);
             } else {
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
+            }
+        }
+    }
+
+    private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
+        for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
+            Beatmap beatmap = beatMapSet.beatmaps.get(i);
+            FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
+            if (beatmapFile.exists()) {
+                beatMapSet.beatmaps.set(i, beatmapUtils.createMap(beatmapFile));
+            } else {
+                handleEmptyBeatmapSet(beatMapSet);
             }
         }
     }

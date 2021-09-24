@@ -35,12 +35,16 @@ public abstract class Beatmap {
 	}
 
 	public void freeResources() {
+		getHitObjects().clear();
 		for (BreakPeriod breakPeriod: breaks) {
 			if (!breakPeriod.isBackground()) {
 				breaks.removeValue(breakPeriod, true);
 			}
 		}
+		generals = null;
 		editorState = null;
+		timingPoints = null;
+		difficulties = null;
 	}
 
 	public boolean isResourcesFree() {
