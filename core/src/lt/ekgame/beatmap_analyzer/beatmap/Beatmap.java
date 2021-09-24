@@ -45,6 +45,9 @@ public abstract class Beatmap {
 		editorState = null;
 		timingPoints = null;
 		difficulties = null;
+		metadata.setTags(null);
+		metadata.setBeatmapId(null);
+		metadata.setBeatmapSetId(null);
 	}
 
 	public boolean isResourcesFree() {

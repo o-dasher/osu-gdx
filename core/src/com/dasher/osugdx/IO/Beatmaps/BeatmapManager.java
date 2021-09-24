@@ -181,6 +181,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
       if (currentMusic != null) {
+          // TODO: MAYBE EXCLUSIVE THREAD FOR AUDIO?
           game.asyncExecutor.submit(() -> {
               audioManager.playMusic(currentMusic);
               if (game.getScreen() instanceof UIScreen && !isReplayingBeatmapMusic) {
