@@ -184,7 +184,9 @@ public class BeatMapStore {
             removeInvalidBeatmapSet(beatMapSet, beatmapFile == null? null : beatmapFile.path());
         }
 
-        saveCache();
+        if (loadedAllBeatmaps) {
+            saveCache();
+        }
     }
 
     private boolean removeInvalidBeatmapSet(@NotNull BeatMapSet beatMapSet, @Null String invalidPath) {
