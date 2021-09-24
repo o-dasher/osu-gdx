@@ -15,13 +15,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.Reader;
 import java.util.Objects;
+import java.util.Scanner;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 51;
+    private final int VERSION = 52;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -94,7 +96,7 @@ public class BeatMapStore {
         if (libCacheFile.exists()) {
             try {
                 cachedSets = json.fromJson(
-                        Array.class, BeatMapSet.class, new BufferedInputStream(libCacheFile.read())
+                        Array.class, BeatMapSet.class, libCacheFile.read()
                 );
             } catch (Exception e) {
                 e.printStackTrace();
@@ -308,7 +310,7 @@ public class BeatMapStore {
     private void saveCache() {
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
-        libCacheFile.writeString(json.toJson(beatMapSets, Array.class, BeatMapSet.class), false);
+        libCacheFile.writeString(json.prettyPrint(beatMapSets), false);
     }
 
     public void loadAllBeatmaps() {
