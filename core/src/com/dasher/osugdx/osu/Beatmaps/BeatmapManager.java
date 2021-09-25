@@ -15,6 +15,9 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
@@ -133,7 +136,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
 
         if (currentMusic != null && !newMap.equals(currentMap)) {
             // WE DON'T RESTART MUSIC IF ITS SAME MAP ON UI SCREEN
-            if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen) || !currentMusic.isPlaying()) {
+            if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen)) {
                 currentMusic.dispose();
             }
         }
