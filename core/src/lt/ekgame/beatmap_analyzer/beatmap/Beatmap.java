@@ -1,10 +1,8 @@
 package lt.ekgame.beatmap_analyzer.beatmap;
 
 import com.badlogic.gdx.utils.Array;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -56,12 +54,7 @@ public abstract class Beatmap {
 				breaks.removeValue(breakPeriod, true);
 			}
 		}
-		generals = null;
-		editorState = null;
 		timingPoints = null;
-		difficulties = null; 
-		metadata.setBeatmapId(null);
-		metadata.setBeatmapSetId(null);
 	}
 
 	public boolean isResourcesFree() {
@@ -164,6 +157,30 @@ public abstract class Beatmap {
 
 	public double getBaseStars() {
 		return baseStars;
+	}
+
+	public void setMetadata(BeatmapMetadata metadata) {
+		this.metadata = metadata;
+	}
+
+	public void setGenerals(BeatmapGenerals generals) {
+		this.generals = generals;
+	}
+
+	public void setDifficulties(BeatmapDifficulties difficulties) {
+		this.difficulties = difficulties;
+	}
+
+	public void setEditorState(BeatmapEditorState editorState) {
+		this.editorState = editorState;
+	}
+
+	public void setBaseCombo(double baseCombo) {
+		this.baseCombo = baseCombo;
+	}
+
+	public void setBaseStars(double baseStars) {
+		this.baseStars = baseStars;
 	}
 
 	@Override

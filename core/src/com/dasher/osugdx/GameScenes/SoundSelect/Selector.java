@@ -14,9 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Null;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
@@ -53,23 +53,19 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
         this.game = game;
         this.font = font;
         Sprite menuButtonBG = skin.menuButtonBG.getSprite();
-        float w = menuButtonBG.getWidth();
-        float h = menuButtonBG.getHeight();
+        float w = 699;
+        float h = 103;
         this.menuBackground = new GameImage(game, menuButtonBG, false);
         this.thumbnail = new GameImage(game, new SpriteDrawable(new Sprite()), false);
         menuBackground.setSize(w, h);
         this.beatmapManager = beatmapManager;
         this.skin = skin;
         this.soundSelectScreen = soundSelectScreen;
-        adjustColor();
         this.addActor(menuBackground);
         setSize(w, h);
-        setOrigin(Align.right);
+        setOrigin(Align.center);
         thumbnail.setSize(115, 85);
-        float thumbnailX = 18;
-        if (skin.menuButtonBG.isHD()) {
-            thumbnailX /= 2;
-        }
+        float thumbnailX = 9;
         thumbnail.setPosition(thumbnailX, getHeight() / 2 - thumbnail.getHeight() / 2);
         menuBackground.setPosition(getWidth() / 2 - w / 2f, getHeight() / 2 - h / 2f);
         setScale(0.9f);
@@ -166,5 +162,10 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
         adjustColor();
+    }
+
+    @Override
+    public void onPreBeatmapChange() {
+
     }
 }

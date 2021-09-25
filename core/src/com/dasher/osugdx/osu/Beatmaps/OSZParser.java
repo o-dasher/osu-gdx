@@ -1,4 +1,4 @@
-package com.dasher.osugdx.IO.Beatmaps;
+package com.dasher.osugdx.osu.Beatmaps;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
@@ -20,7 +20,7 @@ import java.util.zip.ZipInputStream;
  * directory;
  **/
 public class OSZParser {
-    private final BeatMapStore beatMapStore;
+    private final com.dasher.osugdx.osu.Beatmaps.BeatMapStore beatMapStore;
     private final FileHandle beatmapsFolder;
     private final FileHandle importsFolder;
     private boolean isImportingImportDirectory;

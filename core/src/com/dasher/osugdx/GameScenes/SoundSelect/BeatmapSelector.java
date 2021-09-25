@@ -7,11 +7,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Mods.ModManagerListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
-public class BeatmapSelector extends Selector {
+public class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener {
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
     private final Label diffLabel;
@@ -38,20 +40,20 @@ public class BeatmapSelector extends Selector {
         initLabels();
         diffLabel = createLabel(metadata().getVersion());
         diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - middleLabel.getHeight() * labelScale);
-        generateStars();
         adjustColor();
+        onBeatmapCalculated(beatmap);
     }
 
     private void generateStars() {
         float starX = diffLabel.getX();
         // 10 - 1 to account for last star which can be floated
-        float maxStars = Math.min(10 - 1, (int) beatmap.getDifficulty().getStars());
+        float maxStars = Math.min(10 - 1, (int) beatmap.getBaseStars());
         float starScale = 0.25f;
         for (int i = 0; i < maxStars + 1; i++) {
             Sprite starSprite = skin.star1.getSprite();
             if (i == maxStars) {
                 // Last star can be "float"
-                float floatingStar = (float) (beatmap.getDifficulty().getStars() - i);
+                float floatingStar = (float) (beatmap.getBaseStars() - i);
                 TextureRegion region = new TextureRegion(
                         starSprite.getTexture(),
                         0, 0,
@@ -125,7 +127,7 @@ public class BeatmapSelector extends Selector {
 
     @Override
     public boolean isThisMapSelected() {
-        return beatmapManager.getCurrentMap() == beatmap;
+        return beatmapManager.getCurrentMap().beatmapFilePath.equals(beatmap.beatmapFilePath);
     }
 
     @Override
@@ -137,5 +139,13 @@ public class BeatmapSelector extends Selector {
     @Override
     public Selector getSelectedSelector() {
         return soundSelectScreen.selectedBeatmap;
+    }
+
+
+    @Override
+    public void onBeatmapCalculated(Beatmap beatmap) {
+        if (beatmap.beatmapFilePath.equals(this.beatmap.beatmapFilePath)) {
+            generateStars();
+        }
     }
 }

@@ -26,17 +26,18 @@ import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.WorkingBackground;
 import com.dasher.osugdx.Graphics.Fonts;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
-import com.dasher.osugdx.IO.Beatmaps.OSZParser;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapUtils;
+import com.dasher.osugdx.osu.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
+import com.dasher.osugdx.osu.Mods.ModManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -71,6 +72,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public FadeBlock fadeBlock;
 	public Screen nextScreen;
 	public AudioFactory audioFactory;
+	public ModManager modManager;
 	public boolean calledToSwitchScreen;
 	public boolean canSwitchIntroScreen;
 	public boolean loadedAllAssets;
@@ -105,7 +107,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		assetManager = new GameAssetManager();
 		inputMultiplexer = new InputMultiplexer();
 		audioFactory = new AudioFactory(this);
-		cleanupTime = 0.25f;
+		cleanupTime = 0.3f;
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		Gdx.input.setInputProcessor(inputMultiplexer);
@@ -155,17 +157,18 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen) {
 				canSwitchIntroScreen = false;
 				float delta = Gdx.graphics.getDeltaTime();
+				asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
 				json = new Json();
 				random = new Random();
 				gameIO = new GameIO();
 				gameIO.setup(gameName);
+				modManager = new ModManager(this);
 				beatmapUtils = new BeatmapUtils();
 				beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
 				beatmapUtils.setBeatMapStore(beatMapStore);
 				oszParser = new OSZParser(gameIO, beatMapStore);
 				beatMapStore.setOszParser(oszParser);
 				beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
-				asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
 				backgroundStage = new Stage(viewport, batch);
 				skinManager = new SkinManager(this);
 				shapeRenderer = new BuffedShapeRenderer();
@@ -190,13 +193,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				backgroundStage.addActor(workingBackground);
 				beatmapManager.addListener(workingBackground);
 				beatmapManager.addListener(beatFactory);
-				asyncExecutor.submit(() -> {
-					oszParser.parseImportDirectory();
-					beatMapStore.loadCache();
-					beatMapStore.loadAllBeatmaps();
-					Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
-					return null;
-				});
+				oszParser.parseImportDirectory();
+				beatMapStore.loadCache();
+				beatMapStore.loadAllBeatmaps();
+				beatmapManager.randomizeCurrentBeatmapSet();
 				skinManager.changeSkin(skinManager.getDefaultDir());
 				setSwitchFromIntroScreenTask = new ClockTask(delta) {
 					@Override
@@ -236,6 +236,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 	@Override
 	public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+
+	}
+
+	@Override
+	public void onPreBeatmapChange() {
 
 	}
 }

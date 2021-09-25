@@ -11,14 +11,15 @@ import com.dasher.osugdx.Audio.AudioFactory;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Graphics.Fonts;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
-import com.dasher.osugdx.IO.Beatmaps.OSZParser;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapUtils;
+import com.dasher.osugdx.osu.Beatmaps.OSZParser;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
+import com.dasher.osugdx.osu.Mods.ModManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +44,7 @@ public abstract class GameScreen implements Screen {
     protected float cleanupTime;
     protected AsyncExecutor asyncExecutor;
     protected AudioFactory audioFactory;
+    protected ModManager modManager;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -69,6 +71,7 @@ public abstract class GameScreen implements Screen {
         skinManager = game.skinManager;
         oszParser = game.oszParser;
         audioFactory = game.audioFactory;
+        modManager = game.modManager;
     }
 
     @Override

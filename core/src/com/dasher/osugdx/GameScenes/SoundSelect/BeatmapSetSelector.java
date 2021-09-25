@@ -5,16 +5,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
 
 import org.jetbrains.annotations.NotNull;
 
-
-import java.util.Comparator;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
@@ -63,11 +60,13 @@ public class BeatmapSetSelector extends Selector {
         safeChangeSelectedSelector();
         Array<BeatmapSelector> beatmapSelectors = new Array<>();
         Color inactiveBeatmapColor = new Color(0xadd8e6ff);
-        for (Beatmap beatmap: beatMapSet.beatmaps) {
+        for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
+            Beatmap beatmap = beatMapSet.beatmaps.get(i);
             BeatmapSelector beatmapSelector = new BeatmapSelector(
                     game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
                         beatMapSet, beatmap, inactiveBeatmapColor
             );
+            game.modManager.addListener(beatmapSelector);
             beatmapSelectors.add(beatmapSelector);
         }
         beatmapSelectors.sort((o1, o2) ->

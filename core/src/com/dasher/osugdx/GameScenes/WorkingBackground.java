@@ -4,15 +4,14 @@ package com.dasher.osugdx.GameScenes;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 
@@ -93,6 +92,11 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
 
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+
+    }
+
+    @Override
+    public void onPreBeatmapChange() {
 
     }
 

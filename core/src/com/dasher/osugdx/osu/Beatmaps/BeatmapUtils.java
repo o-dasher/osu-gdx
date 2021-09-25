@@ -1,11 +1,9 @@
-package com.dasher.osugdx.IO.Beatmaps;
+package com.dasher.osugdx.osu.Beatmaps;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureManager;
 import com.dasher.osugdx.IO.IOHelper;
@@ -27,7 +25,7 @@ public class BeatmapUtils {
     private final BeatmapParser beatmapParser = new BeatmapParser();
     private final ReusableTextureManager reusableTextureManager = new ReusableTextureManager();
     private final TextureLoader.TextureParameter textureParameter;
-    private BeatMapStore beatMapStore;
+    private com.dasher.osugdx.osu.Beatmaps.BeatMapStore beatMapStore;
 
     public BeatmapUtils() {
         textureParameter = new TextureLoader.TextureParameter();
@@ -50,6 +48,7 @@ public class BeatmapUtils {
                     parseEditor, parseDifficulties, parseMetadata
             );
         } catch (NoSuchElementException e) {
+            e.printStackTrace();
             return beatmap;
         } catch (BeatmapException e) {
             beatMapStore.deleteBeatmapFile(null, mapFile);

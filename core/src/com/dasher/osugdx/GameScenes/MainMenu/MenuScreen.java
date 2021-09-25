@@ -1,9 +1,11 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.MainMenu.Actors.*;
 import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
@@ -27,21 +29,22 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private final Texture optionsButtonTex;
     private final Texture exitButtonTex;
 
-
-    public MenuScreen(@NotNull OsuGame game) {
+    public MenuScreen(@NotNull OsuGame game, Screen previousScreen) {
         super(game);
         logoTexture = assetManager.get(assetManager.textures.logo);
         heartBeat = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoHeartBeat));
         downBeat = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoDownBeat));
         hover = game.audioFactory.newSound(assetManager.get(assetManager.sounds.buttonHover));
-        logoSelect = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoSelect.fileName));
+        logoSelect = game.audioFactory.newSound(assetManager.get(assetManager.sounds.osuLogoSelect));
         playButtonTex = assetManager.get(assetManager.textures.playButton);
         optionsButtonTex = assetManager.get(assetManager.textures.optionsButton);
         exitButtonTex = assetManager.get(assetManager.textures.exitButton);
-        asyncExecutor.submit(() -> {
+
+        /*
+        if (!(previousScreen instanceof IntroScreen)) {
             oszParser.parseImportDirectory();
-            return null;
-        });
+        }
+         */
     }
 
     @Override
@@ -78,7 +81,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     }
 
     public void toSoundSelectScreen() {
-        if (!oszParser.isImportingImportDirectory()) {
+        if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {
             this.switchScreen(new SoundSelectScreen(game));
         }
     }

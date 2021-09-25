@@ -1,8 +1,9 @@
 package com.dasher.osugdx.Framework.Tasks;
 
 
+import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
 
-public abstract class ClockTask {
+public abstract class ClockTask implements UpdateAble {
     private boolean isCancelled = false;
     private boolean isRepeating = false;
     private float timeSeconds = 0f;
@@ -12,6 +13,7 @@ public abstract class ClockTask {
         this.period = period;
     }
 
+    @Override
     public void update(float delta) {
         if (!isCancelled) {
             timeSeconds += delta;

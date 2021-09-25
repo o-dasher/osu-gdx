@@ -68,11 +68,10 @@
             if (
                 beatMapStore.isLoadedAllBeatmaps()
                         && beatmapManager.isFirstBeatmapLoaded()
-                        && !welcomeSound.isPlaying()
-                        && canSwitchScreen
+                        && canSwitchScreen && !game.calledToSwitchScreen
             ) {
                 osuLogo.switchCleanup();
-                switchScreen(new MenuScreen(game));
+                switchScreen(new MenuScreen(game, this));
             }
         }
 

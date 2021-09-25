@@ -6,8 +6,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -15,15 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Input.InputHelper;
 import com.dasher.osugdx.OsuGame;
 
@@ -56,7 +53,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setYMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
         beatmapSetSelectorStage.setAlignX(Align.right);
-        beatmapSetSelectorStage.setXMultiplier(0.95f);
+        beatmapSetSelectorStage.setXMultiplier(0.9f);
         beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.setStairCaseMultiplier(25);
         beatmapSetSelectorStage.setStairCaseAdjustTime(0.5f);
@@ -163,7 +160,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         }
 
         if (InputHelper.isBackPressed()) {
-            this.switchScreen(new MenuScreen(game));
+            if (!game.calledToSwitchScreen) {
+                switchScreen(new MenuScreen(game, this));
+            }
         }
     }
 
@@ -294,6 +293,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
         scrollToSelectedBeatmapSet();
         rearrangeSelectors();
+    }
+
+    @Override
+    public void onPreBeatmapChange() {
+
     }
 
     public boolean isBaseShowing() {

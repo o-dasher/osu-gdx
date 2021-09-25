@@ -1,4 +1,4 @@
-package com.dasher.osugdx.IO.Beatmaps;
+package com.dasher.osugdx.osu.Beatmaps;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;

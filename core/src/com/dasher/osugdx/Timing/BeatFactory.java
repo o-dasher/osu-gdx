@@ -4,9 +4,9 @@ import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManager;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -62,7 +62,13 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
             currentTimingPointIndex++;
         }
 
-        TimingPoint newTimingPoint = timingPoints.get(currentTimingPointIndex);
+        TimingPoint newTimingPoint;
+        try {
+            newTimingPoint = timingPoints.get(currentTimingPointIndex);
+        } catch (Exception e) {
+            return;
+        }
+
         if (!newTimingPoint.isInherited()) {
             currentTimingPoint = newTimingPoint;
         }
@@ -120,14 +126,19 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
 
     @Override
     public void onNewBeatmap(Beatmap beatmap) {
-        currentTimingPointIndex = 0;
-        currentTimingPoint = null;
-        timeSinceLastBeat = 0;
-        beatAccumulator = 0;
+
     }
 
     @Override
     public void onNewBeatmapSet(BeatMapSet beatMapSet) {
 
+    }
+
+    @Override
+    public void onPreBeatmapChange() {
+        currentTimingPointIndex = 0;
+        currentTimingPoint = null;
+        timeSinceLastBeat = 0;
+        beatAccumulator = 0;
     }
 }

@@ -8,9 +8,9 @@ import android.widget.Toast;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
-import com.dasher.osugdx.IO.Beatmaps.BeatMapStore;
-import com.dasher.osugdx.IO.Beatmaps.BeatmapUtils;
-import com.dasher.osugdx.IO.Beatmaps.OSZParser;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapUtils;
+import com.dasher.osugdx.osu.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 

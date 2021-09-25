@@ -1,4 +1,4 @@
-package com.dasher.osugdx.IO.Beatmaps;
+package com.dasher.osugdx.osu.Beatmaps;
 
 
 import com.badlogic.gdx.Gdx;
@@ -20,7 +20,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public class BeatMapStore {
-    private final int VERSION = 60;
+    private final int VERSION = 63;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
