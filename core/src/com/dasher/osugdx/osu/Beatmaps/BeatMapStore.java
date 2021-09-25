@@ -5,9 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Null;
-import com.dasher.osugdx.IO.GameIO;
+import com.dasher.osugdx.OsuGame;
+import com.dasher.osugdx.osu.Mods.ModManagerListener;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +18,9 @@ import java.util.Objects;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.utils.Mods;
 
-public class BeatMapStore {
+public class BeatMapStore implements ModManagerListener {
     private final int VERSION = 63;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
@@ -29,17 +30,15 @@ public class BeatMapStore {
     private final Long beatmapStoreCreationTime;
     private final FileHandle libCacheFile;
     private final Preferences beatmapStorePrefs;
-    private final Json json;
-    private final BeatmapUtils beatmapUtils;
     private OSZParser oszParser;
     private boolean finishedLoadingCache = false;
     private boolean loadedAllBeatmaps = false;
+    private final OsuGame game;
     private BeatMapSet mainDefaultBeatmapSet;
 
-    public BeatMapStore(@NotNull GameIO gameIO, Json json, BeatmapUtils beatmapUtils) {
-        this.songsDir = gameIO.getSongsDir();
-        this.json = json;
-        this.beatmapUtils = beatmapUtils;
+    public BeatMapStore(@NotNull OsuGame game) {
+        this.songsDir = game.gameIO.getSongsDir();
+        this.game = game;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
         libCacheFile = Gdx.files.local(".beatmap_db");
         beatmapStoreCreationTime = System.nanoTime();
@@ -92,7 +91,7 @@ public class BeatMapStore {
         Array<BeatMapSet> cachedSets = new Array<>();
         if (libCacheFile.exists()) {
             try {
-                cachedSets = json.fromJson(
+                cachedSets = game.json.fromJson(
                         Array.class, BeatMapSet.class, libCacheFile.read()
                 );
             } catch (Exception e) {
@@ -232,7 +231,7 @@ public class BeatMapStore {
             System.out.println("Library changed, map not found in cache!");
         }
 
-        Beatmap beatMap = beatmapUtils.createMap(
+        Beatmap beatMap = game.beatmapUtils.createMap(
                 beatmapFile,
                 true, true, true,
                 true, true, true
@@ -310,10 +309,13 @@ public class BeatMapStore {
         return "New BeatmapSet: " + beatMapSet.beatmapSetFolderPath;
     }
 
-    private void saveCache() {
+    private boolean isSavingCache = false;
+
+    public void saveCache() {
+        isSavingCache = true;
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
-        libCacheFile.writeString(json.toJson(beatMapSets), false);
+        game.modManager.calculateBeatmaps(Mods.NOMOD);
     }
 
     public void loadAllBeatmaps() {
@@ -389,5 +391,28 @@ public class BeatMapStore {
 
     public BeatMapSet getMainDefaultBeatmapSet() {
         return mainDefaultBeatmapSet;
+    }
+
+    @Override
+    public void onBeatmapCalculated(Beatmap beatmap) {
+
+    }
+
+    @Override
+    public void onCompleteCalculation() {
+        if (isSavingCache) {
+            Array<BeatMapSet> array = new Array<>(beatMapSets);
+            for (int i = 0; i < array.size; i++) {
+                BeatMapSet beatmapSet = array.get(i);
+                for (Beatmap beatmap: beatmapSet.beatmaps) {
+                    Beatmap copy = game.beatmapManager.reInitBeatmap(beatmap, false);
+                    copy.setBaseStars(0);
+                    copy.freeResources();
+                }
+            }
+            libCacheFile.writeString(game.json.toJson(array), false);
+            isSavingCache = false;
+            System.out.println("Saved beatmap cache successfully");
+        }
     }
 }

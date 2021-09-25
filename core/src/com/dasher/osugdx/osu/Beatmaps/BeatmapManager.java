@@ -80,7 +80,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
     }
 
-    private Beatmap reInitBeatmap(@NotNull Beatmap beatmap, boolean partial) {
+    protected Beatmap reInitBeatmap(@NotNull Beatmap beatmap, boolean partial) {
         Beatmap newMap = null;
         FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
         if (beatmapFile.exists()) {
@@ -223,9 +223,6 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         timeLastMap = System.nanoTime();
         onNewBeatmap(currentMap);
         System.out.println("Selected map: " + currentMap.toString());
-        if (!isFirstBeatmapLoaded) {
-            game.modManager.calculateBeatmaps(Mods.NOMOD);
-        }
         isFirstBeatmapLoaded = true;
     }
 

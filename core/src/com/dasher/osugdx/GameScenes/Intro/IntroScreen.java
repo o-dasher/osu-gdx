@@ -62,7 +62,7 @@
         introStage.act(delta);
         introStage.draw();
 
-        if (beatMapStore == null) {
+        if (beatMapStore == null || beatmapManager == null) {
             resetGlobals();
         } else {
             if (

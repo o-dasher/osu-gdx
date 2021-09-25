@@ -155,6 +155,11 @@ public class BeatmapSelector extends Selector implements BeatmapManagerListener,
     }
 
     @Override
+    public void onCompleteCalculation() {
+
+    }
+
+    @Override
     public Beatmap getBeatmapReference() {
         return this.beatmap;
     }

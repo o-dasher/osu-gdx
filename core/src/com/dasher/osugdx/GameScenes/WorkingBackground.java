@@ -35,6 +35,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         setScaling(Scaling.fill);
         setAlign(Align.center);
         setOrigin(Align.center);
+        setColor(Color.BLACK);
         if (game.beatmapManager.getCurrentMap() != null) {
             onNewBeatmap(game.beatmapManager.getCurrentMap());
         }

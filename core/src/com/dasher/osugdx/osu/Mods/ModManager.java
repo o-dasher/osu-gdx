@@ -45,6 +45,7 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
                                 if (calculated.getHitObjects().notEmpty()) {
                                     calculated.calculateBase();
                                     beatmap.setBaseStars(calculated.getBaseStars());
+                                    beatmap.setTimingPoints(calculated.getTimingPoints());
                                 }
                             } else {
                                 beatmap.calculateBase();
@@ -52,6 +53,7 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
                             onBeatmapCalculated(beatmap);
                         }
                     }
+                    onCompleteCalculation();
                     return null;
                 });
             }
@@ -60,8 +62,17 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
 
     @Override
     public void onBeatmapCalculated(Beatmap beatmap) {
-        for (ModManagerListener listener: listeners) {
+        for (int i = 0; i < listeners.size; i ++) {
+            ModManagerListener listener = listeners.get(i);
             listener.onBeatmapCalculated(beatmap);
+        }
+    }
+
+    @Override
+    public void onCompleteCalculation() {
+        for (int i = 0; i < listeners.size; i ++) {
+            ModManagerListener listener = listeners.get(i);
+            listener.onCompleteCalculation();
         }
     }
 

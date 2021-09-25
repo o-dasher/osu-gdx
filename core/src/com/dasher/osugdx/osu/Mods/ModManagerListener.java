@@ -4,4 +4,5 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 public interface ModManagerListener {
     void onBeatmapCalculated(Beatmap beatmap);
+    void onCompleteCalculation();
 }

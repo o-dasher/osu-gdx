@@ -6,16 +6,19 @@ import com.badlogic.gdx.audio.Music;
 import org.jetbrains.annotations.NotNull;
 
 class GameMusic implements Music {
-    private final float musicVolume = 1;
+    private final AudioFactory audioFactory;
     private final Music music;
+    private float baseVolume = 1;
 
-    public GameMusic(@NotNull Music music) {
+    public GameMusic(@NotNull Music music, @NotNull AudioFactory audioFactory) {
         this.music = music;
-        music.setVolume(musicVolume);
+        this.audioFactory = audioFactory;
+        setVolume(audioFactory.musicVolume);
     }
 
     @Override
     public void play() {
+        music.setVolume(audioFactory.musicVolume * baseVolume);
         music.play();
     }
 
@@ -46,7 +49,7 @@ class GameMusic implements Music {
 
     @Override
     public void setVolume(float volume) {
-        music.setVolume(volume * musicVolume);
+        this.baseVolume = volume;
     }
 
     @Override

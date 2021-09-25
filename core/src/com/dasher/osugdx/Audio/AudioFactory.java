@@ -8,17 +8,14 @@ import com.dasher.osugdx.OsuGame;
 import org.jetbrains.annotations.NotNull;
 
 public class AudioFactory {
-    AsyncExecutor asyncExecutor;
-
-    public AudioFactory(@NotNull OsuGame game) {
-        asyncExecutor = game.asyncExecutor;
-    }
+    protected float musicVolume = 1;
+    protected float soundVolume = 1;
 
     public GameMusic newMusic(Music music) {
-        return new GameMusic(music);
+        return new GameMusic(music, this);
     }
     
     public GameSound newSound(Sound sound) {
-        return new GameSound(sound);
+        return new GameSound(sound, this);
     }
 }

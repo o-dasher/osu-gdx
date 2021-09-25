@@ -14,7 +14,10 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.utils.async.AsyncResult;
+import com.badlogic.gdx.utils.async.AsyncTask;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Audio.AudioFactory;
@@ -77,6 +80,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public boolean canSwitchIntroScreen;
 	public boolean loadedAllAssets;
 	public ClockTask setSwitchFromIntroScreenTask;
+	public AsyncResult<Null> loadBeatmapsTask;
 
 	private int WORLD_WIDTH;
 	private int WORLD_HEIGHT;
@@ -106,13 +110,33 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		batch = new SpriteBatch();
 		assetManager = new GameAssetManager();
 		inputMultiplexer = new InputMultiplexer();
-		audioFactory = new AudioFactory(this);
+		audioFactory = new AudioFactory();
 		cleanupTime = 0.3f;
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		Gdx.input.setInputProcessor(inputMultiplexer);
-		assetManager.load();
 		setScreen(new IntroScreen(this));
+		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
+		loadBeatmapsTask = asyncExecutor.submit(() -> {
+			json = new Json();
+			random = new Random();
+			gameIO = new GameIO();
+			gameIO.setup(gameName);
+			modManager = new ModManager(this);
+			beatmapUtils = new BeatmapUtils();
+			beatMapStore = new BeatMapStore(this);
+			modManager.addListener(beatMapStore);
+			beatmapUtils.setBeatMapStore(beatMapStore);
+			oszParser = new OSZParser(gameIO, beatMapStore);
+			beatMapStore.setOszParser(oszParser);
+			beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
+			oszParser.parseImportDirectory();
+			beatMapStore.loadCache();
+			beatMapStore.loadAllBeatmaps();
+			beatmapManager.randomizeCurrentBeatmapSet();
+			return null;
+		});
+		assetManager.load();
 	}
 
 	@Override
@@ -154,21 +178,9 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		if (assetManager.update()) {
 			loadedAllAssets = true;
 			Screen currentScreen = getScreen();
-			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen) {
+			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen && loadBeatmapsTask.isDone()) {
 				canSwitchIntroScreen = false;
 				float delta = Gdx.graphics.getDeltaTime();
-				asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
-				json = new Json();
-				random = new Random();
-				gameIO = new GameIO();
-				gameIO.setup(gameName);
-				modManager = new ModManager(this);
-				beatmapUtils = new BeatmapUtils();
-				beatMapStore = new BeatMapStore(gameIO, json, beatmapUtils);
-				beatmapUtils.setBeatMapStore(beatMapStore);
-				oszParser = new OSZParser(gameIO, beatMapStore);
-				beatMapStore.setOszParser(oszParser);
-				beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
 				backgroundStage = new Stage(viewport, batch);
 				skinManager = new SkinManager(this);
 				shapeRenderer = new BuffedShapeRenderer();
@@ -193,12 +205,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				backgroundStage.addActor(workingBackground);
 				beatmapManager.addListener(workingBackground);
 				beatmapManager.addListener(beatFactory);
-				oszParser.parseImportDirectory();
-				beatMapStore.loadCache();
-				beatMapStore.loadAllBeatmaps();
-				beatmapManager.randomizeCurrentBeatmapSet();
 				skinManager.changeSkin(skinManager.getDefaultDir());
-				setSwitchFromIntroScreenTask = new ClockTask(delta) {
+				setSwitchFromIntroScreenTask = new ClockTask(delta * 2) {
 					@Override
 					public void run() {
 						((IntroScreen) currentScreen).setCanSwitchScreen(true);

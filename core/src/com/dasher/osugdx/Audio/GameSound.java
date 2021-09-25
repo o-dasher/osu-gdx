@@ -4,21 +4,22 @@ package com.dasher.osugdx.Audio;
 import com.badlogic.gdx.audio.Sound;
 
 class GameSound implements Sound {
-    private final float soundVolume = 1;
+    private final AudioFactory audioFactory;
     private final Sound sound;
 
-    public GameSound(Sound sound) {
+    public GameSound(Sound sound, AudioFactory audioFactory) {
         this.sound = sound;
+        this.audioFactory = audioFactory;
     }
 
     @Override
     public long play() {
-        return sound.play(soundVolume);
+        return sound.play(audioFactory.soundVolume);
     }
 
     @Override
     public long play(float volume) {
-        return sound.play(soundVolume * volume);
+        return sound.play(audioFactory.soundVolume * volume);
     }
 
     @Override
@@ -28,12 +29,12 @@ class GameSound implements Sound {
 
     @Override
     public long loop() {
-        return sound.loop(soundVolume);
+        return sound.loop(audioFactory.soundVolume);
     }
 
     @Override
     public long loop(float volume) {
-        return sound.loop(volume);
+        return sound.loop(audioFactory.soundVolume * volume);
     }
 
     @Override
@@ -88,7 +89,7 @@ class GameSound implements Sound {
 
     @Override
     public void setVolume(long soundId, float volume) {
-        sound.setVolume(soundId, volume);
+        sound.setVolume(soundId, audioFactory.soundVolume * volume);
     }
 
     @Override

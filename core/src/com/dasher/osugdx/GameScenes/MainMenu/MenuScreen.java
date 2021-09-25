@@ -11,10 +11,14 @@ import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
+import com.dasher.osugdx.osu.Mods.ModManagerListener;
+
 import org.jetbrains.annotations.NotNull;
 
+import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
-public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
+
+public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, ModManagerListener {
     private MainLogo menuLogo;
     private OverlayLogo logoOverlay;
     private Stage menuStage;
@@ -29,6 +33,8 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private final Texture optionsButtonTex;
     private final Texture exitButtonTex;
     private final Screen previousScreen;
+    private boolean canSwitchToSoundSelectScreen;
+    private boolean completedImport;
 
     public MenuScreen(@NotNull OsuGame game, Screen previousScreen) {
         super(game);
@@ -68,9 +74,17 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
 
         if (previousScreen instanceof IntroScreen) {
             beatmapManager.startMusicPlaying();
+            completedImport = true;
         } else {
+            modManager.addListener(this);
             asyncExecutor.submit(() -> {
+                int previousSize = beatMapStore.getBeatMapSets().size;
                 oszParser.parseImportDirectory();
+                if (beatMapStore.getBeatMapSets().size == previousSize) {
+                    completedImport = true;
+                } else {
+                    beatMapStore.saveCache();
+                }
                 return null;
             });
         }
@@ -82,9 +96,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     }
 
     public void toSoundSelectScreen() {
-        if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {
-            this.switchScreen(new SoundSelectScreen(game));
-        }
+        canSwitchToSoundSelectScreen = true;
     }
 
     @Override
@@ -107,6 +119,12 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         overlayStage.draw();
 
         renderFade(delta);
+
+        if (completedImport && canSwitchToSoundSelectScreen) {
+            if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {
+                this.switchScreen(new SoundSelectScreen(game));
+            }
+        }
     }
 
     @Override
@@ -134,5 +152,15 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         menuStage.dispose();
         overlayStage.dispose();
         buttonsStage.dispose();
+    }
+
+    @Override
+    public void onBeatmapCalculated(Beatmap beatmap) {
+
+    }
+
+    @Override
+    public void onCompleteCalculation() {
+        completedImport = true;
     }
 }
