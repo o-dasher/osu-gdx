@@ -62,7 +62,12 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
             currentTimingPointIndex++;
         }
 
-        TimingPoint newTimingPoint = timingPoints.get(currentTimingPointIndex);
+        TimingPoint newTimingPoint;
+        if (currentTimingPointIndex < timingPoints.size) {
+            newTimingPoint = timingPoints.get(currentTimingPointIndex);
+        } else {
+            return;
+        }
 
         if (!newTimingPoint.isInherited()) {
             currentTimingPoint = newTimingPoint;

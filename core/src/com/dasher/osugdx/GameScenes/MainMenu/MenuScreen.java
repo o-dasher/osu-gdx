@@ -28,6 +28,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private final Texture playButtonTex;
     private final Texture optionsButtonTex;
     private final Texture exitButtonTex;
+    private final Screen previousScreen;
 
     public MenuScreen(@NotNull OsuGame game, Screen previousScreen) {
         super(game);
@@ -39,12 +40,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         playButtonTex = assetManager.get(assetManager.textures.playButton);
         optionsButtonTex = assetManager.get(assetManager.textures.optionsButton);
         exitButtonTex = assetManager.get(assetManager.textures.exitButton);
-
-        /*
-        if (!(previousScreen instanceof IntroScreen)) {
-            oszParser.parseImportDirectory();
-        }
-         */
+        this.previousScreen = previousScreen;
     }
 
     @Override
@@ -70,8 +66,13 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         buttonsStage.addActor(optionsButton);
         buttonsStage.addActor(exitButton);
 
-        if (!beatmapManager.getCurrentMusic().isPlaying()) {
+        if (previousScreen instanceof IntroScreen) {
             beatmapManager.startMusicPlaying();
+        } else {
+            asyncExecutor.submit(() -> {
+                oszParser.parseImportDirectory();
+                return null;
+            });
         }
 
         beatFactory.addListener(menuLogo);

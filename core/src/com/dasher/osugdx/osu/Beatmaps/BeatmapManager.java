@@ -176,15 +176,18 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     public Beatmap getCurrentMap() {
         return currentMap;
     }
+    private boolean isProcessingDiff = false;
 
     public void setCurrentMap(Beatmap newMap) {
-        if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
-            toast.log("Abnormal beatmap selected!");
-            beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
-            if (currentBeatmapSet.beatmaps.isEmpty()) {
-                handleEmptyBeatmapSet(currentBeatmapSet);
-            } else {
-                setCurrentMap(currentBeatmapSet.beatmaps.first());
+        if (!isProcessingDiff) {
+            if (!currentBeatmapSet.beatmaps.contains(newMap, true)) {
+                toast.log("Abnormal beatmap selected!");
+                beatMapStore.deleteBeatmapFile(currentBeatmapSet, null);
+                if (currentBeatmapSet.beatmaps.isEmpty()) {
+                    handleEmptyBeatmapSet(currentBeatmapSet);
+                } else {
+                    setCurrentMap(currentBeatmapSet.beatmaps.first());
+                }
             }
         }
         onPreBeatmapChange();
@@ -199,6 +202,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         currentMap = newMap;
         long time = TimeUtils.millis();
         game.asyncExecutor.submit(() -> {
+            isProcessingDiff = true;
             currentMap = reInitBeatmap(newMap, isReplayingBeatmapMusic);
             for (int i = 0; i < currentBeatmapSet.beatmaps.size; i++) {
                 Beatmap beatmap = currentBeatmapSet.beatmaps.get(i);
@@ -236,18 +240,13 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
         if (currentMusic != null && !isReplayingBeatmapMusic) {
-            currentMusic.play();
-            if (game.getScreen() instanceof UIScreen) {
-                game.asyncExecutor.submit(() -> {
-                    try {
-                        currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        System.out.println("MAIN MUSIC SETPOSITION EXCEPTION");
-                    }
-                    return currentMusic;
-                });
-            }
+            game.asyncExecutor.submit(() -> {
+                currentMusic.play();
+                if (game.getScreen() instanceof UIScreen) {
+                    currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                }
+                return currentMusic;
+            });
         }
     }
 

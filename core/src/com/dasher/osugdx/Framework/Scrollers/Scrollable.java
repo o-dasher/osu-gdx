@@ -40,6 +40,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private final IdentityMap<Actor, ScrollItemData> baseData = new IdentityMap<>();
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
+    private float layoutTime = 0;
 
     public Scrollable() {
         super();
@@ -114,20 +115,27 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
             scrollItemData.baseVec.y = y;
             currentActor.setPosition(x, y);
             baseData.put(currentActor, scrollItemData);
-            currentActor.addAction(
-                    Actions.sequence(
-                            Actions.run(() -> isLayouting = true),
-                            Actions.moveBy(
-                                    0,
-                                    height * (items.size - i)
-                            ),
-                            Actions.run(() -> {
-                                isLayouting = false;
-                                scrollItemData.baseVec.x = currentActor.getX();
-                                scrollItemData.baseVec.y = currentActor.getY();
-                            })
-                    )
-            );
+            float hBy = height * (items.size - i);
+            if (layoutTime <= 0) {
+                isLayouting = true;
+                currentActor.setPosition(currentActor.getX(), currentActor.getY() + hBy);
+                isLayouting = false;
+            } else {
+                currentActor.addAction(
+                        Actions.sequence(
+                                Actions.run(() -> isLayouting = true),
+                                Actions.moveBy(
+                                        0,
+                                        hBy
+                                ),
+                                Actions.run(() -> {
+                                    isLayouting = false;
+                                    scrollItemData.baseVec.x = currentActor.getX();
+                                    scrollItemData.baseVec.y = currentActor.getY();
+                                })
+                        )
+                );
+            }
         }
     }
 

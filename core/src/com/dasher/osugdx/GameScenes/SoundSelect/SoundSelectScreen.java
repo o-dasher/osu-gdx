@@ -57,7 +57,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setXMultiplier(0.9f);
         beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.setStairCaseMultiplier(25);
-        beatmapSetSelectorStage.setStairCaseAdjustTime(0.5f);
+        beatmapSetSelectorStage.setStairCaseAdjustTime(0.3f);
         beatmapSetSelectorStage.setHoverAbleItems(true);
         beatmapSetSelectorStage.setHoverXMultiplier(0.05f);
         resetSelectors();
@@ -161,7 +161,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.WebGL) {
             updateSelectorThumbnails(delta);
         }
-        
+
         if (InputHelper.isBackPressed()) {
             if (!game.calledToSwitchScreen) {
                 switchScreen(new MenuScreen(game, this));
