@@ -53,7 +53,7 @@ public class BeatmapSetSelector extends Selector {
 
     @Override
     public boolean mapChangeCondition() {
-        return !(isThisMapSelected()) && !soundSelectScreen.isScrollingToNextBeatmapSet;
+        return !(isThisMapSelected()) && !soundSelectScreen.isMovingSelectors();
     }
 
     public void layoutBeatmaps() {

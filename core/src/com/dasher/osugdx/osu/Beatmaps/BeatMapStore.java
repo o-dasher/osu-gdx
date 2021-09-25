@@ -21,7 +21,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class BeatMapStore implements ModManagerListener {
-    private final int VERSION = 63;
+    private final int VERSION = 64;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -245,7 +245,6 @@ public class BeatMapStore implements ModManagerListener {
                 deleteBeatmapFile(null, beatmapFile);
                 return;
             }
-            beatMap.freeResources();
             beatMapSet.beatmaps.add(beatMap);
             logBeatmapLoaded(beatMap);
         }
@@ -309,7 +308,7 @@ public class BeatMapStore implements ModManagerListener {
         return "New BeatmapSet: " + beatMapSet.beatmapSetFolderPath;
     }
 
-    private boolean isSavingCache = false;
+    protected boolean isSavingCache = false;
 
     public void saveCache() {
         isSavingCache = true;
@@ -405,8 +404,7 @@ public class BeatMapStore implements ModManagerListener {
             for (int i = 0; i < array.size; i++) {
                 BeatMapSet beatmapSet = array.get(i);
                 for (Beatmap beatmap: beatmapSet.beatmaps) {
-                    Beatmap copy = game.beatmapManager.reInitBeatmap(beatmap, false);
-                    copy.setBaseStars(0);
+                    Beatmap copy = game.beatmapManager.reInitBeatmap(beatmap);
                     copy.freeResources();
                 }
             }
@@ -414,5 +412,9 @@ public class BeatMapStore implements ModManagerListener {
             isSavingCache = false;
             System.out.println("Saved beatmap cache successfully");
         }
+    }
+
+    public boolean isSavingCache() {
+        return isSavingCache;
     }
 }

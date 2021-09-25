@@ -20,24 +20,31 @@ import java.util.zip.ZipInputStream;
  * directory;
  **/
 public class OSZParser {
-    private final com.dasher.osugdx.osu.Beatmaps.BeatMapStore beatMapStore;
+    private BeatMapSet lastImportedBeatmapset;
+    private final BeatMapStore beatMapStore;
+    private final BeatmapManager beatmapManager;
     private final FileHandle beatmapsFolder;
     private final FileHandle importsFolder;
     private boolean isImportingImportDirectory;
 
-    public OSZParser(@NotNull GameIO gameIO, BeatMapStore beatMapStore) {
+    public OSZParser(@NotNull GameIO gameIO, BeatMapStore beatMapStore, BeatmapManager beatmapManager) {
         this.beatmapsFolder = gameIO.getSongsDir();
         this.importsFolder = gameIO.getImportDir();
+        this.beatmapManager = beatmapManager;
         this.beatMapStore = beatMapStore;
     }
 
     public void parseImportDirectory() {
+        lastImportedBeatmapset = null;
         isImportingImportDirectory = true;
         for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
             System.out.println("Importing: " + file.nameWithoutExtension());
             if (parseOSZ(file) != null) {
                 System.out.println(file.nameWithoutExtension() + " imported!");
             }
+        }
+        if (lastImportedBeatmapset != null) {
+            beatmapManager.setCurrentBeatmapSet(lastImportedBeatmapset);
         }
         isImportingImportDirectory = false;
     }
@@ -104,7 +111,7 @@ public class OSZParser {
 
         if (beatmapSetOsz.type() == Files.FileType.External) {
             beatmapSetOsz.delete();
-            beatMapStore.loadBeatmapSet(Gdx.files.external(folderPath));
+            lastImportedBeatmapset = beatMapStore.loadBeatmapSet(Gdx.files.external(folderPath));
         }
 
         return folderFile;

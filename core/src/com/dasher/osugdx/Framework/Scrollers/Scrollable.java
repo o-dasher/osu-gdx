@@ -16,9 +16,11 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IdentityMap;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -41,6 +43,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
     private float layoutTime = 0;
+    private float minStairCaseAdjustTime = 0;
 
     public Scrollable() {
         super();
@@ -75,6 +78,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 return false;
             }
         });
+        minStairCaseAdjustTime = stairCaseAdjustTime / 10;
     }
 
     public void setYMultiplier(float yMultiplier) {
@@ -90,7 +94,10 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     public void layout() {
+        getRoot().getActions().clear();
         baseData.clear();
+        isFirstStairCaseX = true;
+        isFirstStairCaseY = true;
         for (int i = 0; i < items.size; i++) {
             T currentActor = items.get(i);
             currentActor.clearActions();
@@ -109,7 +116,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     x = CenteringHelper.getCenterX(currentActor.getWidth());
                     break;
             }
-
             ScrollItemData scrollItemData = new ScrollItemData();
             scrollItemData.baseVec.x = x;
             scrollItemData.baseVec.y = y;
@@ -211,10 +217,23 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                             downActors.add(item);
                         }
                     }
+                    if (setNotLayoutingStaircaseTask != null) {
+                        setNotLayoutingStaircaseTask.update(delta);
+                    }
                     upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
                     downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
-                    stairCaseEffect(upActors);
-                    stairCaseEffect(downActors);
+                    float realAdjustTime = stairCaseAdjustTime;
+                    if (isFirstStairCaseX || isFirstStairCaseY) {
+                        realAdjustTime = minStairCaseAdjustTime;
+                        if (isFirstStairCaseX) {
+                            isFirstStairCaseX = false;
+                        }
+                        if (isFirstStairCaseY) {
+                            isFirstStairCaseY = false;
+                        }
+                    }
+                    stairCaseEffect(upActors, realAdjustTime);
+                    stairCaseEffect(downActors, realAdjustTime);
                 }
             }
 
@@ -235,18 +254,9 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     private final Vector2 nextStairCaseCoordinate = new Vector2();
+    private ClockTask setNotLayoutingStaircaseTask;
 
-    private void stairCaseEffect(@NotNull Array<T> itemsPart) {
-        float realAdjustTime = stairCaseAdjustTime;
-        if (isFirstStairCaseX || isFirstStairCaseY) {
-            realAdjustTime = 0;
-            if (isFirstStairCaseX) {
-                isFirstStairCaseX = false;
-            }
-            if (isFirstStairCaseY) {
-                isFirstStairCaseY = false;
-            }
-        }
+    private void stairCaseEffect(@NotNull Array<T> itemsPart, float realAdjustTime) {
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
             ScrollItemData itemData = baseData.get(actor);
@@ -263,6 +273,23 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
             actor.addAction(Actions.moveTo(nextStairCaseCoordinate.x, nextStairCaseCoordinate.y, realAdjustTime));
         }
+
+        /*
+        if (isStairCased) {
+            if (!isLayouting) {
+                if (setNotLayoutingStaircaseTask == null) {
+                    setNotLayoutingStaircaseTask = new ClockTask(realAdjustTime * 2) {
+                        @Override
+                        public void run() {
+                            System.out.print("AA");
+                            isLayouting = false;
+                        }
+                    };
+                }
+            }
+        }
+
+         */
     }
 
     public Array<T> getItems() {
@@ -298,7 +325,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     @Override
     public boolean pan(float x, float y, float deltaX, float deltaY) {
-        if (isNotLayouting()) {
+        if (!isLayouting) {
             float panScrollMultiplier = scrollMultiplier / 12.5f;
             float byX = isXScrollable? -(deltaX * panScrollMultiplier) : 0;
             float byY = isYScrollable? -(deltaY * panScrollMultiplier) : 0;
@@ -378,5 +405,9 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void setHoverYMultiplier(float hoverYMultiplier) {
         this.hoverYMultiplier = hoverYMultiplier;
+    }
+
+    public void setMinStairCaseAdjustTime(float minStairCaseAdjustTime) {
+        this.minStairCaseAdjustTime = minStairCaseAdjustTime;
     }
 }

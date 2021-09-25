@@ -1,5 +1,6 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 
-public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, ModManagerListener {
+public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     private MainLogo menuLogo;
     private OverlayLogo logoOverlay;
     private Stage menuStage;
@@ -34,7 +35,6 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, M
     private final Texture exitButtonTex;
     private final Screen previousScreen;
     private boolean canSwitchToSoundSelectScreen;
-    private boolean completedImport;
 
     public MenuScreen(@NotNull OsuGame game, Screen previousScreen) {
         super(game);
@@ -74,19 +74,9 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, M
 
         if (previousScreen instanceof IntroScreen) {
             beatmapManager.startMusicPlaying();
-            completedImport = true;
         } else {
-            modManager.addListener(this);
-            asyncExecutor.submit(() -> {
-                int previousSize = beatMapStore.getBeatMapSets().size;
-                oszParser.parseImportDirectory();
-                if (beatMapStore.getBeatMapSets().size == previousSize) {
-                    completedImport = true;
-                } else {
-                    beatMapStore.saveCache();
-                }
-                return null;
-            });
+            game.toast.log("Importing beatmaps please wait...");
+            oszParser.parseImportDirectory();
         }
 
         beatFactory.addListener(menuLogo);
@@ -120,7 +110,13 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, M
 
         renderFade(delta);
 
-        if (completedImport && canSwitchToSoundSelectScreen) {
+        /*
+        System.out.println(completedImport);
+        System.out.println(canSwitchToSoundSelectScreen);
+        System.out.println("IJJ");
+         */
+
+        if (!beatMapStore.isSavingCache() && canSwitchToSoundSelectScreen) {
             if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {
                 this.switchScreen(new SoundSelectScreen(game));
             }
@@ -152,15 +148,5 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic, M
         menuStage.dispose();
         overlayStage.dispose();
         buttonsStage.dispose();
-    }
-
-    @Override
-    public void onBeatmapCalculated(Beatmap beatmap) {
-
-    }
-
-    @Override
-    public void onCompleteCalculation() {
-        completedImport = true;
     }
 }
