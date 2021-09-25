@@ -311,6 +311,7 @@ public class BeatMapStore implements ModManagerListener {
     protected boolean isSavingCache = false;
 
     public void saveCache() {
+        System.out.println("Saving cache...");
         isSavingCache = true;
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
@@ -403,9 +404,13 @@ public class BeatMapStore implements ModManagerListener {
             Array<BeatMapSet> array = new Array<>(beatMapSets);
             for (int i = 0; i < array.size; i++) {
                 BeatMapSet beatmapSet = array.get(i);
-                for (Beatmap beatmap: beatmapSet.beatmaps) {
-                    Beatmap copy = game.beatmapManager.reInitBeatmap(beatmap);
-                    copy.freeResources();
+                for (int j = 0; i < beatmapSet.beatmaps.size; j++) {
+                    Beatmap beatmap = beatmapSet.beatmaps.get(j);
+                    try {
+                        beatmapSet.beatmaps.set(i, (Beatmap) beatmap.clone());
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             libCacheFile.writeString(game.json.toJson(array), false);

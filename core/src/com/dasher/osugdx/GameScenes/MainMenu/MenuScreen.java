@@ -1,6 +1,6 @@
 package com.dasher.osugdx.GameScenes.MainMenu;
 
-import com.badlogic.gdx.Gdx;
+
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -12,11 +12,8 @@ import com.dasher.osugdx.GameScenes.ScreenWithBackgroundMusic;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
-import com.dasher.osugdx.osu.Mods.ModManagerListener;
 
 import org.jetbrains.annotations.NotNull;
-
-import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 
 public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
@@ -116,7 +113,7 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         System.out.println("IJJ");
          */
 
-        if (!beatMapStore.isSavingCache() && canSwitchToSoundSelectScreen) {
+        if (canSwitchToSoundSelectScreen) {
             if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {
                 this.switchScreen(new SoundSelectScreen(game));
             }

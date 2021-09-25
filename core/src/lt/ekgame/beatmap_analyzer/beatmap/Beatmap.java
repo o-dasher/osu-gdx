@@ -11,7 +11,7 @@ import lt.ekgame.beatmap_analyzer.difficulty.Difficulty;
 import lt.ekgame.beatmap_analyzer.difficulty.DifficultyCalculator;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
-public abstract class Beatmap {
+public abstract class Beatmap implements Cloneable {
 	public String beatmapFilePath = "";
 	protected BeatmapGenerals generals;
 	protected BeatmapEditorState editorState;
@@ -185,6 +185,11 @@ public abstract class Beatmap {
 
 	public void setTimingPoints(Array<TimingPoint> timingPoints) {
 		this.timingPoints = timingPoints;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 
 	@Override
