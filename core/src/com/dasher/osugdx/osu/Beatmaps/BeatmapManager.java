@@ -15,6 +15,7 @@ import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
 import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener>, com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener {
@@ -22,7 +23,8 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     private final OsuGame game;
     private final PlatformToast toast;
     private final com.dasher.osugdx.osu.Beatmaps.BeatmapUtils beatmapUtils;
-    private final Array<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener> beatmapManagerListeners = new Array<>();
+    private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
+    private final Array<TimingPoint> currentTimingPoints = new Array<>();
     private com.dasher.osugdx.osu.Beatmaps.BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
     private String previousBeatmapSetFolder = "";
@@ -80,25 +82,23 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
         if (beatmapFile.exists()) {
             if (!partial) {
+                currentTimingPoints.clear();
                 newMap = beatmapUtils.createMap(
                         beatmapFile,
                         true, true, true,
                         true, true, true
                 );
+                currentTimingPoints.addAll(newMap.getTimingPoints());
             } else {
                 System.out.println("Set beatmap data from cache");
                 newMap = beatmap;
-                newMap.setEditorState(beatmap.getEditorState());
-                newMap.setDifficulties(beatmap.getDifficultySettings());
-                newMap.setGenerals(beatmap.getGenerals());
-                newMap.setMetadata(beatmap.getMetadata());
-                newMap.setBaseStars(beatmap.getBaseStars());
+                newMap.setTimingPoints(currentTimingPoints);
             }
         }
         return newMap;
     }
 
-    private void reInitBeatmapSet(@NotNull com.dasher.osugdx.osu.Beatmaps.BeatMapSet beatMapSet) {
+    private void reInitBeatmapSet(@NotNull BeatMapSet beatMapSet) {
         Array<String> invalidPaths = new Array<>();
         for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
             Beatmap beatmap = beatMapSet.beatmaps.get(i);
@@ -116,14 +116,15 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         }
     }
 
-    private void setupMusic(@NotNull Beatmap newMap) {
+    // Return whether it's the same music repeating itself
+    private boolean setupMusic(@NotNull Beatmap newMap) {
         String newFolder = currentBeatmapSet.beatmapSetFolderPath + "/";
         if (newMap.getGenerals() == null) {
             beatMapStore.deleteBeatmapFile(null, Gdx.files.external(newMap.beatmapFilePath));
             if (game.getScreen() instanceof SoundSelectScreen) {
                 game.getScreen().show();
             }
-            return;
+            return false;
         }
 
         String newMusicPath = newFolder + newMap.getGenerals().getAudioFileName();
@@ -169,6 +170,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         }
 
         previousBeatmapSetFolder = newFolder;
+        return isReplayingBeatmapMusic;
     }
 
     public Beatmap getCurrentMap() {
@@ -185,11 +187,18 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
         }
+        onPreBeatmapChange();
+        boolean isReplayingBeatmapMusic = setupMusic(newMap);
         if (currentMap != null) {
-            currentMap.getTimingPoints().clear();
+            if (!isReplayingBeatmapMusic) {
+                if (currentMap.getTimingPoints() != null) {
+                    System.out.println("CLEAR");
+                    currentMap.getTimingPoints().clear();
+                }
+            }
         }
-        setupMusic(newMap);
-        currentMap = reInitBeatmap(newMap, false);
+        currentMap = newMap;
+        currentMap = reInitBeatmap(newMap, isReplayingBeatmapMusic);
         if (currentMap == null) {
             randomizeCurrentBeatmapSet();
         }
@@ -202,7 +211,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         isFirstBeatmapLoaded = true;
     }
 
-    private void handleEmptyBeatmapSet(com.dasher.osugdx.osu.Beatmaps.BeatMapSet beatMapSet) {
+    private void handleEmptyBeatmapSet(BeatMapSet beatMapSet) {
         beatMapStore.deleteBeatmapFile(beatMapSet, null);
         randomizeCurrentBeatmapSet();
         if (game.getScreen() instanceof SoundSelectScreen) {
@@ -219,7 +228,12 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
             currentMusic.play();
             if (game.getScreen() instanceof UIScreen) {
                 game.asyncExecutor.submit(() -> {
-                    currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                    try {
+                        currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("MAIN MUSIC SETPOSITION EXCEPTION");
+                    }
                     return currentMusic;
                 });
             }
@@ -239,27 +253,27 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     }
 
     @Override
-    public Array<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener> getListeners() {
+    public Array<BeatmapManagerListener> getListeners() {
         return beatmapManagerListeners;
     }
 
     @Override
     public void onNewBeatmap(Beatmap beatmap) {
-        for (com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener listener : beatmapManagerListeners) {
+        for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onNewBeatmap(beatmap);
         }
     }
 
     @Override
-    public void onNewBeatmapSet(com.dasher.osugdx.osu.Beatmaps.BeatMapSet beatMapSet) {
-        for (com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener listener : beatmapManagerListeners) {
+    public void onNewBeatmapSet(BeatMapSet beatMapSet) {
+        for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onNewBeatmapSet(beatMapSet);
         }
     }
 
     @Override
     public void onPreBeatmapChange() {
-        for (com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener listener : beatmapManagerListeners) {
+        for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onPreBeatmapChange();
         }
     }

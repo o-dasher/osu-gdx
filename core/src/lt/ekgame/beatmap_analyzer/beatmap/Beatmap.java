@@ -183,6 +183,10 @@ public abstract class Beatmap {
 		this.baseStars = baseStars;
 	}
 
+	public void setTimingPoints(Array<TimingPoint> timingPoints) {
+		this.timingPoints = timingPoints;
+	}
+
 	@Override
 	public String toString() {
 		return

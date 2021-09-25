@@ -141,6 +141,10 @@ public class BeatmapSelector extends Selector implements BeatmapManagerListener,
         return soundSelectScreen.selectedBeatmap;
     }
 
+    @Override
+    public void onNewBeatmap(Beatmap beatmap) {
+        super.onNewBeatmap(beatmap);
+    }
 
     @Override
     public void onBeatmapCalculated(Beatmap beatmap) {
