@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
@@ -80,6 +81,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         if (isBaseShowing) {
             return;
         }
+        long time = TimeUtils.millis();
         isBaseShowing = true;
         //beatmapSetSelectors.sort((a, b) ->
         //        (int) (b.beatMapSet.beatmaps.get(b.beatMapSet.beatmaps.size - 1).getBaseStars()
@@ -104,6 +106,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.layout();
         scrollToSelectedBeatmapSet();
         isBaseShowing = false;
+        System.out.println(TimeUtils.timeSinceMillis(time)+"ms to rearrange selectors");
     }
 
     public boolean scrollToSelectedBeatmapSet() {
@@ -158,7 +161,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.WebGL) {
             updateSelectorThumbnails(delta);
         }
-
+        
         if (InputHelper.isBackPressed()) {
             if (!game.calledToSwitchScreen) {
                 switchScreen(new MenuScreen(game, this));

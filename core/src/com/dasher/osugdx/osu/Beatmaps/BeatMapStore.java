@@ -41,7 +41,7 @@ public class BeatMapStore {
         this.json = json;
         this.beatmapUtils = beatmapUtils;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
-        libCacheFile = Gdx.files.external(songsDir.path() + "/.beatmap_db");
+        libCacheFile = Gdx.files.local(".beatmap_db");
         beatmapStoreCreationTime = System.nanoTime();
         specialFiles.add(libCacheFile.name());
         setupCaching();

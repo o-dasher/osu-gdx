@@ -13,6 +13,7 @@ import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerReferencesListener;
 import com.dasher.osugdx.osu.Mods.ModManagerListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
-public class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener {
+public class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener, BeatmapManagerReferencesListener {
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
     private final Label diffLabel;
@@ -151,5 +152,15 @@ public class BeatmapSelector extends Selector implements BeatmapManagerListener,
         if (beatmap.beatmapFilePath.equals(this.beatmap.beatmapFilePath)) {
             generateStars();
         }
+    }
+
+    @Override
+    public Beatmap getBeatmapReference() {
+        return this.beatmap;
+    }
+
+    @Override
+    public void setBeatmapReference(Beatmap beatmap) {
+        this.beatmap = beatmap;
     }
 }

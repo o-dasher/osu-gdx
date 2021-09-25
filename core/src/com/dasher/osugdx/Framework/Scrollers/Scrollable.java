@@ -185,7 +185,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 upperBound = Math.max(upperBound, item.getY());
                 lowerBound = Math.min(lowerBound, item.getY());
                 item.setDebug(false);
-                if (ActorHelper.actorIsVisible(item) && isStairCased) {
+                if (item.getStage() != null && ActorHelper.actorIsVisible(item) && isStairCased) {
                     visibleActors.add(item);
                 }
             }

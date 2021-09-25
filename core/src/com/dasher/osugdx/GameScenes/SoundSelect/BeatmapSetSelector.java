@@ -67,6 +67,7 @@ public class BeatmapSetSelector extends Selector {
                         beatMapSet, beatmap, inactiveBeatmapColor
             );
             game.modManager.addListener(beatmapSelector);
+            game.beatmapManager.addListener(beatmapSelector);
             beatmapSelectors.add(beatmapSelector);
         }
         beatmapSelectors.sort((o1, o2) ->

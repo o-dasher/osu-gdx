@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
@@ -18,7 +19,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
-public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener>, com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener {
+public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener {
     private final com.dasher.osugdx.osu.Beatmaps.BeatMapStore beatMapStore;
     private final OsuGame game;
     private final PlatformToast toast;
@@ -67,7 +68,6 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
             if (currentBeatmapSet.beatmaps.isEmpty()) {
                 handleEmptyBeatmapSet(currentBeatmapSet);
             } else {
-                System.out.println(currentBeatmapSet.beatmaps.first().getMetadata().getTitle());
                 setCurrentMap(currentBeatmapSet.beatmaps.first());
             }
         }
@@ -192,13 +192,24 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         if (currentMap != null) {
             if (!isReplayingBeatmapMusic) {
                 if (currentMap.getTimingPoints() != null) {
-                    System.out.println("CLEAR");
                     currentMap.getTimingPoints().clear();
                 }
             }
         }
         currentMap = newMap;
-        currentMap = reInitBeatmap(newMap, isReplayingBeatmapMusic);
+        long time = TimeUtils.millis();
+        game.asyncExecutor.submit(() -> {
+            currentMap = reInitBeatmap(newMap, isReplayingBeatmapMusic);
+            for (int i = 0; i < currentBeatmapSet.beatmaps.size; i++) {
+                Beatmap beatmap = currentBeatmapSet.beatmaps.get(i);
+                if (beatmap.beatmapFilePath.equals(currentMap.beatmapFilePath)) {
+                    currentBeatmapSet.beatmaps.set(i, beatmap);
+                }
+            }
+            setBeatmapReference(currentMap);
+            System.out.println(TimeUtils.timeSinceMillis(time) + "ms to load beatmap");
+            return null;
+        });
         if (currentMap == null) {
             randomizeCurrentBeatmapSet();
         }
@@ -260,7 +271,18 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     @Override
     public void onNewBeatmap(Beatmap beatmap) {
         for (BeatmapManagerListener listener : beatmapManagerListeners) {
+            updateListenerReference(listener, beatmap);
             listener.onNewBeatmap(beatmap);
+        }
+    }
+
+    public void updateListenerReference(BeatmapManagerListener listener, Beatmap beatmap) {
+        if (listener instanceof BeatmapManagerReferencesListener) {
+            if (beatmap.beatmapFilePath.equals(((BeatmapManagerReferencesListener) listener)
+                    .getBeatmapReference().beatmapFilePath)
+            ) {
+                ((BeatmapManagerReferencesListener) listener).setBeatmapReference(beatmap);
+            }
         }
     }
 
@@ -275,6 +297,19 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     public void onPreBeatmapChange() {
         for (BeatmapManagerListener listener : beatmapManagerListeners) {
             listener.onPreBeatmapChange();
+        }
+    }
+
+    @Override
+    public Beatmap getBeatmapReference() {
+        return null;
+    }
+
+    @Override
+    public void setBeatmapReference(Beatmap beatmap) {
+        // INDEXED BECAUSE ASYNCHRONOUS;
+        for (int i = 0; i < beatmapManagerListeners.size; i++) {
+            updateListenerReference(beatmapManagerListeners.get(i), beatmap);
         }
     }
 }
