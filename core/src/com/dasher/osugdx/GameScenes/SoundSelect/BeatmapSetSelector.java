@@ -23,9 +23,9 @@ public class BeatmapSetSelector extends Selector {
     public BeatmapSetSelector(
             OsuGame game, @NotNull Skin skin, BeatMapSet beatMapSet, BeatmapManager beatmapManager,
             BitmapFont font, Label.LabelStyle labelStyle,
-            SoundSelectScreen soundSelectScreen
+            SoundSelectScreen soundSelectScreen, boolean allowThumbnails
     ) {
-        super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle);
+        super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle, allowThumbnails);
         this.beatMapSet = beatMapSet;
         initLabels();
         adjustColor();
@@ -64,7 +64,7 @@ public class BeatmapSetSelector extends Selector {
             Beatmap beatmap = beatMapSet.beatmaps.get(i);
             BeatmapSelector beatmapSelector = new BeatmapSelector(
                     game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
-                        beatMapSet, beatmap, inactiveBeatmapColor
+                        beatMapSet, beatmap, inactiveBeatmapColor, allowThumbnails
             );
             game.modManager.addListener(beatmapSelector);
             game.beatmapManager.addListener(beatmapSelector);

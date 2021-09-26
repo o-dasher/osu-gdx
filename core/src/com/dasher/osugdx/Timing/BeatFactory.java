@@ -47,6 +47,7 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
         Array<TimingPoint> timingPoints = beatmapManager.getCurrentMap().getTimingPoints();
 
         if (timingPoints == null || timingPoints.isEmpty()) {
+            System.out.println("Ignoring timing points of beatmap with no timing points.");
             return;
         }
 

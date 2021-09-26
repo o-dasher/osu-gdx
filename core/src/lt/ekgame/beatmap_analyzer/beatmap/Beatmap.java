@@ -35,9 +35,9 @@ public abstract class Beatmap implements Cloneable {
 		this.timingPoints = timingPoints;
 	}
 
-	public void calculateBase() {
+	public void calculateBase(Mods mods) {
 		if (!calculatedBaseDiff) {
-			Difficulty baseDifficulty = getDifficulty();
+			Difficulty baseDifficulty = getDifficulty(mods);
 			baseStars = baseDifficulty.getStars();
 			baseCombo = baseDifficulty.getMaxCombo();
 			calculatedBaseDiff = true;
@@ -46,7 +46,7 @@ public abstract class Beatmap implements Cloneable {
 
 	public void freeResources() {
 		if (getHitObjects() != null) {
-			calculateBase();
+			calculateBase(Mods.NOMOD);
 			getHitObjects().clear();
 		}
 		for (BreakPeriod breakPeriod: breaks) {
@@ -54,6 +54,8 @@ public abstract class Beatmap implements Cloneable {
 				breaks.removeValue(breakPeriod, true);
 			}
 		}
+		difficulties = null;
+		editorState = null;
 		timingPoints = null;
 	}
 

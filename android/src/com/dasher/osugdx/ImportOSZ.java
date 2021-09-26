@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapStore;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapUtils;
 import com.dasher.osugdx.osu.Beatmaps.OSZParser;
 import com.dasher.osugdx.IO.GameIO;
@@ -33,7 +34,8 @@ public class ImportOSZ extends Activity {
             // TODO: BROKEN
             BeatMapStore beatMapStore = new BeatMapStore(new OsuGame(toast));
             beatmapUtils.setBeatMapStore(beatMapStore);
-            OSZParser oszParser = new OSZParser(gameIO, beatMapStore);
+            BeatmapManager beatmapManager = new BeatmapManager(new OsuGame(toast), beatMapStore, toast, beatmapUtils);
+            OSZParser oszParser = new OSZParser(gameIO, beatMapStore, beatmapManager);
             beatMapStore.setOszParser(oszParser);
             oszParser.parseOSZ(file);
             Toast.makeText(this, "Imported BeatmapSet: " + file.path(), Toast.LENGTH_SHORT).show();

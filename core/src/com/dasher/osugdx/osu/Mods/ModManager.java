@@ -13,7 +13,6 @@ import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class ModManager implements ModManagerListener, Listenable<ModManagerListener> {
     private final OsuGame game;
-    private boolean shouldStopBeatmapCalculation;
     private final Array<ModManagerListener> listeners = new Array<>();
 
     public ModManager(OsuGame game) {
@@ -21,43 +20,44 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
     }
 
     public void calculateBeatmaps(Mods mods) {
-        shouldStopBeatmapCalculation = true;
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                shouldStopBeatmapCalculation = false;
-                Array<BeatMapSet> beatMapSets = game.beatMapStore.getBeatMapSets();
-                game.asyncExecutor.submit(() -> {
-                    for (int i = 0; i < beatMapSets.size; i++) {
-                        if (shouldStopBeatmapCalculation) {
-                            return null;
+        game.asyncExecutor.submit(() -> {
+            Array<BeatMapSet> beatMapSets = game.beatMapStore.getBeatMapSets();
+            for (int i = 0; i < beatMapSets.size; i++) {
+                BeatMapSet beatMapSet = beatMapSets.get(i);
+                for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
+                    Beatmap beatmap = beatMapSet.beatmaps.get(j);
+                    if (beatmap.getHitObjects().isEmpty()) {
+                        Beatmap calculated = game.beatmapUtils.createMap(
+                                Gdx.files.external(beatmap.beatmapFilePath),
+                                true, true,
+                                true, true,
+                                true, true
+                        );
+                        if (calculated.getHitObjects().notEmpty()) {
+                            calculated.calculateBase(mods);
+                            beatmap.setBaseStars(calculated.getBaseStars());
+                            beatmap.setTimingPoints(calculated.getTimingPoints());
+                            System.out.println(beatmap.getMetadata().getTitleRomanized() + " recalculated");
                         }
-                        BeatMapSet beatMapSet = beatMapSets.get(i);
-                        for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
-                            Beatmap beatmap = beatMapSet.beatmaps.get(j);
-                            if (beatmap.getHitObjects().isEmpty()) {
-                                Beatmap calculated = game.beatmapUtils.createMap(
-                                        Gdx.files.external(beatmap.beatmapFilePath),
-                                        true, true,
-                                        true, true,
-                                        true, true
-                                );
-                                if (calculated.getHitObjects().notEmpty()) {
-                                    calculated.calculateBase();
-                                    beatmap.setBaseStars(calculated.getBaseStars());
-                                    beatmap.setTimingPoints(calculated.getTimingPoints());
-                                }
-                            } else {
-                                beatmap.calculateBase();
-                            }
-                            onBeatmapCalculated(beatmap);
-                        }
-                        onCompleteCalculation();
+                    } else {
+                        System.out.println(
+                                "Ignoring beatmap calculation of: "
+                                        + beatmap.getMetadata().getTitleRomanized() +
+                                        ", it already has objects"
+                        );
+                        beatmap.calculateBase(mods);
                     }
-                    return null;
-                });
+                    onBeatmapCalculated(beatmap);
+                }
             }
-        }, 1);
+            // i hate lambdas....
+            try {
+                onCompleteCalculation();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
     }
 
     @Override

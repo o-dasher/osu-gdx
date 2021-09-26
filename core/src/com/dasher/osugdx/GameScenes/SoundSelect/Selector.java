@@ -28,7 +28,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
 
 public abstract class Selector extends Group implements BeatmapManagerListener {
-    protected final GameImage thumbnail;
+    protected GameImage thumbnail = null;
     protected final OsuGame game;
     protected final GameImage menuBackground;
     protected final Skin skin;
@@ -42,21 +42,25 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
     protected final Array<Label> labels = new Array<>();
     protected final float labelScale = 0.5f;
     protected final float colorSelectTime = 0.25f;
+    protected boolean allowThumbnails;
 
     public Selector(
             OsuGame game, @NotNull Skin skin,
             BeatmapManager beatmapManager, SoundSelectScreen soundSelectScreen,
-            BitmapFont font, Label.LabelStyle labelStyle
+            BitmapFont font, Label.LabelStyle labelStyle, boolean allowThumbnails
     ) {
         super();
         this.labelStyle = labelStyle;
         this.game = game;
         this.font = font;
+        this.allowThumbnails = allowThumbnails;
         Sprite menuButtonBG = skin.menuButtonBG.getSprite();
         float w = 699;
         float h = 103;
         this.menuBackground = new GameImage(game, menuButtonBG, false);
-        this.thumbnail = new GameImage(game, new SpriteDrawable(new Sprite()), false);
+        if (allowThumbnails) {
+            this.thumbnail = new GameImage(game, new SpriteDrawable(new Sprite()), false);
+        }
         menuBackground.setSize(w, h);
         this.beatmapManager = beatmapManager;
         this.skin = skin;
@@ -64,9 +68,11 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
         this.addActor(menuBackground);
         setSize(w, h);
         setOrigin(Align.center);
-        thumbnail.setSize(115, 85);
-        float thumbnailX = 9;
-        thumbnail.setPosition(thumbnailX, getHeight() / 2 - thumbnail.getHeight() / 2);
+        if (thumbnail != null) {
+            thumbnail.setSize(115, 85);
+            float thumbnailX = 9;
+            thumbnail.setPosition(thumbnailX, getHeight() / 2 - thumbnail.getHeight() / 2);
+        }
         menuBackground.setPosition(getWidth() / 2 - w / 2f, getHeight() / 2 - h / 2f);
         setScale(0.9f);
         addListener(new ClickListener() {

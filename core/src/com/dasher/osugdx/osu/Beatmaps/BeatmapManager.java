@@ -52,12 +52,6 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
             return;
         }
 
-        if (currentBeatmapSet != null) {
-            for (Beatmap beatmap : currentBeatmapSet.beatmaps) {
-                beatmap.freeResources();
-            }
-        }
-
         if (newBeatmapSet.beatmaps.isEmpty()) {
             newBeatmapSet.getFolder().delete();
             beatMapStore.getBeatMapSets().removeValue(newBeatmapSet, true);
@@ -165,10 +159,10 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
                 }
             }
         }
+        isProcessingDiff = true;
         onPreBeatmapChange();
         setupMusic(newMap);
         currentMap = newMap;
-        isProcessingDiff = true;
         for (int i = 0; i < currentBeatmapSet.beatmaps.size; i++) {
             Beatmap beatmap = currentBeatmapSet.beatmaps.get(i);
             if (beatmap.beatmapFilePath.equals(currentMap.beatmapFilePath)) {
@@ -190,10 +184,13 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
 
     private void handleEmptyBeatmapSet(BeatMapSet beatMapSet) {
         beatMapStore.deleteBeatmapFile(beatMapSet, null);
-        randomizeCurrentBeatmapSet();
-        if (game.getScreen() instanceof SoundSelectScreen) {
-            game.getScreen().show();
-        }
+        game.asyncExecutor.submit(() -> {
+            randomizeCurrentBeatmapSet();
+            if (game.getScreen() instanceof SoundSelectScreen) {
+                game.getScreen().show();
+            }
+            return null;
+        });
     }
 
     public void startMusicPlaying() {
@@ -201,13 +198,14 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     }
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
-        if (currentMusic != null && !isReplayingBeatmapMusic) {
+        if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.isPlaying())) {
+            currentMusic.play();  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
             game.asyncExecutor.submit(() -> {
-                currentMusic.play();
                 if (game.getScreen() instanceof UIScreen) {
+                    // MOVES MUSIC POSITION INSIDE THREAD OTHERWISE GAME MAY FREEZE OR EVEN CRASH
                     currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
                 }
-                return currentMusic;
+                return null;
             });
         }
     }

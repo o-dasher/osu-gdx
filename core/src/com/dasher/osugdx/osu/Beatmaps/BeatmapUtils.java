@@ -34,6 +34,10 @@ public class BeatmapUtils {
         textureParameter.magFilter = Texture.TextureFilter.Linear;
     }
 
+    public Beatmap createMap(@NotNull Beatmap beatmap) {
+        return createMap(Gdx.files.external(beatmap.beatmapFilePath), true, true, true, true, true, true);
+    }
+
     public Beatmap createMap(
             @NotNull FileHandle mapFile,
             boolean parseGeneral, boolean parseObjects, boolean parseTimingPoints,

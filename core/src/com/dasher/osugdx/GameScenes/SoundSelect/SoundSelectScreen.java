@@ -38,6 +38,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     private boolean isBaseShowing = false;
     private float thumbnailLazyLoadingTime;
     private Label.LabelStyle selectorLabelStyle;
+    private boolean allowThumbnails;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -57,9 +58,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setXMultiplier(0.9f);
         beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.setStairCaseMultiplier(25);
-        beatmapSetSelectorStage.setStairCaseAdjustTime(0.25f);
+        beatmapSetSelectorStage.setStairCaseAdjustTime(0.3f);
         beatmapSetSelectorStage.setHoverAbleItems(true);
         beatmapSetSelectorStage.setHoverXMultiplier(0.05f);
+        allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
         resetSelectors();
         beatmapManager.addListener(this);
     }
@@ -70,7 +72,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         for (BeatMapSet beatMapSet: beatMapSets) {
             BeatmapSetSelector beatmapSetSelector = new BeatmapSetSelector(
                     game, game.skinManager.getSelectedSkin(), beatMapSet,
-                    beatmapManager, fonts.baseBitmapFont, selectorLabelStyle, this
+                    beatmapManager, fonts.baseBitmapFont, selectorLabelStyle, this, allowThumbnails
             );
             beatmapSetSelectors.add(beatmapSetSelector);
         }
@@ -158,7 +160,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         renderFade(delta);
 
         // loading thumbnails is rather slow on these platforms
-        if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.WebGL) {
+        if (allowThumbnails) {
             updateSelectorThumbnails(delta);
         }
 
@@ -274,14 +276,16 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void dispose() {
         for (Selector selector: beatmapSetSelectorStage.getItems()) {
-            SpriteDrawable drawable =  ((SpriteDrawable) selector.thumbnail.getDrawable());
-            ReusableTexture texture =  ((ReusableTexture) drawable.getSprite().getTexture());
-            if (
-                    texture != null
-                    && !texture.isDisposed()
-                    && (((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() != texture)
-            ) {
-                texture.forceDispose();
+            if (allowThumbnails) {
+                SpriteDrawable drawable =  ((SpriteDrawable) selector.thumbnail.getDrawable());
+                ReusableTexture texture =  ((ReusableTexture) drawable.getSprite().getTexture());
+                if (
+                        texture != null
+                                && !texture.isDisposed()
+                                && (((TextureRegionDrawable) workingBackground.getDrawable()).getRegion().getTexture() != texture)
+                ) {
+                    texture.forceDispose();
+                }
             }
         }
         beatmapSetSelectorStage.dispose();

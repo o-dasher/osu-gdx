@@ -21,7 +21,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class BeatMapStore implements ModManagerListener {
-    private final int VERSION = 64;
+    private final int VERSION = 82;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -40,7 +40,8 @@ public class BeatMapStore implements ModManagerListener {
         this.songsDir = game.gameIO.getSongsDir();
         this.game = game;
         beatmapStorePrefs = Gdx.app.getPreferences(getClass().getSimpleName());
-        libCacheFile = Gdx.files.local(".beatmap_db");
+        System.out.println(game.gameIO.getSongsDir());
+        libCacheFile = Gdx.files.external(game.gameIO.getSongsDir().path()+"/.beatmap_db");
         beatmapStoreCreationTime = System.nanoTime();
         specialFiles.add(libCacheFile.name());
         setupCaching();
@@ -189,7 +190,6 @@ public class BeatMapStore implements ModManagerListener {
         for (Beatmap beatmap: beatMapSet.beatmaps) {
             if (beatmap.beatmapFilePath.equals(invalidPath)) {
                 beatMapSet.beatmaps.removeValue(beatmap, true);
-                return true;
             }
         }
         if (beatMapSet.beatmaps.isEmpty() || invalidPath == null) {
@@ -245,6 +245,7 @@ public class BeatMapStore implements ModManagerListener {
                 deleteBeatmapFile(null, beatmapFile);
                 return;
             }
+            beatMap.getHitObjects().clear();
             beatMapSet.beatmaps.add(beatMap);
             logBeatmapLoaded(beatMap);
         }
@@ -401,18 +402,26 @@ public class BeatMapStore implements ModManagerListener {
     @Override
     public void onCompleteCalculation() {
         if (isSavingCache) {
-            Array<BeatMapSet> array = new Array<>(beatMapSets);
-            for (int i = 0; i < array.size; i++) {
-                BeatMapSet beatmapSet = array.get(i);
-                for (int j = 0; i < beatmapSet.beatmaps.size; j++) {
+            Array<BeatMapSet> array = new Array<>();
+            for (int i = 0; i < beatMapSets.size; i++) {
+                BeatMapSet beatmapSet = beatMapSets.get(i);
+                BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
+                for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
                     Beatmap beatmap = beatmapSet.beatmaps.get(j);
+                    Beatmap clone = null;
                     try {
-                        beatmapSet.beatmaps.set(i, (Beatmap) beatmap.clone());
+                        clone = (Beatmap) beatmap.clone();
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
                     }
+                    if (clone != null) {
+                        clone.freeResources();
+                        cloneBeatmapSet.beatmaps.add(clone);
+                    }
                 }
+                array.add(cloneBeatmapSet);
             }
+            System.out.println("Trying to perform cache saving...");
             libCacheFile.writeString(game.json.toJson(array), false);
             isSavingCache = false;
             System.out.println("Saved beatmap cache successfully");

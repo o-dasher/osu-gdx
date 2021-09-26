@@ -22,7 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
-public class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener, BeatmapManagerReferencesListener {
+public
+class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener, BeatmapManagerReferencesListener {
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
     private final Label diffLabel;
@@ -32,9 +33,9 @@ public class BeatmapSelector extends Selector implements BeatmapManagerListener,
             OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager,
             SoundSelectScreen soundSelectScreen,
             BitmapFont font, Label.LabelStyle labelStyle,
-            BeatMapSet beatmapSet, @NotNull Beatmap beatmap, Color inactiveColor
+            BeatMapSet beatmapSet, @NotNull Beatmap beatmap, Color inactiveColor, boolean allowThumbnails
     ) {
-        super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle);
+        super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle, allowThumbnails);
         this.beatmap = beatmap;
         this.beatmapSet = beatmapSet;
         this.inactiveColor = inactiveColor;

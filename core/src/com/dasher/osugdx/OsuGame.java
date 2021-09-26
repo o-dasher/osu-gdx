@@ -133,7 +133,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			oszParser.parseImportDirectory();
 			beatMapStore.loadCache();
 			beatMapStore.loadAllBeatmaps();
-			Gdx.app.postRunnable(() -> beatmapManager.randomizeCurrentBeatmapSet());
+			beatmapManager.randomizeCurrentBeatmapSet();
 			return null;
 		});
 		assetManager.load();

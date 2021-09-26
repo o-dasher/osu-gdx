@@ -72,7 +72,6 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         if (previousScreen instanceof IntroScreen) {
             beatmapManager.startMusicPlaying();
         } else {
-            game.toast.log("Importing beatmaps please wait...");
             oszParser.parseImportDirectory();
         }
 
@@ -106,12 +105,6 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
         overlayStage.draw();
 
         renderFade(delta);
-
-        /*
-        System.out.println(completedImport);
-        System.out.println(canSwitchToSoundSelectScreen);
-        System.out.println("IJJ");
-         */
 
         if (canSwitchToSoundSelectScreen) {
             if (!oszParser.isImportingImportDirectory() && !game.calledToSwitchScreen) {

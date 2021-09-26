@@ -24,7 +24,7 @@ public class BeatMapSet {
     }
 
     public String getTitle() {
-        return beatmaps.first() == null? defaultString : beatmaps.first().getMetadata().getTitle();
+        return beatmaps.first() == null? defaultString : beatmaps.first().getMetadata().getTitleRomanized();
     }
 
     public FileHandle getFolder() {
