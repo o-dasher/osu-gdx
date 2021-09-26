@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Images.GameImage;
@@ -156,7 +157,7 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     }
 
     @Override
-    public void onCompleteCalculation() {
+    public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
 
     }
 

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
+import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.IO.GameIO;
 
 import org.jetbrains.annotations.NotNull;
@@ -19,13 +20,14 @@ import java.util.zip.ZipInputStream;
  * Class for decompressing *.osz files and copying files into application
  * directory;
  **/
-public class OSZParser {
+public class OSZParser implements Listenable<OSZParserListener>, OSZParserListener {
     private BeatMapSet lastImportedBeatmapset;
     private final BeatMapStore beatMapStore;
     private final BeatmapManager beatmapManager;
     private final FileHandle beatmapsFolder;
     private final FileHandle importsFolder;
     private boolean isImportingImportDirectory;
+    private final Array<OSZParserListener> listeners = new Array<>();
 
     public OSZParser(@NotNull GameIO gameIO, BeatMapStore beatMapStore, BeatmapManager beatmapManager) {
         this.beatmapsFolder = gameIO.getSongsDir();
@@ -46,6 +48,7 @@ public class OSZParser {
         if (lastImportedBeatmapset != null) {
             beatmapManager.setCurrentBeatmapSet(lastImportedBeatmapset);
         }
+        onParseEnd();
         isImportingImportDirectory = false;
     }
 
@@ -119,5 +122,17 @@ public class OSZParser {
 
     public boolean isImportingImportDirectory() {
         return isImportingImportDirectory;
+    }
+
+    @Override
+    public Array<OSZParserListener> getListeners() {
+        return listeners;
+    }
+
+    @Override
+    public void onParseEnd() {
+        for (OSZParserListener listener: listeners) {
+            listener.onParseEnd();
+        }
     }
 }

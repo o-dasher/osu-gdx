@@ -20,7 +20,7 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
-public class BeatMapStore implements ModManagerListener {
+public class BeatMapStore implements ModManagerListener, OSZParserListener {
     private final int VERSION = 82;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
@@ -316,7 +316,6 @@ public class BeatMapStore implements ModManagerListener {
         isSavingCache = true;
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
-        game.modManager.calculateBeatmaps(Mods.NOMOD);
     }
 
     public void loadAllBeatmaps() {
@@ -371,6 +370,7 @@ public class BeatMapStore implements ModManagerListener {
         if (tempCachedBeatmaps.size != beatMapSets.size) {
             System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
         }
+        game.modManager.calculateBeatmaps(beatMapSets, Mods.NOMOD);
         saveCache();
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
@@ -400,35 +400,44 @@ public class BeatMapStore implements ModManagerListener {
     }
 
     @Override
-    public void onCompleteCalculation() {
-        if (isSavingCache) {
-            Array<BeatMapSet> array = new Array<>();
-            for (int i = 0; i < beatMapSets.size; i++) {
-                BeatMapSet beatmapSet = beatMapSets.get(i);
-                BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
-                for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
-                    Beatmap beatmap = beatmapSet.beatmaps.get(j);
-                    Beatmap clone = null;
-                    try {
-                        clone = (Beatmap) beatmap.clone();
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
+    public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
+        if (calculatedBeatmapSets == beatMapSets) {
+            if (isSavingCache) {
+                Array<BeatMapSet> array = new Array<>();
+                for (int i = 0; i < beatMapSets.size; i++) {
+                    BeatMapSet beatmapSet = beatMapSets.get(i);
+                    BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
+                    for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
+                        Beatmap beatmap = beatmapSet.beatmaps.get(j);
+                        Beatmap clone = null;
+                        try {
+                            clone = (Beatmap) beatmap.clone();
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
+                        if (clone != null) {
+                            clone.freeResources();
+                            cloneBeatmapSet.beatmaps.add(clone);
+                        }
                     }
-                    if (clone != null) {
-                        clone.freeResources();
-                        cloneBeatmapSet.beatmaps.add(clone);
-                    }
+                    array.add(cloneBeatmapSet);
                 }
-                array.add(cloneBeatmapSet);
+                System.out.println("Trying to perform cache saving...");
+                game.modManager.calculateBeatmaps(array, Mods.NOMOD);
+                libCacheFile.writeString(game.json.toJson(array), false);
+                isSavingCache = false;
+                System.out.println("Saved beatmap cache successfully");
             }
-            System.out.println("Trying to perform cache saving...");
-            libCacheFile.writeString(game.json.toJson(array), false);
-            isSavingCache = false;
-            System.out.println("Saved beatmap cache successfully");
         }
     }
 
     public boolean isSavingCache() {
         return isSavingCache;
+    }
+
+    @Override
+    public void onParseEnd() {
+        // TODO: MAYBE JUST CALCULATE THE NEW IMPORTED BEATMAPSETS RATHER THAN RECALC EVERYTHING
+        game.modManager.calculateBeatmaps(beatMapSets, Mods.NOMOD);
     }
 }

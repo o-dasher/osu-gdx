@@ -129,6 +129,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			beatmapUtils.setBeatMapStore(beatMapStore);
 			beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
 			oszParser = new OSZParser(gameIO, beatMapStore, beatmapManager);
+			oszParser.addListener(beatMapStore);
 			beatMapStore.setOszParser(oszParser);
 			oszParser.parseImportDirectory();
 			beatMapStore.loadCache();

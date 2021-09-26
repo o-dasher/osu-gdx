@@ -19,9 +19,8 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
         this.game = game;
     }
 
-    public void calculateBeatmaps(Mods mods) {
+    public void calculateBeatmaps(Array<BeatMapSet> beatMapSets, Mods mods) {
         game.asyncExecutor.submit(() -> {
-            Array<BeatMapSet> beatMapSets = game.beatMapStore.getBeatMapSets();
             for (int i = 0; i < beatMapSets.size; i++) {
                 BeatMapSet beatMapSet = beatMapSets.get(i);
                 for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
@@ -52,7 +51,7 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
             }
             // i hate lambdas....
             try {
-                onCompleteCalculation();
+                onCompleteCalculation(beatMapSets);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -69,10 +68,10 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
     }
 
     @Override
-    public void onCompleteCalculation() {
+    public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
         for (int i = 0; i < listeners.size; i ++) {
             ModManagerListener listener = listeners.get(i);
-            listener.onCompleteCalculation();
+            listener.onCompleteCalculation(calculatedBeatmapSets);
         }
     }
 
