@@ -9,7 +9,8 @@ public abstract class ClockTask implements UpdateAble {
     private float timeSeconds = 0f;
     private float period;
 
-    public ClockTask(float period) {
+    public
+    ClockTask(float period) {
         this.period = period;
     }
 

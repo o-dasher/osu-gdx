@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Images.GameImage;
@@ -29,6 +30,7 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     protected BeatMapSet beatmapSet;
     private final Label diffLabel;
     private final Color inactiveColor;
+    private final Array<ClockTask> generateStarsTasks = new Array<>();
 
     public BeatmapSelector(
             OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager,
@@ -72,13 +74,27 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
             );
             star.setTouchable(Touchable.disabled);
             starX += star.getWidth() * starScale;
-            addActor(star);
+            final float clockTime = (i + 1) * 0.1f;
+            generateStarsTasks.add(new ClockTask(clockTime) {
+                @Override
+                public void run() {
+                    star.getColor().a = 0;
+                    star.addAction(Actions.fadeIn(clockTime));
+                    addActor(star);
+                }
+            });
         }
     }
 
     @Override
     public void act(float delta) {
         super.act(delta);
+        for (ClockTask task: generateStarsTasks) {
+            task.update(delta);
+            if (task.isCancelled()) {
+                generateStarsTasks.removeValue(task, true);
+            }
+        }
     }
 
     @Override

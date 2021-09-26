@@ -21,12 +21,12 @@ import java.util.zip.ZipInputStream;
  * directory;
  **/
 public class OSZParser implements Listenable<OSZParserListener>, OSZParserListener {
-    private BeatMapSet lastImportedBeatmapset;
     private final BeatMapStore beatMapStore;
     private final BeatmapManager beatmapManager;
     private final FileHandle beatmapsFolder;
     private final FileHandle importsFolder;
     private boolean isImportingImportDirectory;
+    private final Array<BeatMapSet> newImportedBeatmapSets = new Array<>();
     private final Array<OSZParserListener> listeners = new Array<>();
 
     public OSZParser(@NotNull GameIO gameIO, BeatMapStore beatMapStore, BeatmapManager beatmapManager) {
@@ -37,7 +37,6 @@ public class OSZParser implements Listenable<OSZParserListener>, OSZParserListen
     }
 
     public void parseImportDirectory() {
-        lastImportedBeatmapset = null;
         isImportingImportDirectory = true;
         for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
             System.out.println("Importing: " + file.nameWithoutExtension());
@@ -45,10 +44,12 @@ public class OSZParser implements Listenable<OSZParserListener>, OSZParserListen
                 System.out.println(file.nameWithoutExtension() + " imported!");
             }
         }
-        if (lastImportedBeatmapset != null) {
-            beatmapManager.setCurrentBeatmapSet(lastImportedBeatmapset);
+        if (newImportedBeatmapSets.notEmpty()) {
+            beatmapManager.setCurrentBeatmapSet(newImportedBeatmapSets.get(newImportedBeatmapSets.size  - 1));
         }
-        onParseEnd();
+        // TODO: MAKE PARSE END SEND AN ARRAY OF THE NEW IMPORTED BEATMAPSETS
+        onParseEnd(newImportedBeatmapSets);
+        newImportedBeatmapSets.clear();
         isImportingImportDirectory = false;
     }
 
@@ -114,7 +115,7 @@ public class OSZParser implements Listenable<OSZParserListener>, OSZParserListen
 
         if (beatmapSetOsz.type() == Files.FileType.External) {
             beatmapSetOsz.delete();
-            lastImportedBeatmapset = beatMapStore.loadBeatmapSet(Gdx.files.external(folderPath));
+            newImportedBeatmapSets.add(beatMapStore.loadBeatmapSet(Gdx.files.external(folderPath)));
         }
 
         return folderFile;
@@ -130,9 +131,9 @@ public class OSZParser implements Listenable<OSZParserListener>, OSZParserListen
     }
 
     @Override
-    public void onParseEnd() {
+    public void onParseEnd(Array<BeatMapSet> newImportedBeatmapSets) {
         for (OSZParserListener listener: listeners) {
-            listener.onParseEnd();
+            listener.onParseEnd(newImportedBeatmapSets);
         }
     }
 }

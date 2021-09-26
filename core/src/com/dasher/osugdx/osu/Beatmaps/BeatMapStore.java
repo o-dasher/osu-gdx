@@ -182,7 +182,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         }
 
         if (loadedAllBeatmaps) {
-            saveCache();
+            cacheBeatmapSets(beatMapSets);
         }
     }
 
@@ -284,9 +284,6 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         }
 
         addNewBeatmapSet(beatMapSet, samePathBeatmapSet, beatMapSetFolder);
-        if (loadedAllBeatmaps) {
-            saveCache();
-        }
 
         return beatMapSet;
     }
@@ -316,6 +313,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         isSavingCache = true;
         beatmapStorePrefs.putInteger(versionKey, VERSION);
         beatmapStorePrefs.flush();
+        cacheBeatmapSets(beatMapSets);
     }
 
     public void loadAllBeatmaps() {
@@ -366,12 +364,10 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
                 oszParser.parseOSZ(Gdx.files.internal(track));
             }
         }
-
         if (tempCachedBeatmaps.size != beatMapSets.size) {
             System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
         }
-        game.modManager.calculateBeatmaps(beatMapSets, Mods.NOMOD);
-        saveCache();
+        game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
@@ -401,32 +397,39 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
 
     @Override
     public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
+        cacheBeatmapSets(calculatedBeatmapSets);
+    }
+
+    public void cacheBeatmapSets(@Null Array<BeatMapSet> calculatedBeatmapSets) {
         if (calculatedBeatmapSets == beatMapSets) {
             if (isSavingCache) {
-                Array<BeatMapSet> array = new Array<>();
-                for (int i = 0; i < beatMapSets.size; i++) {
-                    BeatMapSet beatmapSet = beatMapSets.get(i);
-                    BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
-                    for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
-                        Beatmap beatmap = beatmapSet.beatmaps.get(j);
-                        Beatmap clone = null;
-                        try {
-                            clone = (Beatmap) beatmap.clone();
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
+                game.asyncExecutor.submit(() -> {
+                    Array<BeatMapSet> array = new Array<>();
+                    for (int i = 0; i < beatMapSets.size; i++) {
+                        BeatMapSet beatmapSet = beatMapSets.get(i);
+                        BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
+                        for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
+                            Beatmap beatmap = beatmapSet.beatmaps.get(j);
+                            Beatmap clone = null;
+                            try {
+                                clone = (Beatmap) beatmap.clone();
+                            } catch (CloneNotSupportedException e) {
+                                e.printStackTrace();
+                            }
+                            if (clone != null) {
+                                clone.freeResources();
+                                cloneBeatmapSet.beatmaps.add(clone);
+                            }
                         }
-                        if (clone != null) {
-                            clone.freeResources();
-                            cloneBeatmapSet.beatmaps.add(clone);
-                        }
+                        array.add(cloneBeatmapSet);
                     }
-                    array.add(cloneBeatmapSet);
-                }
-                System.out.println("Trying to perform cache saving...");
-                game.modManager.calculateBeatmaps(array, Mods.NOMOD);
-                libCacheFile.writeString(game.json.toJson(array), false);
-                isSavingCache = false;
-                System.out.println("Saved beatmap cache successfully");
+                    System.out.println("Trying to perform cache saving...");
+                    game.modManager.calculateBeatmapSets(array, Mods.NOMOD);
+                    libCacheFile.writeString(game.json.toJson(array), false);
+                    isSavingCache = false;
+                    System.out.println("Saved beatmap cache successfully");
+                    return null;
+                });
             }
         }
     }
@@ -436,8 +439,17 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
     }
 
     @Override
-    public void onParseEnd() {
-        // TODO: MAYBE JUST CALCULATE THE NEW IMPORTED BEATMAPSETS RATHER THAN RECALC EVERYTHING
-        game.modManager.calculateBeatmaps(beatMapSets, Mods.NOMOD);
+    public void onParseEnd(Array<BeatMapSet> newImportedBeatmapSets) {
+        if (isLoadedAllBeatmaps()) {
+            game.asyncExecutor.submit(() -> {
+                for (BeatMapSet beatMapSet: newImportedBeatmapSets) {
+                    for (Beatmap beatmap: beatMapSet.beatmaps) {
+                        game.modManager.calculateBeatmap(beatmap, Mods.NOMOD);
+                    }
+                }
+                cacheBeatmapSets(beatMapSets);
+                return null;
+            });
+        }
     }
 }

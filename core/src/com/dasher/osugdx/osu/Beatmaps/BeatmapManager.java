@@ -202,14 +202,19 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
         if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.isPlaying())) {
             System.out.println("Starting playing music from Thread: " + Thread.currentThread().getName());
-            currentMusic.play();  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
-            game.asyncExecutor.submit(() -> {
-                if (game.getScreen() instanceof UIScreen) {
-                    // MOVES MUSIC POSITION INSIDE THREAD OTHERWISE GAME MAY FREEZE OR EVEN CRASH
-                    currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
-                }
-                return null;
-            });
+            // TRY CATCH BECAUSE THE MUSIC MAY CHANGE BEFORE THE COMPUTER READ THE BUFFERS FOR IT
+            try {
+                currentMusic.play();  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
+                game.asyncExecutor.submit(() -> {
+                    if (game.getScreen() instanceof UIScreen) {
+                        // MOVES MUSIC POSITION INSIDE THREAD OTHERWISE GAME MAY FREEZE OR EVEN CRASH
+                        currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                    }
+                    return null;
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

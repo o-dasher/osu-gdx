@@ -41,6 +41,7 @@ public class BeatmapSetSelector extends Selector {
         return Color.PINK;
     }
 
+    // TODO: PROPER BEATMAPSET COLOR BASED ON WHETER IT HAS A SINGLE BEATMAP ETC
     @Override
     public Color inactiveColor() {
         return Color.PINK;

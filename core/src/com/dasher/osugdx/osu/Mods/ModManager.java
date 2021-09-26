@@ -8,6 +8,8 @@ import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
@@ -19,34 +21,38 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
         this.game = game;
     }
 
-    public void calculateBeatmaps(Array<BeatMapSet> beatMapSets, Mods mods) {
+    public void calculateBeatmap(@NotNull Beatmap beatmap, Mods mods) {
+        if (beatmap.getHitObjects().isEmpty()) {
+            Beatmap calculated = game.beatmapUtils.createMap(
+                    Gdx.files.external(beatmap.beatmapFilePath),
+                    true, true,
+                    true, true,
+                    true, true
+            );
+            if (calculated.getHitObjects().notEmpty()) {
+                calculated.calculateBase(mods);
+                beatmap.setBaseStars(calculated.getBaseStars());
+                beatmap.setTimingPoints(calculated.getTimingPoints());
+                System.out.println(beatmap.getMetadata().getTitleRomanized() + " recalculated");
+            }
+        } else {
+            System.out.println(
+                    "Ignoring beatmap calculation of: "
+                            + beatmap.getMetadata().getTitleRomanized() +
+                            ", it already has objects"
+            );
+            beatmap.calculateBase(mods);
+        }
+        onBeatmapCalculated(beatmap);
+    }
+
+    public void calculateBeatmapSets(Array<BeatMapSet> beatMapSets, Mods mods) {
         game.asyncExecutor.submit(() -> {
             for (int i = 0; i < beatMapSets.size; i++) {
                 BeatMapSet beatMapSet = beatMapSets.get(i);
                 for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
                     Beatmap beatmap = beatMapSet.beatmaps.get(j);
-                    if (beatmap.getHitObjects().isEmpty()) {
-                        Beatmap calculated = game.beatmapUtils.createMap(
-                                Gdx.files.external(beatmap.beatmapFilePath),
-                                true, true,
-                                true, true,
-                                true, true
-                        );
-                        if (calculated.getHitObjects().notEmpty()) {
-                            calculated.calculateBase(mods);
-                            beatmap.setBaseStars(calculated.getBaseStars());
-                            beatmap.setTimingPoints(calculated.getTimingPoints());
-                            System.out.println(beatmap.getMetadata().getTitleRomanized() + " recalculated");
-                        }
-                    } else {
-                        System.out.println(
-                                "Ignoring beatmap calculation of: "
-                                        + beatmap.getMetadata().getTitleRomanized() +
-                                        ", it already has objects"
-                        );
-                        beatmap.calculateBase(mods);
-                    }
-                    onBeatmapCalculated(beatmap);
+                    calculateBeatmap(beatmap, mods);
                 }
             }
             // i hate lambdas....
