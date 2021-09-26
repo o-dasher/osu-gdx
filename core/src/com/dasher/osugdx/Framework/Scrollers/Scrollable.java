@@ -95,7 +95,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void layout() {
         getRoot().getActions().clear();
-        baseData.clear();
         isFirstStairCaseX = true;
         isFirstStairCaseY = true;
         for (int i = 0; i < items.size; i++) {
@@ -116,7 +115,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                     x = CenteringHelper.getCenterX(currentActor.getWidth());
                     break;
             }
-            ScrollItemData scrollItemData = new ScrollItemData();
+            ScrollItemData scrollItemData = baseData.containsKey(currentActor)?
+                    baseData.get(currentActor) : new ScrollItemData();
             scrollItemData.baseVec.x = x;
             scrollItemData.baseVec.y = y;
             currentActor.setPosition(x, y);

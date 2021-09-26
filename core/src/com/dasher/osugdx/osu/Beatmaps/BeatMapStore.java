@@ -139,6 +139,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
             cachedSets.removeValue(beatMapSet, true);
         }
         beatMapSets.addAll(cachedSets);
+        cachedSets.clear();
         for (BeatMapSet beatMapSet: beatMapSets) {
             if (!isBeatmapSetValid(beatMapSet)) {
                 deleteBeatmapFile(beatMapSet, null);
@@ -372,20 +373,14 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
             }
         }
 
-        if (tempCachedBeatmaps.size == beatMapSets.size) {
-            // OTHERWISE WE SET LOADEDALLMAPS AFTER RECALCULATION
-            if (!libraryChanged) {
-                loadedAllBeatmaps = true;
-            }
-        } else {
-            System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
+        if (!libraryChanged) {
+            loadedAllBeatmaps = true;
         }
 
         saveCacheInfo();
         if (libraryChanged) {
             game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
         }
-
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");

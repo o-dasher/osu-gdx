@@ -34,7 +34,7 @@ public class ImportOSZ extends Activity {
             // TODO: BROKEN
             BeatMapStore beatMapStore = new BeatMapStore(new OsuGame(toast));
             beatmapUtils.setBeatMapStore(beatMapStore);
-            BeatmapManager beatmapManager = new BeatmapManager(new OsuGame(toast), beatMapStore, toast, beatmapUtils);
+            BeatmapManager beatmapManager = new BeatmapManager(new OsuGame(toast), beatMapStore, toast);
             OSZParser oszParser = new OSZParser(gameIO, beatMapStore, beatmapManager);
             beatMapStore.setOszParser(oszParser);
             oszParser.parseOSZ(file);

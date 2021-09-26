@@ -11,9 +11,12 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Null;
+import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
@@ -27,7 +30,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
 
-public abstract class Selector extends Group implements BeatmapManagerListener {
+public abstract class Selector extends Group implements BeatmapManagerListener, Disposable {
     protected GameImage thumbnail = null;
     protected final OsuGame game;
     protected final GameImage menuBackground;
@@ -54,6 +57,7 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
         this.game = game;
         this.font = font;
         this.allowThumbnails = allowThumbnails;
+        game.beatmapManager.addListener(this);
         Sprite menuButtonBG = skin.menuButtonBG.getSprite();
         float w = 699;
         float h = 103;
@@ -177,5 +181,21 @@ public abstract class Selector extends Group implements BeatmapManagerListener {
     @Override
     public void onPreBeatmapChange() {
 
+    }
+
+    @Override
+    public void dispose() {
+        game.beatmapManager.removeListener(this);
+        if (thumbnail != null) {
+            SpriteDrawable drawable =  ((SpriteDrawable) thumbnail.getDrawable());
+            ReusableTexture texture =  ((ReusableTexture) drawable.getSprite().getTexture());
+            if (
+                    texture != null
+                            && !texture.isDisposed()
+                            && (((TextureRegionDrawable) game.workingBackground.getDrawable()).getRegion().getTexture() != texture)
+            ) {
+                texture.forceDispose();
+            }
+        }
     }
 }
