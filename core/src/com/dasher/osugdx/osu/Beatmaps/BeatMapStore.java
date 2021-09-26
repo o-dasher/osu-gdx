@@ -35,6 +35,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
     private boolean loadedAllBeatmaps = false;
     private final OsuGame game;
     private BeatMapSet mainDefaultBeatmapSet;
+    private boolean libraryChanged = false;
 
     public BeatMapStore(@NotNull OsuGame game) {
         this.songsDir = game.gameIO.getSongsDir();
@@ -66,6 +67,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         } else {
             libCacheFile.write(false);
             System.out.println("Created a new beatmap cache library successfully");
+            libraryChanged = true;
             finishCacheLoading();
         }
     }
@@ -97,9 +99,11 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
                 );
             } catch (Exception e) {
                 e.printStackTrace();
+                libraryChanged = true;
                 clearCache();
             }
         } else {
+            libraryChanged = true;
             clearCache();
         }
         return cachedSets;
@@ -128,6 +132,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
             invalidBeatmaps.clear();
             if (cachedSet.beatmaps.isEmpty()) {
                 invalidSets.add(cachedSet);
+                libraryChanged = true;
             }
         }
         for (BeatMapSet beatMapSet: invalidSets) {
@@ -195,6 +200,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         if (beatMapSet.beatmaps.isEmpty() || invalidPath == null) {
             Gdx.files.external(beatMapSet.beatmapSetFolderPath).delete();
             beatMapSets.removeValue(beatMapSet, true);
+            libraryChanged = true;
         }
         return false;
     }
@@ -228,6 +234,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         if (isMapLoadedInCache) {
             return;
         } else {
+            libraryChanged = true;
             System.out.println("Library changed, map not found in cache!");
         }
 
@@ -238,6 +245,7 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         );
 
         if (beatMap == null) {
+            libraryChanged = true;
             deleteBeatmapFile(null, beatmapFile);
         } else {
             if (beatMap.getGamemode() != GameMode.OSU) {
@@ -308,12 +316,11 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
 
     protected boolean isSavingCache = false;
 
-    public void saveCache() {
-        System.out.println("Saving cache...");
-        isSavingCache = true;
-        beatmapStorePrefs.putInteger(versionKey, VERSION);
-        beatmapStorePrefs.flush();
-        cacheBeatmapSets(beatMapSets);
+    public void saveCacheInfo() {
+        if (beatmapStorePrefs.getInteger(versionKey) != VERSION) {
+            beatmapStorePrefs.putInteger(versionKey, VERSION);
+            beatmapStorePrefs.flush();
+        }
     }
 
     public void loadAllBeatmaps() {
@@ -364,14 +371,24 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
                 oszParser.parseOSZ(Gdx.files.internal(track));
             }
         }
-        if (tempCachedBeatmaps.size != beatMapSets.size) {
+
+        if (tempCachedBeatmaps.size == beatMapSets.size) {
+            // OTHERWISE WE SET LOADEDALLMAPS AFTER RECALCULATION
+            if (!libraryChanged) {
+                loadedAllBeatmaps = true;
+            }
+        } else {
             System.out.println("Cached beatmaps size doesn't match beatmapSets size!");
         }
-        game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
+
+        saveCacheInfo();
+        if (libraryChanged) {
+            game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
+        }
+
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
-        loadedAllBeatmaps = true;
     }
 
     public boolean isFinishedLoadingCache() {
@@ -395,42 +412,50 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
 
     }
 
+    public Array<BeatMapSet> cacheBeatmapSetArray;
+
     @Override
     public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
-        cacheBeatmapSets(calculatedBeatmapSets);
+        if (calculatedBeatmapSets == beatMapSets) {
+            loadedAllBeatmaps = true;
+            cacheBeatmapSets(calculatedBeatmapSets);
+            System.out.println("Finished beatmapSets calculation");
+        } else if (calculatedBeatmapSets == cacheBeatmapSetArray) {
+            libCacheFile.writeString(game.json.toJson(cacheBeatmapSetArray), false);
+            isSavingCache = false;
+            System.out.println("Saved beatmap cache successfully");
+            cacheBeatmapSetArray.clear();
+        }
     }
 
     public void cacheBeatmapSets(@Null Array<BeatMapSet> calculatedBeatmapSets) {
+        System.out.println("Saving cache info...");
         if (calculatedBeatmapSets == beatMapSets) {
-            if (isSavingCache) {
-                game.asyncExecutor.submit(() -> {
-                    Array<BeatMapSet> array = new Array<>();
-                    for (int i = 0; i < beatMapSets.size; i++) {
-                        BeatMapSet beatmapSet = beatMapSets.get(i);
-                        BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
-                        for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
-                            Beatmap beatmap = beatmapSet.beatmaps.get(j);
-                            Beatmap clone = null;
-                            try {
-                                clone = (Beatmap) beatmap.clone();
-                            } catch (CloneNotSupportedException e) {
-                                e.printStackTrace();
-                            }
-                            if (clone != null) {
-                                clone.freeResources();
-                                cloneBeatmapSet.beatmaps.add(clone);
-                            }
+            game.asyncExecutor.submit(() -> {
+                cacheBeatmapSetArray = new Array<>();
+                for (int i = 0; i < beatMapSets.size; i++) {
+                    BeatMapSet beatmapSet = beatMapSets.get(i);
+                    BeatMapSet cloneBeatmapSet = new BeatMapSet(Gdx.files.external(beatmapSet.beatmapSetFolderPath));
+                    for (int j = 0; j < beatmapSet.beatmaps.size; j++) {
+                        Beatmap beatmap = beatmapSet.beatmaps.get(j);
+                        Beatmap clone = null;
+                        try {
+                            clone = (Beatmap) beatmap.clone();
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
                         }
-                        array.add(cloneBeatmapSet);
+                        if (clone != null) {
+                            System.out.println("Copied " + clone.getMetadata().getTitleRomanized() + " for cache saving.");
+                            clone.freeResources();
+                            cloneBeatmapSet.beatmaps.add(clone);
+                        }
                     }
-                    System.out.println("Trying to perform cache saving...");
-                    game.modManager.calculateBeatmapSets(array, Mods.NOMOD);
-                    libCacheFile.writeString(game.json.toJson(array), false);
-                    isSavingCache = false;
-                    System.out.println("Saved beatmap cache successfully");
-                    return null;
-                });
-            }
+                    cacheBeatmapSetArray.add(cloneBeatmapSet);
+                }
+                System.out.println("Trying to perform cache saving...");
+                game.modManager.calculateBeatmapSets(cacheBeatmapSetArray, Mods.NOMOD);
+                return null;
+            });
         }
     }
 

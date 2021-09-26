@@ -66,6 +66,7 @@
         if (beatMapStore == null || beatmapManager == null) {
             resetGlobals();
         } else {
+            // System.out.println(beatMapStore.isLoadedAllBeatmaps() + ", " + beatmapManager.isFirstBeatmapLoaded() + ", " + canSwitchScreen +","+!game.calledToSwitchScreen);
             if (
                 beatMapStore.isLoadedAllBeatmaps()
                         && beatmapManager.isFirstBeatmapLoaded()
