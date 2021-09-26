@@ -8,8 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Audio.GameMusic;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
-import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
-import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
@@ -21,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 
 
-public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener, UpdateAble {
+public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener {
     private final BeatMapStore beatMapStore;
     private final OsuGame game;
     private final PlatformToast toast;
@@ -31,7 +29,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     private String previousBeatmapSetFolder = "";
     private GameMusic currentMusic;
     private long timeLastMap;
-    private final Array<ClockTask> disposePreviousMusicsTasks = new Array<>();
     private boolean isFirstBeatmapLoaded = false;
 
     public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast) {
@@ -90,12 +87,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen)) {
                 game.parrot.stopMusic(currentMusic, true);
                 GameMusic finalMusic = currentMusic;
-                disposePreviousMusicsTasks.add(new ClockTask(game.parrot.getSettings().musicFadeOutDuration) {
-                    @Override
-                    public void run() {
-                        finalMusic.dispose();
-                    }
-                });
+                finalMusic.dispose();
             }
         }
 
@@ -259,17 +251,6 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         // INDEXED BECAUSE ASYNCHRONOUS;
         for (int i = 0; i < beatmapManagerListeners.size; i++) {
             updateListenerReference(beatmapManagerListeners.get(i), beatmap);
-        }
-    }
-
-
-    @Override
-    public void update(float delta) {
-        for (ClockTask disposeTask: disposePreviousMusicsTasks) {
-            disposeTask.update(delta);
-            if (disposeTask.isCancelled()) {
-                disposePreviousMusicsTasks.removeValue(disposeTask, true);
-            }
         }
     }
 }

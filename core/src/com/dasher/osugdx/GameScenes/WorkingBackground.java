@@ -53,7 +53,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
             currentTexture.dispose();
         }
 
-        float time = isFirstBGChange? 0.5f :  0.25f;
+        float time = isFirstBGChange? 0.25f :  0.2f;
 
         if (isFirstBGChange) {
             isFirstBGChange = false;

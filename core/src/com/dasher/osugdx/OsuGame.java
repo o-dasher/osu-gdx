@@ -179,9 +179,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		float delta = Gdx.graphics.getDeltaTime();
 		parrot.update(delta);
 		audioFactory.update(delta);
-		if (beatmapManager != null) {
-			beatmapManager.update(delta);
-		}
 		super.render();
 
 		if (assetManager.update()) {

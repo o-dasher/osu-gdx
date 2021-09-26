@@ -2,10 +2,12 @@ package com.dasher.osugdx.Audio;
 
 import com.badlogic.gdx.audio.Music;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.rafaskoberg.gdx.parrot.music.ParrotMusicType;
 
 
 import org.jetbrains.annotations.NotNull;
+
 
 public class GameMusic implements ParrotMusicType, Music, UpdateAble {
     private final AudioFactory audioFactory;
@@ -15,6 +17,7 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
     private boolean asynchronous;
     private boolean didSetPosition;
     private boolean isDisposed = false;
+    private ClockTask disposeTask;
 
 
     public GameMusic(@NotNull Music music, @NotNull AudioFactory audioFactory) {
@@ -113,9 +116,17 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
 
     @Override
     public void dispose() {
-        music.dispose();
-        audioFactory.musics.removeValue(this, true);
-        isDisposed = true;
+        audioFactory.parrot.stopMusic(this,true);
+        GameMusic thisMusic = this;
+        disposeTask = new ClockTask(audioFactory.parrot.getSettings().musicFadeOutDuration) {
+            @Override
+            public void run() {
+                music.dispose();
+                audioFactory.musics.removeValue(thisMusic, true);
+                isDisposed = true;
+                System.out.println("GameMusic: Disposed music at channel: " + channel);
+            }
+        };
     }
 
     @Override
@@ -140,6 +151,9 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
 
     @Override
     public void update(float delta) {
+        if (!isDisposed && disposeTask != null) {
+            disposeTask.update(delta);
+        }
         if (asynchronous) {
             if (!didSetPosition && setPosition > 0) {
                 if (audioFactory.parrot.isMusicPlaying(channel)) {

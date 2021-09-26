@@ -55,12 +55,7 @@ public class ModManager implements ModManagerListener, Listenable<ModManagerList
                     calculateBeatmap(beatmap, mods);
                 }
             }
-            // i hate lambdas....
-            try {
-                onCompleteCalculation(beatMapSets);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            onCompleteCalculation(beatMapSets);
             return null;
         });
     }
