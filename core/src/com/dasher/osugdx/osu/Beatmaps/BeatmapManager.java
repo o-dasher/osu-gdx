@@ -6,40 +6,38 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.dasher.osugdx.Audio.GameMusic;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
+import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
+import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.PlatformSpecific.Toast.PlatformToast;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
-import lt.ekgame.beatmap_analyzer.beatmap.TimingPoint;
-import lt.ekgame.beatmap_analyzer.utils.Mods;
 
-public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener {
-    private final com.dasher.osugdx.osu.Beatmaps.BeatMapStore beatMapStore;
+
+public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener, UpdateAble {
+    private final BeatMapStore beatMapStore;
     private final OsuGame game;
     private final PlatformToast toast;
-    private final com.dasher.osugdx.osu.Beatmaps.BeatmapUtils beatmapUtils;
     private final Array<BeatmapManagerListener> beatmapManagerListeners = new Array<>();
     private BeatMapSet currentBeatmapSet;
     private Beatmap currentMap;
     private String previousBeatmapSetFolder = "";
-    private Music currentMusic;
+    private GameMusic currentMusic;
     private long timeLastMap;
+    private ClockTask disposePreviousMusicTask;
     private boolean isFirstBeatmapLoaded = false;
 
-    public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast, BeatmapUtils beatmapUtils) {
+    public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast) {
         this.game = game;
         this.beatMapStore = beatMapStore;
         this.toast = toast;
-        this.beatmapUtils = beatmapUtils;
     }
 
     public BeatMapSet getCurrentBeatmapSet() {
@@ -72,19 +70,6 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
     }
 
-    protected Beatmap reInitBeatmap(@NotNull Beatmap beatmap) {
-        Beatmap newMap = null;
-        FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-        if (beatmapFile.exists()) {
-            newMap = beatmapUtils.createMap(
-                    beatmapFile,
-                    true, true, true,
-                    true, true, true
-            );
-        }
-        return newMap;
-    }
-
     // Return whether it's the same music repeating itself
     private boolean setupMusic(@NotNull Beatmap newMap) {
         String newFolder = currentBeatmapSet.beatmapSetFolderPath + "/";
@@ -103,7 +88,14 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         if (currentMusic != null && !newMap.equals(currentMap)) {
             // WE DON'T RESTART MUSIC IF ITS SAME MAP ON UI SCREEN
             if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen)) {
-                currentMusic.dispose();
+                final GameMusic toDisposeMusic = currentMusic;
+                game.parrot.stopMusic(toDisposeMusic, true);
+                disposePreviousMusicTask = new ClockTask(game.parrot.getSettings().musicFadeOutDuration) {
+                    @Override
+                    public void run() {
+                        toDisposeMusic.getMusic().dispose();
+                    }
+                };
             }
         }
 
@@ -115,7 +107,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
                 currentMusic = game.audioFactory.newMusic(Gdx.audio.newMusic(musicFile));
-                currentMusic.setOnCompletionListener((music) -> {
+                currentMusic.getMusic().setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
                     if (currentMusic.hashCode() == music.hashCode()) {
                         // EVEN THOUGH THE THREAD THAT IS PLAYING THE MUSIC IS OR NOT THE GL
@@ -200,15 +192,15 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     }
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
-        if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.isPlaying())) {
+        if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.getMusic().isPlaying())) {
             System.out.println("Starting playing music from Thread: " + Thread.currentThread().getName());
             // TRY CATCH BECAUSE THE MUSIC MAY CHANGE BEFORE THE COMPUTER READ THE BUFFERS FOR IT
             try {
-                currentMusic.play();  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
+                game.parrot.playMusic(currentMusic, false, true);  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
                 game.asyncExecutor.submit(() -> {
                     if (game.getScreen() instanceof UIScreen) {
                         // MOVES MUSIC POSITION INSIDE THREAD OTHERWISE GAME MAY FREEZE OR EVEN CRASH
-                        currentMusic.setPosition(beatmap.getGenerals().getPreviewTime());
+                        currentMusic.getMusic().setPosition(beatmap.getGenerals().getPreviewTime());
                     }
                     return null;
                 });
@@ -227,7 +219,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
     }
 
     public Music getCurrentMusic() {
-        return currentMusic;
+        return currentMusic == null? null : currentMusic.getMusic();
     }
 
     @Override
@@ -277,6 +269,14 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
         // INDEXED BECAUSE ASYNCHRONOUS;
         for (int i = 0; i < beatmapManagerListeners.size; i++) {
             updateListenerReference(beatmapManagerListeners.get(i), beatmap);
+        }
+    }
+
+
+    @Override
+    public void update(float delta) {
+        if (disposePreviousMusicTask != null) {
+            disposePreviousMusicTask.update(delta);
         }
     }
 }

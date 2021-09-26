@@ -41,6 +41,7 @@ import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 import com.dasher.osugdx.osu.Mods.ModManager;
+import com.rafaskoberg.gdx.parrot.Parrot;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -79,6 +80,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public boolean calledToSwitchScreen;
 	public boolean canSwitchIntroScreen;
 	public boolean loadedAllAssets;
+	public Parrot parrot;
 	public ClockTask setSwitchFromIntroScreenTask;
 	public AsyncResult<Null> loadBeatmapsTask;
 
@@ -110,7 +112,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		batch = new SpriteBatch();
 		assetManager = new GameAssetManager();
 		inputMultiplexer = new InputMultiplexer();
-		audioFactory = new AudioFactory();
+		parrot = new Parrot();
+		audioFactory = new AudioFactory(parrot);
 		cleanupTime = 0.3f;
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
@@ -127,7 +130,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			beatMapStore = new BeatMapStore(this);
 			modManager.addListener(beatMapStore);
 			beatmapUtils.setBeatMapStore(beatMapStore);
-			beatmapManager = new BeatmapManager(this, beatMapStore, toast, beatmapUtils);
+			beatmapManager = new BeatmapManager(this, beatMapStore, toast);
 			oszParser = new OSZParser(gameIO, beatMapStore, beatmapManager);
 			oszParser.addListener(beatMapStore);
 			beatMapStore.setOszParser(oszParser);
@@ -173,6 +176,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			setSwitchFromIntroScreenTask = null;
 		}
 
+		float delta = Gdx.graphics.getDeltaTime();
+		parrot.update(delta);
+		if (beatmapManager != null) {
+			beatmapManager.update(delta);
+		}
 		super.render();
 
 		if (assetManager.update()) {
@@ -180,7 +188,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			Screen currentScreen = getScreen();
 			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen && loadBeatmapsTask.isDone()) {
 				canSwitchIntroScreen = false;
-				float delta = Gdx.graphics.getDeltaTime();
 				beatmapManager.randomizeCurrentBeatmapSet();
 				backgroundStage = new Stage(viewport, batch);
 				skinManager = new SkinManager(this);

@@ -7,6 +7,7 @@
  import com.badlogic.gdx.scenes.scene2d.Stage;
  import com.badlogic.gdx.scenes.scene2d.actions.Actions;
  import com.badlogic.gdx.utils.Timer;
+ import com.dasher.osugdx.Audio.GameMusic;
  import com.dasher.osugdx.GameScenes.Intro.Actors.LogoActor;
  import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
  import com.dasher.osugdx.GameScenes.UIScreen;
@@ -17,8 +18,8 @@
  public
  class IntroScreen extends UIScreen {
     private Stage introStage;
-    private Music seeyaSound;
-    private Music welcomeSound;
+    private GameMusic seeyaSound;
+    private GameMusic welcomeSound;
     private Texture logoTexture;
     private LogoActor osuLogo;
     private boolean canSwitchScreen;
@@ -48,7 +49,7 @@
         seeyaSound = audioFactory.newMusic(Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.seeya.fileName)));
         welcomeSound = audioFactory.newMusic(Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.welcome.fileName)));
 
-        welcomeSound.play();
+        parrot.playMusic(welcomeSound);
     }
 
     @Override
@@ -102,8 +103,8 @@
     public void dispose() {
         logoTexture.dispose();
         introStage.dispose();
-        seeyaSound.dispose();
-        welcomeSound.dispose();
+        seeyaSound.getMusic().dispose();
+        welcomeSound.getMusic().dispose();
     }
 
      public void setCanSwitchScreen(boolean canSwitchScreen) {

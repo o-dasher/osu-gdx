@@ -20,6 +20,7 @@ import com.dasher.osugdx.Skins.SkinManager;
 import com.dasher.osugdx.Timing.BeatFactory;
 import com.dasher.osugdx.assets.GameAssetManager;
 import com.dasher.osugdx.osu.Mods.ModManager;
+import com.rafaskoberg.gdx.parrot.Parrot;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,7 @@ public abstract class GameScreen implements Screen {
     protected AsyncExecutor asyncExecutor;
     protected AudioFactory audioFactory;
     protected ModManager modManager;
+    protected Parrot parrot;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -72,6 +74,7 @@ public abstract class GameScreen implements Screen {
         oszParser = game.oszParser;
         audioFactory = game.audioFactory;
         modManager = game.modManager;
+        parrot = game.parrot;
     }
 
     @Override
