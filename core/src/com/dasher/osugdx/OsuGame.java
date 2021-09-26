@@ -113,13 +113,13 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		assetManager = new GameAssetManager();
 		inputMultiplexer = new InputMultiplexer();
 		parrot = new Parrot();
-		audioFactory = new AudioFactory(parrot);
 		cleanupTime = 0.3f;
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		Gdx.input.setInputProcessor(inputMultiplexer);
-		setScreen(new IntroScreen(this));
 		asyncExecutor = new AsyncExecutor(Runtime.getRuntime().availableProcessors(), "MAIN EXECUTOR");
+		audioFactory = new AudioFactory(this);
+		setScreen(new IntroScreen(this));
 		loadBeatmapsTask = asyncExecutor.submit(() -> {
 			json = new Json();
 			random = new Random();
@@ -178,6 +178,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 		float delta = Gdx.graphics.getDeltaTime();
 		parrot.update(delta);
+		audioFactory.update(delta);
 		if (beatmapManager != null) {
 			beatmapManager.update(delta);
 		}

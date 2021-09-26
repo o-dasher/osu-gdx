@@ -36,6 +36,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         setAlign(Align.center);
         setOrigin(Align.center);
         if (game.beatmapManager.getCurrentMap() != null) {
+            getColor().a = 0;
             onNewBeatmap(game.beatmapManager.getCurrentMap());
         }
     }
@@ -52,7 +53,7 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
             currentTexture.dispose();
         }
 
-        float time = 0.75f / (isFirstBGChange? 4 : 8);
+        float time = isFirstBGChange? 0.5f :  0.25f;
 
         if (isFirstBGChange) {
             isFirstBGChange = false;

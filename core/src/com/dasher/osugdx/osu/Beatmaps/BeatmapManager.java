@@ -31,8 +31,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     private String previousBeatmapSetFolder = "";
     private GameMusic currentMusic;
     private long timeLastMap;
-    private ClockTask disposePreviousMusicTask;
-    private ClockTask musicSetPositionTask;
+    private final Array<ClockTask> disposePreviousMusicsTasks = new Array<>();
     private boolean isFirstBeatmapLoaded = false;
 
     public BeatmapManager(OsuGame game, BeatMapStore beatMapStore, PlatformToast toast) {
@@ -89,7 +88,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         if (currentMusic != null && !newMap.equals(currentMap)) {
             // WE DON'T RESTART MUSIC IF ITS SAME MAP ON UI SCREEN
             if (!(newMusicPath.equals(currentMusicPath) && game.getScreen() instanceof UIScreen)) {
-                currentMusic.getMusic().dispose();
+                game.parrot.stopMusic(currentMusic, true);
+                GameMusic finalMusic = currentMusic;
+                disposePreviousMusicsTasks.add(new ClockTask(game.parrot.getSettings().musicFadeOutDuration) {
+                    @Override
+                    public void run() {
+                        finalMusic.dispose();
+                    }
+                });
             }
         }
 
@@ -101,6 +107,7 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             FileHandle musicFile = Gdx.files.external(newMusicPath);
             try {
                 currentMusic = game.audioFactory.newMusic(Gdx.audio.newMusic(musicFile));
+                currentMusic.setAsynchronous(true);
                 currentMusic.getMusic().setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
                     if (currentMusic.hashCode() == music.hashCode()) {
@@ -185,25 +192,11 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
         startMusicPlaying(currentMap, false);
     }
 
-    private final int channel = 1;
-
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
         if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.getMusic().isPlaying())) {
             System.out.println("Starting playing music from Thread: " + Thread.currentThread().getName());
-            game.parrot.playMusic(currentMusic, false, true, channel, channel); // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
-            // ENQUEUES SET POSITION TO NEXT FRAME
-            GameMusic finalMusic = currentMusic;
-            musicSetPositionTask = new ClockTask(0) {
-                @Override
-                public void run() {
-                    if (game.getScreen() instanceof UIScreen && finalMusic.getMusic().isPlaying()) {
-                        if (beatmap.getGenerals().getPreviewTime() <= 0) {
-                            return;
-                        }
-                        finalMusic.getMusic().setPosition(beatmap.getGenerals().getPreviewTime());
-                    }
-                }
-            };
+            currentMusic.playParrot(false, true); // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
+            currentMusic.forcePosition(beatmap.getGenerals().getPreviewTime());
         }
     }
 
@@ -272,14 +265,11 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
 
     @Override
     public void update(float delta) {
-        if (disposePreviousMusicTask != null) {
-            disposePreviousMusicTask.update(delta);
-            if (disposePreviousMusicTask.isCancelled()) {
-                disposePreviousMusicTask = null;
+        for (ClockTask disposeTask: disposePreviousMusicsTasks) {
+            disposeTask.update(delta);
+            if (disposeTask.isCancelled()) {
+                disposePreviousMusicsTasks.removeValue(disposeTask, true);
             }
-        }
-        if (musicSetPositionTask != null) {
-            musicSetPositionTask.update(delta);
         }
     }
 }
