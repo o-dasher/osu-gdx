@@ -1,13 +1,12 @@
 package com.dasher.osugdx.Audio;
 
 import com.badlogic.gdx.audio.Music;
-import com.rafaskoberg.gdx.parrot.Parrot;
 import com.rafaskoberg.gdx.parrot.music.ParrotMusicType;
 
 
 import org.jetbrains.annotations.NotNull;
 
-public class GameMusic implements ParrotMusicType {
+public class GameMusic implements ParrotMusicType, Music {
     private final AudioFactory audioFactory;
     private final Music music;
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
@@ -67,19 +68,25 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
                 starSprite = new Sprite(region);
             }
             GameImage star = new GameImage(game, starSprite, false);
-            star.setScale(starScale);
             star.setPosition(
                     starX,
                     diffLabel.getY() - star.getHeight() * starScale * labelScale
             );
-            star.setTouchable(Touchable.disabled);
             starX += star.getWidth() * starScale;
             final float clockTime = (i + 1) * 0.1f;
             generateStarsTasks.add(new ClockTask(clockTime) {
                 @Override
                 public void run() {
+                    star.setOrigin(Align.bottomLeft);
+                    star.setTouchable(Touchable.disabled);
+                    star.setScale(0);
                     star.getColor().a = 0;
-                    star.addAction(Actions.fadeIn(clockTime));
+                    star.addAction(
+                            Actions.parallel(
+                                    Actions.fadeIn(clockTime),
+                                    Actions.scaleTo(starScale, starScale, clockTime)
+                            )
+                    );
                     addActor(star);
                 }
             });

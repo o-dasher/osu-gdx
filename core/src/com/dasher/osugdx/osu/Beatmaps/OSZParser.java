@@ -37,20 +37,21 @@ public class OSZParser implements Listenable<OSZParserListener>, OSZParserListen
     }
 
     public void parseImportDirectory() {
-        isImportingImportDirectory = true;
-        for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
-            System.out.println("Importing: " + file.nameWithoutExtension());
-            if (parseOSZ(file) != null) {
-                System.out.println(file.nameWithoutExtension() + " imported!");
+        if (!isImportingImportDirectory) {
+            isImportingImportDirectory = true;
+            newImportedBeatmapSets.clear();
+            for (FileHandle file: importsFolder.list(pathname -> pathname.getName().endsWith("osz"))) {
+                System.out.println("Importing: " + file.nameWithoutExtension());
+                if (parseOSZ(file) != null) {
+                    System.out.println(file.nameWithoutExtension() + " imported!");
+                }
             }
+            if (newImportedBeatmapSets.notEmpty()) {
+                beatmapManager.setCurrentBeatmapSet(newImportedBeatmapSets.get(newImportedBeatmapSets.size  - 1));
+                onParseEnd(newImportedBeatmapSets);
+            }
+            isImportingImportDirectory = false;
         }
-        if (newImportedBeatmapSets.notEmpty()) {
-            beatmapManager.setCurrentBeatmapSet(newImportedBeatmapSets.get(newImportedBeatmapSets.size  - 1));
-        }
-        // TODO: MAKE PARSE END SEND AN ARRAY OF THE NEW IMPORTED BEATMAPSETS
-        onParseEnd(newImportedBeatmapSets);
-        newImportedBeatmapSets.clear();
-        isImportingImportDirectory = false;
     }
 
     public String getFolderPathFor(@NotNull FileHandle oszFile) {
