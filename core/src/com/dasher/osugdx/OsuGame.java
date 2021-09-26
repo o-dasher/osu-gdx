@@ -133,7 +133,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			oszParser.parseImportDirectory();
 			beatMapStore.loadCache();
 			beatMapStore.loadAllBeatmaps();
-			beatmapManager.randomizeCurrentBeatmapSet();
 			return null;
 		});
 		assetManager.load();
@@ -181,6 +180,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			if (currentScreen instanceof IntroScreen && canSwitchIntroScreen && loadBeatmapsTask.isDone()) {
 				canSwitchIntroScreen = false;
 				float delta = Gdx.graphics.getDeltaTime();
+				beatmapManager.randomizeCurrentBeatmapSet();
 				backgroundStage = new Stage(viewport, batch);
 				skinManager = new SkinManager(this);
 				shapeRenderer = new BuffedShapeRenderer();

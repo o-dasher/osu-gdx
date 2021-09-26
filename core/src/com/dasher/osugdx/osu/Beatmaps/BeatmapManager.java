@@ -118,7 +118,9 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
                 currentMusic.setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
                     if (currentMusic.hashCode() == music.hashCode()) {
-                        randomizeCurrentBeatmapSet();
+                        // EVEN THOUGH THE THREAD THAT IS PLAYING THE MUSIC IS OR NOT THE GL
+                        // THREAD POSTRUNNABLE MUST BE CALLED NO IDEA WHY THOUGH
+                        Gdx.app.postRunnable(this::randomizeCurrentBeatmapSet);
                     }
                 });
             } catch (Exception e) {
@@ -199,6 +201,7 @@ public class BeatmapManager implements Listenable<com.dasher.osugdx.osu.Beatmaps
 
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
         if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.isPlaying())) {
+            System.out.println("Starting playing music from Thread: " + Thread.currentThread().getName());
             currentMusic.play();  // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
             game.asyncExecutor.submit(() -> {
                 if (game.getScreen() instanceof UIScreen) {

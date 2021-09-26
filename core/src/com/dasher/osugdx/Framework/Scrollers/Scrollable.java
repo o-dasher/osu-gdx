@@ -260,7 +260,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
             ScrollItemData itemData = baseData.get(actor);
-            if (itemData.baseVec == null) {
+            if (itemData == null || itemData.baseVec == null) {
                 return;
             }
 
