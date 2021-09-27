@@ -3,11 +3,16 @@ package com.dasher.osugdx.GameScenes;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.crashinvaders.vfx.effects.GaussianBlurEffect;
+import com.crashinvaders.vfx.effects.VfxEffect;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTextureListener;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
@@ -73,6 +78,11 @@ public class WorkingBackground extends GameImage implements BeatmapManagerListen
         setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
         applyCentering(viewport);
         super.act(delta);
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        super.draw(batch, parentAlpha);
     }
 
     @Override

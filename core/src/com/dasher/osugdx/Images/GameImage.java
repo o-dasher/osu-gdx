@@ -7,7 +7,7 @@ import com.dasher.osugdx.Framework.Actors.CenteredImage;
 import com.dasher.osugdx.OsuGame;
 
 public class GameImage extends CenteredImage {
-    private final OsuGame game;
+    protected final OsuGame game;
     private float baseScale = 0;
 
     public GameImage(OsuGame game, boolean forceCenter) {

@@ -89,15 +89,14 @@ public class MenuScreen extends UIScreen implements ScreenWithBackgroundMusic {
     public void render(float delta) {
         super.render(delta);
 
+        renderBackground(delta);
+
         // ACT
-        backgroundStage.act(delta);
         buttonsStage.act(delta);
         menuStage.act(delta);
         overlayStage.act(delta);
 
         // DRAW
-        viewport.apply(true);
-        backgroundStage.draw();
         menuLogo.renderBeatCircles(delta);
         buttonsStage.draw();
         menuLogo.colorLayer();

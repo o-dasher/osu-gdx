@@ -1,12 +1,13 @@
  package com.dasher.osugdx.GameScenes.Intro;
 
  import com.badlogic.gdx.Gdx;
- import com.badlogic.gdx.audio.Music;
+ import com.badlogic.gdx.graphics.Pixmap;
  import com.badlogic.gdx.graphics.Texture;
  import com.badlogic.gdx.math.Interpolation;
  import com.badlogic.gdx.scenes.scene2d.Stage;
  import com.badlogic.gdx.scenes.scene2d.actions.Actions;
- import com.badlogic.gdx.utils.Timer;
+ import com.crashinvaders.vfx.effects.MotionBlurEffect;
+ import com.crashinvaders.vfx.effects.util.MixEffect;
  import com.dasher.osugdx.Audio.GameMusic;
  import com.dasher.osugdx.GameScenes.Intro.Actors.LogoActor;
  import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
@@ -60,6 +61,7 @@
         if (backgroundStage != null) {
             backgroundStage.act(delta);
         }
+
         introStage.act(delta);
         introStage.draw();
 

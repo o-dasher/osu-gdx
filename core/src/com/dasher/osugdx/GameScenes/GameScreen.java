@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.crashinvaders.vfx.VfxManager;
+import com.crashinvaders.vfx.effects.GaussianBlurEffect;
 import com.dasher.osugdx.Audio.AudioFactory;
 import com.dasher.osugdx.Config.UIConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
@@ -47,6 +49,8 @@ public abstract class GameScreen implements Screen {
     protected AudioFactory audioFactory;
     protected ModManager modManager;
     protected Parrot parrot;
+    protected VfxManager vfxManager;
+    protected GaussianBlurEffect backgroundBlurEffect;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -75,6 +79,8 @@ public abstract class GameScreen implements Screen {
         audioFactory = game.audioFactory;
         modManager = game.modManager;
         parrot = game.parrot;
+        vfxManager = game.vfxManager;
+        backgroundBlurEffect = game.backgroundBlurEffect;
     }
 
     @Override
@@ -90,6 +96,19 @@ public abstract class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+    }
+
+    protected void renderBackground(float delta) {
+        viewport.apply(true);
+        backgroundStage.act(delta);
+        vfxManager.addEffect(backgroundBlurEffect);
+        vfxManager.beginInputCapture();
+        backgroundStage.draw();
+        vfxManager.endInputCapture();
+        vfxManager.applyEffects();
+        vfxManager.renderToScreen();
+        vfxManager.removeEffect(backgroundBlurEffect);
+        viewport.apply();
     }
 
     public void switchScreen(Screen screen) {

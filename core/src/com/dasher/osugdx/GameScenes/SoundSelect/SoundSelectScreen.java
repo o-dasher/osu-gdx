@@ -4,6 +4,7 @@ package com.dasher.osugdx.GameScenes.SoundSelect;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.input.GestureDetector;
@@ -15,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.crashinvaders.vfx.effects.MotionBlurEffect;
+import com.crashinvaders.vfx.effects.util.MixEffect;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
@@ -40,6 +43,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     private float thumbnailLazyLoadingTime;
     private Label.LabelStyle selectorLabelStyle;
     private boolean allowThumbnails;
+    private MotionBlurEffect scrollMotionBlur;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -65,6 +69,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setStartFromSidesStaircase(true);
         beatmapSetSelectorStage.setExponentialAlpha(true);
         allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
+        scrollMotionBlur = new MotionBlurEffect(Pixmap.Format.RGBA8888, MixEffect.Method.MAX, 1);
         resetSelectors();
         beatmapManager.addListener(this);
     }
@@ -152,12 +157,20 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             scrolledToBeatmapSetAtStart = scrollToSelectedBeatmapSet();
         }
 
-        viewport.apply(true);
-        backgroundStage.act(delta);
-        backgroundStage.draw();
-        viewport.apply();
+        renderBackground(delta);
+
+
         beatmapSetSelectorStage.act(delta);
+
+        vfxManager.addEffect(scrollMotionBlur);
+        vfxManager.beginInputCapture();
+
         beatmapSetSelectorStage.draw();
+
+        vfxManager.endInputCapture();
+        vfxManager.applyEffects();
+        vfxManager.renderToScreen();
+        vfxManager.removeEffect(scrollMotionBlur);
 
         renderFade(delta);
 
