@@ -137,7 +137,7 @@ public abstract class Selector extends Group implements BeatmapManagerListener, 
 
     public void adjustColor() {
         if (isThisMapSelected()) {
-            if (getColor() != skin.getSongSelectActiveTextColor()) {
+            if (getColor() != activeColor()) {
                 safeChangeSelectedSelector();
                 menuBackground.addAction(Actions.color(activeColor(), colorSelectTime));
             }

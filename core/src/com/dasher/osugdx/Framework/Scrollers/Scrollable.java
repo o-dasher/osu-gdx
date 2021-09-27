@@ -180,8 +180,9 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     public void removeItem(T item) {
-        getActors().removeValue(item, true);
+        addAction(Actions.removeActor(item));
         getItems().removeValue(item, true);
+        baseData.remove(item);
     }
 
     @Override

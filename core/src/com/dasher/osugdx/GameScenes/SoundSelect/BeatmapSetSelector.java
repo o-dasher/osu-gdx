@@ -41,6 +41,7 @@ public class BeatmapSetSelector extends Selector {
         beatmapSelectors.sort((o1, o2) ->
                 Double.compare(o1.beatmap.getBaseStars(), o2.beatmap.getBaseStars())
         );
+        menuBackground.setColor(inactiveColor());
     }
 
     public BeatmapSelector createBeatmapSelector(Beatmap beatmap) {
@@ -115,10 +116,10 @@ public class BeatmapSetSelector extends Selector {
             for (BeatmapSelector beatmapSelector : ((BeatmapSetSelector) selector).beatmapSelectors) {
                 beatmapSelector.generateStarsTasks.clear();
                 beatmapSelector.getActions().clear();
+                soundSelectScreen.beatmapSetSelectorStage.removeItem(beatmapSelector);
                 for (GameImage star: beatmapSelector.stars) {
                     star.getColor().a = 0;
                 }
-                soundSelectScreen.beatmapSetSelectorStage.removeItem(beatmapSelector);
             }
             ((BeatmapSetSelector) selector).isLayouted = false;
         }

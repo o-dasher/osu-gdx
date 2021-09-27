@@ -51,7 +51,6 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
         diffLabel = createLabel(metadata().getVersion());
         diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - middleLabel.getHeight() * labelScale);
         adjustColor();
-        onBeatmapCalculated(beatmap);
         generateStars();
     }
 
