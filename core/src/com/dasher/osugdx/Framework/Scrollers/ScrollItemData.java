@@ -6,4 +6,5 @@ public class ScrollItemData {
     protected Vector2 baseVec = new Vector2();
     protected Vector2 extraVec = new Vector2();
     protected boolean isHovered = false;
+    protected boolean didBaseFirstX = false;
 }

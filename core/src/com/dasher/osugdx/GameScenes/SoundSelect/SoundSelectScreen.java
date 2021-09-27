@@ -49,7 +49,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public void show() {
         super.show();
         selectorLabelStyle = new Label.LabelStyle(fonts.allerFont, null);
-        thumbnailLazyLoadingTime = 0.25f;
+        thumbnailLazyLoadingTime = 0.1f;
         beatmapSetSelectorStage = new Scrollable<>(viewport);
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
         inputMultiplexer.addProcessor(beatmapSetSelectorStage);
@@ -62,6 +62,8 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setStairCaseAdjustTime(0.25f);
         beatmapSetSelectorStage.setHoverAbleItems(true);
         beatmapSetSelectorStage.setHoverXMultiplier(0.05f);
+        beatmapSetSelectorStage.setStartFromSidesStaircase(true);
+        beatmapSetSelectorStage.setExponentialAlpha(true);
         allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
         resetSelectors();
         beatmapManager.addListener(this);

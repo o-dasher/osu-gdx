@@ -49,7 +49,7 @@
         seeyaSound = audioFactory.newMusic(Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.seeya.fileName)));
         welcomeSound = audioFactory.newMusic(Gdx.audio.newMusic(Gdx.files.internal(assetManager.sounds.welcome.fileName)));
 
-        parrot.playMusic(welcomeSound);
+        welcomeSound.playParrot(false, true);
     }
 
     @Override

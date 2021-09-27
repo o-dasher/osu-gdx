@@ -17,7 +17,6 @@ import com.badlogic.gdx.utils.IdentityMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
-import com.dasher.osugdx.Framework.Tasks.ClockTask;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -40,8 +39,9 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
     private float layoutTime = 0;
-    private boolean iExponentialAlpha = true;
+    private boolean isExponentialAlpha = false;
     private float minStairCaseAdjustTime = 0;
+    private boolean startFromSidesStaircase = false;
 
     public Scrollable() {
         super();
@@ -91,6 +91,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         this.alignX = alignX;
     }
 
+    boolean firstLayout = true;
+
     public void layout() {
         getRoot().getActions().clear();
         isFirstStairCaseX = true;
@@ -115,33 +117,40 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
             }
             ScrollItemData scrollItemData = baseData.containsKey(currentActor)?
                     baseData.get(currentActor) : new ScrollItemData();
-            scrollItemData.baseVec.x = x;
-            scrollItemData.baseVec.y = y;
-            currentActor.setPosition(x, y);
+            y += height * (items.size - i);
+            scrollItemData.baseVec.set(x, y);
             baseData.put(currentActor, scrollItemData);
-            float hBy = height * (items.size - i);
+            isLayouting = true;
+            if (isStairCased && scrollItemData.didBaseFirstX) {
+                x = currentActor.getX();
+            } else if (isStairCased) {
+                if (startFromSidesStaircase) {
+                    switch (alignX) {
+                        case Align.right:
+                            x = getViewport().getWorldWidth() / 2 + currentActor.getWidth() / 2;
+                            break;
+                        case Align.left:
+                            x = -currentActor.getWidth() / 2;
+                            break;
+                    }
+                }
+            }
             if (layoutTime <= 0) {
-                isLayouting = true;
-                currentActor.setPosition(currentActor.getX(), currentActor.getY() + hBy);
+                currentActor.setPosition(x, y);
+                scrollItemData.didBaseFirstX = true;
                 isLayouting = false;
             } else {
                 currentActor.addAction(
                         Actions.sequence(
-                                Actions.run(() -> isLayouting = true),
-                                Actions.moveBy(
-                                        0,
-                                        hBy,
-                                        layoutTime
-                                ),
+                                Actions.moveTo(x, y, layoutTime),
                                 Actions.run(() -> {
                                     isLayouting = false;
-                                    scrollItemData.baseVec.x = currentActor.getX();
-                                    scrollItemData.baseVec.y = currentActor.getY();
                                 })
                         )
                 );
             }
         }
+        firstLayout = false;
     }
 
     public void addItem(T item) {
@@ -221,7 +230,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 }
                 upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
                 downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
-                if (iExponentialAlpha) {
+                if (isExponentialAlpha) {
                     float time = 0.25f;
                     exponentialAlphaEffect(upActors, time);
                     exponentialAlphaEffect(downActors, time);
@@ -407,5 +416,13 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
     public void setMinStairCaseAdjustTime(float minStairCaseAdjustTime) {
         this.minStairCaseAdjustTime = minStairCaseAdjustTime;
+    }
+
+    public void setExponentialAlpha(boolean exponentialAlpha) {
+        this.isExponentialAlpha = exponentialAlpha;
+    }
+
+    public void setStartFromSidesStaircase(boolean startFromSidesStaircase) {
+        this.startFromSidesStaircase = startFromSidesStaircase;
     }
 }
