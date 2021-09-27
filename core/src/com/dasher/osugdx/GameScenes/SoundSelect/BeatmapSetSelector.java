@@ -115,9 +115,9 @@ public class BeatmapSetSelector extends Selector {
         if (selector instanceof BeatmapSetSelector) {
             for (BeatmapSelector beatmapSelector : ((BeatmapSetSelector) selector).beatmapSelectors) {
                 beatmapSelector.generateStarsTasks.clear();
-                beatmapSelector.getActions().clear();
                 soundSelectScreen.beatmapSetSelectorStage.removeItem(beatmapSelector);
                 for (GameImage star: beatmapSelector.stars) {
+                    star.getActions().clear();
                     star.getColor().a = 0;
                 }
             }
