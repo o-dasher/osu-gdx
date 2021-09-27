@@ -179,6 +179,11 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         super.addActor(item);
     }
 
+    public void removeItem(T item) {
+        getActors().removeValue(item, true);
+        getItems().removeValue(item, true);
+    }
+
     @Override
     public void addActor(Actor actor) {
         System.out.println("For scrollable use addItem() instead!...");

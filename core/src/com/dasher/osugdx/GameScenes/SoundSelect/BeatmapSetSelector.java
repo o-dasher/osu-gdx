@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
@@ -38,14 +39,14 @@ public class BeatmapSetSelector extends Selector {
             beatmapSelectors.add(beatmapSelector);
         }
         beatmapSelectors.sort((o1, o2) ->
-                (int) (o1.beatmap.getBaseStars() - o2.beatmap.getBaseStars())
+                Double.compare(o1.beatmap.getBaseStars(), o2.beatmap.getBaseStars())
         );
     }
 
     public BeatmapSelector createBeatmapSelector(Beatmap beatmap) {
         return new BeatmapSelector(
                 game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
-                beatMapSet, beatmap, inactiveBeatmapColor, allowThumbnails
+                beatMapSet, beatmap, inactiveBeatmapColor, allowThumbnails, this
         );
     }
 
@@ -77,8 +78,9 @@ public class BeatmapSetSelector extends Selector {
 
     public void layoutBeatmaps() {
         safeChangeSelectedSelector();
-        for (Beatmap beatmap: beatMapSet.beatmaps) {
-            soundSelectScreen.beatmapSetSelectorStage.addItem(createBeatmapSelector(beatmap));
+        for (BeatmapSelector beatmapSelector: beatmapSelectors) {
+            beatmapSelector.animateStars();
+            soundSelectScreen.beatmapSetSelectorStage.addItem(beatmapSelector);
         }
         soundSelectScreen.rearrangeSelectors();
         isLayouted = true;
@@ -109,6 +111,17 @@ public class BeatmapSetSelector extends Selector {
     @Override
     public void disableSelector(Selector selector) {
         super.disableSelector(selector);
+        if (selector instanceof BeatmapSetSelector) {
+            for (BeatmapSelector beatmapSelector : ((BeatmapSetSelector) selector).beatmapSelectors) {
+                beatmapSelector.generateStarsTasks.clear();
+                beatmapSelector.getActions().clear();
+                for (GameImage star: beatmapSelector.stars) {
+                    star.getColor().a = 0;
+                }
+                soundSelectScreen.beatmapSetSelectorStage.removeItem(beatmapSelector);
+            }
+            ((BeatmapSetSelector) selector).isLayouted = false;
+        }
     }
 
     @Override

@@ -180,7 +180,7 @@ public abstract class Selector extends Group implements BeatmapManagerListener, 
 
     @Override
     public void onPreBeatmapChange() {
-
+        adjustColor();
     }
 
     @Override

@@ -30,18 +30,21 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
     protected final Array<GameImage> stars = new Array<>();
+    protected final Array<ClockTask> generateStarsTasks = new Array<>();
     private final Label diffLabel;
     private final Color inactiveColor;
-    private final Array<ClockTask> generateStarsTasks = new Array<>();
+    private final BeatmapSetSelector beatmapSetSelector;
+    private boolean generatedStars = false;
 
     public BeatmapSelector(
             OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager,
             SoundSelectScreen soundSelectScreen,
             BitmapFont font, Label.LabelStyle labelStyle,
-            BeatMapSet beatmapSet, @NotNull Beatmap beatmap, Color inactiveColor, boolean allowThumbnails
+            BeatMapSet beatmapSet, @NotNull Beatmap beatmap, Color inactiveColor, boolean allowThumbnails, BeatmapSetSelector beatmapSetSelector
     ) {
         super(game, skin, beatmapManager, soundSelectScreen, font, labelStyle, allowThumbnails);
         this.beatmap = beatmap;
+        this.beatmapSetSelector = beatmapSetSelector;
         this.beatmapSet = beatmapSet;
         this.inactiveColor = inactiveColor;
         initLabels();
@@ -49,10 +52,14 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
         diffLabel.setPosition(middleLabel.getX(), middleLabel.getY() - middleLabel.getHeight() * labelScale);
         adjustColor();
         onBeatmapCalculated(beatmap);
+        generateStars();
     }
 
     protected void generateStars() {
-        stars.clear();
+        if (generatedStars) {
+            return;
+        }
+        generatedStars = true;
         float starX = diffLabel.getX();
         // 10 - 1 to account for last star which can be floated
         float maxStars = Math.min(10 - 1, (int) beatmap.getBaseStars());
@@ -74,14 +81,23 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
                     starX,
                     diffLabel.getY() - star.getHeight() * starScale * labelScale
             );
+            star.setOrigin(Align.bottomLeft);
+            star.setTouchable(Touchable.disabled);
             starX += star.getWidth() * starScale;
             stars.add(star);
+            addActor(star);
+        }
+    }
+
+    protected void animateStars() {
+        float starScale = 0.25f;
+        for (int i = 0; i < stars.size; i++) {
+            GameImage star = stars.get(i);
+            star.getColor().a = 0;
             final float clockTime = (i + 1) * 0.1f;
             generateStarsTasks.add(new ClockTask(clockTime) {
                 @Override
                 public void run() {
-                    star.setOrigin(Align.bottomLeft);
-                    star.setTouchable(Touchable.disabled);
                     star.setScale(0);
                     star.getColor().a = 0;
                     star.addAction(
@@ -90,7 +106,6 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
                                     Actions.scaleTo(starScale, starScale, clockTime)
                             )
                     );
-                    addActor(star);
                 }
             });
         }
@@ -171,14 +186,12 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     }
 
     @Override
-    public void onNewBeatmap(Beatmap beatmap) {
-        super.onNewBeatmap(beatmap);
-    }
-
-    @Override
     public void onBeatmapCalculated(Beatmap beatmap) {
         if (beatmap.beatmapFilePath.equals(this.beatmap.beatmapFilePath)) {
             generateStars();
+            if (beatmapSetSelector.isThisMapSelected()) {
+                animateStars();
+            }
         }
     }
 
@@ -199,6 +212,6 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
 
     @Override
     public void dispose() {
-        stars.clear();
+
     }
 }
