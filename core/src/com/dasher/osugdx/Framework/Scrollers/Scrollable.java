@@ -40,6 +40,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     private float stairCaseMultiplier = 25f;
     private float stairCaseAdjustTime = 1;
     private float layoutTime = 0;
+    private boolean iExponentialAlpha = true;
     private float minStairCaseAdjustTime = 0;
 
     public Scrollable() {
@@ -202,24 +203,30 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 }
             }
 
-            if (isStairCased) {
-                final int midIndex = (visibleActors.size - 1) / 2;
-                if (!(midIndex >= visibleActors.size) && midIndex >= 0) {
-                    Actor centerActor = visibleActors.get(midIndex);
-                    Array<T> upActors = new Array<>();
-                    Array<T> downActors = new Array<>();
-                    for (T item: items) {
-                        if (item.getY() > centerActor.getY()) {
+            final int midIndex = (visibleActors.size - 1) / 2;
+            if (!(midIndex >= visibleActors.size) && midIndex >= 0) {
+                Actor centerActor = visibleActors.get(midIndex);
+                Array<T> upActors = new Array<>();
+                Array<T> downActors = new Array<>();
+                for (T item: items) {
+                    if (item.getY() > centerActor.getY()) {
+                        upActors.add(item);
+                    } else {
+                        if (item == centerActor) {
                             upActors.add(item);
                         } else {
                             downActors.add(item);
                         }
                     }
-                    if (setNotLayoutingStaircaseTask != null) {
-                        setNotLayoutingStaircaseTask.update(delta);
-                    }
-                    upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
-                    downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
+                }
+                upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
+                downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
+                if (iExponentialAlpha) {
+                    float time = 0.25f;
+                    exponentialAlphaEffect(upActors, time);
+                    exponentialAlphaEffect(downActors, time);
+                }
+                if (isStairCased) {
                     float realAdjustTime = stairCaseAdjustTime;
                     if (isFirstStairCaseX || isFirstStairCaseY) {
                         realAdjustTime = minStairCaseAdjustTime;
@@ -252,7 +259,17 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
     }
 
     private final Vector2 nextStairCaseCoordinate = new Vector2();
-    private ClockTask setNotLayoutingStaircaseTask;
+
+    private void exponentialAlphaEffect(@NotNull Array<T> itemsPart, float realAdjustTime) {
+        for (int i = 0; i < itemsPart.size; i++) {
+            Actor actor = itemsPart.get(i);
+            float a = 1 - (i * 0.1f );
+            if (actor.getColor().a != a) {
+                actor.addAction(Actions.alpha(a, realAdjustTime));
+            }
+        }
+    }
+
 
     private void stairCaseEffect(@NotNull Array<T> itemsPart, float realAdjustTime) {
         for (int i = 0; i < itemsPart.size; i++) {
@@ -271,23 +288,6 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
 
             actor.addAction(Actions.moveTo(nextStairCaseCoordinate.x, nextStairCaseCoordinate.y, realAdjustTime));
         }
-
-        /*
-        if (isStairCased) {
-            if (!isLayouting) {
-                if (setNotLayoutingStaircaseTask == null) {
-                    setNotLayoutingStaircaseTask = new ClockTask(realAdjustTime * 2) {
-                        @Override
-                        public void run() {
-                            System.out.print("AA");
-                            isLayouting = false;
-                        }
-                    };
-                }
-            }
-        }
-
-         */
     }
 
     public Array<T> getItems() {
