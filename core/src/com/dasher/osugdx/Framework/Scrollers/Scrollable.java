@@ -3,20 +3,17 @@ package com.dasher.osugdx.Framework.Scrollers;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.IdentityMap;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
@@ -78,7 +75,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                 return false;
             }
         });
-        minStairCaseAdjustTime = stairCaseAdjustTime / 10;
+        minStairCaseAdjustTime = stairCaseAdjustTime;
     }
 
     public void setYMultiplier(float yMultiplier) {
@@ -132,7 +129,8 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                                 Actions.run(() -> isLayouting = true),
                                 Actions.moveBy(
                                         0,
-                                        hBy
+                                        hBy,
+                                        layoutTime
                                 ),
                                 Actions.run(() -> {
                                     isLayouting = false;

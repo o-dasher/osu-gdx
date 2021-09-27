@@ -5,18 +5,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
-import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
-import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.Skin;
-import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
-import com.dasher.osugdx.osu.Mods.ModManagerListener;
+import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
+import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 
 import org.jetbrains.annotations.NotNull;
 
-
-import jdk.vm.ci.aarch64.AArch64;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
 
@@ -24,6 +19,7 @@ public class BeatmapSetSelector extends Selector {
     public final BeatMapSet beatMapSet;
     public boolean isLayouted = false;
     public final Array<BeatmapSelector> beatmapSelectors = new Array<>();
+    private final Color inactiveBeatmapColor = new Color(0xadd8e6ff);
 
     public BeatmapSetSelector(
             OsuGame game, @NotNull Skin skin, @NotNull BeatMapSet beatMapSet, BeatmapManager beatmapManager,
@@ -34,19 +30,22 @@ public class BeatmapSetSelector extends Selector {
         this.beatMapSet = beatMapSet;
         initLabels();
         adjustColor();
-        Color inactiveBeatmapColor = new Color(0xadd8e6ff);
         for (int i = 0; i < beatMapSet.beatmaps.size; i++) {
             Beatmap beatmap = beatMapSet.beatmaps.get(i);
-            BeatmapSelector beatmapSelector = new BeatmapSelector(
-                    game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
-                    beatMapSet, beatmap, inactiveBeatmapColor, allowThumbnails
-            );
+            BeatmapSelector beatmapSelector = createBeatmapSelector(beatmap);
             game.modManager.addListener(beatmapSelector);
             game.beatmapManager.addListener(beatmapSelector);
             beatmapSelectors.add(beatmapSelector);
         }
         beatmapSelectors.sort((o1, o2) ->
                 (int) (o1.beatmap.getBaseStars() - o2.beatmap.getBaseStars())
+        );
+    }
+
+    public BeatmapSelector createBeatmapSelector(Beatmap beatmap) {
+        return new BeatmapSelector(
+                game, skin, beatmapManager, soundSelectScreen, font, labelStyle,
+                beatMapSet, beatmap, inactiveBeatmapColor, allowThumbnails
         );
     }
 
@@ -78,8 +77,8 @@ public class BeatmapSetSelector extends Selector {
 
     public void layoutBeatmaps() {
         safeChangeSelectedSelector();
-        for (BeatmapSelector beatmapSelector: beatmapSelectors) {
-            soundSelectScreen.beatmapSetSelectorStage.addItem(beatmapSelector);
+        for (Beatmap beatmap: beatMapSet.beatmaps) {
+            soundSelectScreen.beatmapSetSelectorStage.addItem(createBeatmapSelector(beatmap));
         }
         soundSelectScreen.rearrangeSelectors();
         isLayouted = true;
@@ -108,9 +107,15 @@ public class BeatmapSetSelector extends Selector {
     }
 
     @Override
+    public void disableSelector(Selector selector) {
+        super.disableSelector(selector);
+    }
+
+    @Override
     public void dispose() {
         super.dispose();
         for (BeatmapSelector beatmapSelector: beatmapSelectors) {
+            beatmapSelector.dispose();
             beatmapManager.removeListener(beatmapSelector);
             game.modManager.removeListener(beatmapSelector);
         }

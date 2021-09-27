@@ -59,7 +59,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setXMultiplier(0.9f);
         beatmapSetSelectorStage.setStairCased(true);
         beatmapSetSelectorStage.setStairCaseMultiplier(25);
-        beatmapSetSelectorStage.setStairCaseAdjustTime(0.3f);
+        beatmapSetSelectorStage.setStairCaseAdjustTime(0.25f);
         beatmapSetSelectorStage.setHoverAbleItems(true);
         beatmapSetSelectorStage.setHoverXMultiplier(0.05f);
         allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
@@ -176,28 +176,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
             clockTask.update(delta);
         }
         if (beatmapSetSelectorStage.isNotLayouting() && !isScrollingToNextBeatmapSet && !isBaseShowing) {
-            int visibleI = -1;
             for (Selector selector: beatmapSetSelectorStage.getItems()) {
                 SpriteDrawable thumbDrawable = ((SpriteDrawable) selector.thumbnail.getDrawable());
                 Sprite thumbSprite = thumbDrawable.getSprite();
                 if (selector.getStage() != null && ActorHelper.actorIsVisible(selector)) {
-                    visibleI++;
-
-                    if (selector instanceof BeatmapSetSelector) {
-                        if (selector.thumbnail.getActions().isEmpty() && allowThumbnails) {
-                            float a = 1 - (visibleI * 0.1f);
-                            if (selector.thumbnail.getColor().a != a) {
-                                ReusableTexture selectorTexture = (
-                                        (ReusableTexture) ((SpriteDrawable) selector.thumbnail.getDrawable())
-                                                .getSprite().getTexture()
-                                );
-                                if (selectorTexture != null && !selectorTexture.isDisposed()) {
-                                    selector.thumbnail.addAction(Actions.alpha(a, 1));
-                                }
-                            }
-                        }
-                    }
-
                     if (
                             (thumbSprite.getTexture() == null || !selector.isThumbnailTextureLoaded)
                                     && !selector.isLazyLoadingThumbnail

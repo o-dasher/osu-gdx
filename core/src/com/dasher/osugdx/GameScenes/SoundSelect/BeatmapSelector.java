@@ -29,6 +29,7 @@ public
 class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener, BeatmapManagerReferencesListener {
     protected Beatmap beatmap;
     protected BeatMapSet beatmapSet;
+    protected final Array<GameImage> stars = new Array<>();
     private final Label diffLabel;
     private final Color inactiveColor;
     private final Array<ClockTask> generateStarsTasks = new Array<>();
@@ -50,7 +51,8 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
         onBeatmapCalculated(beatmap);
     }
 
-    private void generateStars() {
+    protected void generateStars() {
+        stars.clear();
         float starX = diffLabel.getX();
         // 10 - 1 to account for last star which can be floated
         float maxStars = Math.min(10 - 1, (int) beatmap.getBaseStars());
@@ -73,6 +75,7 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
                     diffLabel.getY() - star.getHeight() * starScale * labelScale
             );
             starX += star.getWidth() * starScale;
+            stars.add(star);
             final float clockTime = (i + 1) * 0.1f;
             generateStarsTasks.add(new ClockTask(clockTime) {
                 @Override
@@ -192,5 +195,10 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     @Override
     public void setBeatmapReference(Beatmap beatmap) {
         this.beatmap = beatmap;
+    }
+
+    @Override
+    public void dispose() {
+        stars.clear();
     }
 }
