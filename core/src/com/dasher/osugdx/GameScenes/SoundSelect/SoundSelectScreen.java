@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.crashinvaders.vfx.effects.MotionBlurEffect;
 import com.crashinvaders.vfx.effects.util.MixEffect;
@@ -27,7 +28,9 @@ import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
 import com.dasher.osugdx.Images.GameImage;
+import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.Skins.Skin;
+import com.dasher.osugdx.Skins.SkinElement;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Input.InputHelper;
@@ -62,14 +65,14 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void show() {
         super.show();
-        Skin skin = skinManager.getSelectedSkin();
+        ObjectMap<OsuElements, SkinElement> elements = skinManager.getSelectedSkin().elements;
 
         // DownBar
         menuOptionsStage = new Stage(viewport);
-        selectionMods = new DownBarOption(game, skin.selectionMods, skin.selectionModsOver, downBarMain, downBarMain);
+        selectionMods = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), downBarMain, downBarMain);
         selectionMods.setPosition(180, 0);
-        randomOption = new DownBarOption(game, skin.selectionRandom, skin.selectionRandomOver, selectionMods);
-        otherOptions = new DownBarOption(game, skin.selectionOptions, skin.selectionOptionsOver, randomOption);
+        randomOption = new DownBarOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods);
+        otherOptions = new DownBarOption(game, elements.get(OsuElements.SELECTION_OPTIONS), elements.get(OsuElements.SELECTION_OPTIONS_OVERLAY), randomOption);
         menuOptionsStage.addActor(selectionMods);
         menuOptionsStage.addActor(randomOption);
         menuOptionsStage.addActor(otherOptions);
@@ -188,15 +191,19 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
         beatmapSetSelectorStage.act(delta);
 
-        vfxManager.addEffect(scrollMotionBlur);
-        vfxManager.beginInputCapture();
+        if (config.getGraphics().isPostProcessingEnabled()) {
+            vfxManager.addEffect(scrollMotionBlur);
+            vfxManager.beginInputCapture();
+        }
 
         beatmapSetSelectorStage.draw();
 
-        vfxManager.endInputCapture();
-        vfxManager.applyEffects();
-        vfxManager.renderToScreen();
-        vfxManager.removeEffect(scrollMotionBlur);
+        if (config.getGraphics().isPostProcessingEnabled()) {
+            vfxManager.endInputCapture();
+            vfxManager.applyEffects();
+            vfxManager.renderToScreen();
+            vfxManager.removeEffect(scrollMotionBlur);
+        }
 
         renderDownBar();
 

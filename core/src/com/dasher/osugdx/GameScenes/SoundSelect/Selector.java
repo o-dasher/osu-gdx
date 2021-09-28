@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Null;
 import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
+import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
@@ -58,7 +59,7 @@ public abstract class Selector extends Group implements BeatmapManagerListener, 
         this.font = font;
         this.allowThumbnails = allowThumbnails;
         game.beatmapManager.addListener(this);
-        Sprite menuButtonBG = skin.menuButtonBG.getSprite();
+        Sprite menuButtonBG = skin.elements.get(OsuElements.MENU_BUTTON_BG).getSprite();
         float w = 699;
         float h = 103;
         this.menuBackground = new GameImage(game, menuButtonBG, false);

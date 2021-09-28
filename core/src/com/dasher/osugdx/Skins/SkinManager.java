@@ -2,10 +2,13 @@ package com.dasher.osugdx.Skins;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 public class SkinManager {
     private final OsuGame game;
@@ -29,8 +32,8 @@ public class SkinManager {
     }
 
     public void loadElements() {
-        for (SkinElementNames elementName: SkinElementNames.values()) {
-            SkinElement createdElement = null;
+        for (OsuElements elementName: OsuElements.values()) {
+            SkinElement createdElement;
             for (String name: elementName.names) {
                 for (String extension: elementName.extensions) {
                     String path = selectedSkin.getDirectory().path() + "/" +name+"."+ extension;
@@ -41,68 +44,16 @@ public class SkinManager {
                     } catch (Exception e) {
                         continue;
                     }
-                    switch (elementName) {
-                        case CURSOR:
-                            selectedSkin.cursor = createdElement;
-                            break;
-                        case CURSOR_MIDDLE: {
-                            selectedSkin.cursorMiddle = createdElement;
-                            break;
-                        }
-                        case CURSOR_TRAIL: {
-                            selectedSkin.cursorTrail = createdElement;
-                            break;
-                        }
-                        case MENU_BUTTON_BG: {
-                            selectedSkin.menuButtonBG = createdElement;
-                            break;
-                        }
-                        case STAR:
-                            selectedSkin.star1 = createdElement;
-                            break;
-                        case STAR2:
-                            selectedSkin.star2 = createdElement;
-                            break;
-                        case STAR3:
-                            selectedSkin.star3 = createdElement;
-                            break;
-                        case SELECTION_MODS:
-                            selectedSkin.selectionMods = createdElement;
-                            break;
-                        case SELECTION_RANDOM:
-                            selectedSkin.selectionRandom = createdElement;
-                            break;
-                        case SELECTION_OPTIONS:
-                            selectedSkin.selectionOptions = createdElement;
-                            break;
-                        case SELECTION_MODS_OVERLAY:
-                            selectedSkin.selectionModsOver = createdElement;
-                            break;
-                        case SELECTION_RANDOM_OVERLAY:
-                            selectedSkin.selectionRandomOver = createdElement;
-                            break;
-                        case SELECTION_OPTIONS_OVERLAY:
-                            selectedSkin.selectionOptionsOver = createdElement;
-                            break;
-                        case SELECTION_MODE:
-                            selectedSkin.selectionMode = createdElement;
-                            break;
-                        case SELECTION_MODE_OVERLAY:
-                            selectedSkin.selectionModeHover = createdElement;
-                            break;
-                        default:
-                            break;
-                    }
+                    selectedSkin.elements.put(elementName, createdElement);
                 }
             }
-            selectedSkin.elements.add(createdElement);
         }
     }
 
     private void unloadElements() {
-        for (SkinElement element: selectedSkin.elements) {
-            element.dispose();
-            selectedSkin.elements.removeValue(element, true);
+        for (ObjectMap.Entry<OsuElements, SkinElement> entry: selectedSkin.elements) {
+            entry.value.dispose();
+            selectedSkin.elements.remove(entry.key);
         }
     }
 

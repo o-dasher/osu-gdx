@@ -18,13 +18,12 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import com.badlogic.gdx.utils.async.AsyncResult;
-import com.badlogic.gdx.utils.async.AsyncTask;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.GaussianBlurEffect;
 import com.dasher.osugdx.Audio.AudioFactory;
-import com.dasher.osugdx.Config.UIConfig;
+import com.dasher.osugdx.Config.GameConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.FadeBlock;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
@@ -57,7 +56,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public SpriteBatch batch;
 	public Viewport viewport;
 	public GameAssetManager assetManager;
-	public UIConfig uiConfig;
 	public InputMultiplexer inputMultiplexer;
 	public BuffedShapeRenderer shapeRenderer;
 	public GlyphLayout glyphLayout;
@@ -88,6 +86,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public ClockTask setSwitchFromIntroScreenTask;
 	public AsyncResult<Null> loadBeatmapsTask;
 	public GaussianBlurEffect backgroundBlurEffect;
+	public GameConfig config;
 
 	private int WORLD_WIDTH;
 	private int WORLD_HEIGHT;
@@ -119,6 +118,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		inputMultiplexer = new InputMultiplexer();
 		parrot = new Parrot();
 		cleanupTime = 0.3f;
+		config = new GameConfig();
 		Gdx.input.setCatchKey(Input.Keys.BACK, true);
 		Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 		Gdx.input.setInputProcessor(inputMultiplexer);
@@ -184,8 +184,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 		float delta = Gdx.graphics.getDeltaTime();
 
-		vfxManager.cleanUpBuffers();
-		vfxManager.update(delta);
+		if (config.getGraphics().isPostProcessingEnabled()) {
+			vfxManager.cleanUpBuffers();
+			vfxManager.update(delta);
+		}
+
 		parrot.update(delta);
 		audioFactory.update(delta);
 		super.render();
@@ -210,7 +213,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 						calledToSwitchScreen = false;
 					}
 				};
-				uiConfig = new UIConfig();
+				config.loadConfig();
 				glyphLayout = new GlyphLayout();
 				fadeBlock.setAlphaIncreaseDivisor(cleanupTime);
 				fonts = new Fonts(assetManager);
@@ -221,7 +224,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				beatmapManager.addListener(workingBackground);
 				beatmapManager.addListener(beatFactory);
 				backgroundBlurEffect = new GaussianBlurEffect();
-				backgroundBlurEffect.setType(GaussianBlurEffect.BlurType.Gaussian5x5b);
 				backgroundBlurEffect.setPasses(5);
 				skinManager.changeSkin(skinManager.getDefaultDir());
 				setSwitchFromIntroScreenTask = new ClockTask(delta * 2) {

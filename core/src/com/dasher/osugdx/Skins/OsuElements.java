@@ -1,6 +1,6 @@
 package com.dasher.osugdx.Skins;
 
-public enum SkinElementNames {
+public enum OsuElements {
     // Cursor
     CURSOR("cursor", Extensions.pngOnly),
     CURSOR_MIDDLE("cursormiddle", Extensions.pngOnly),
@@ -32,7 +32,7 @@ public enum SkinElementNames {
     public final String[] names;
     public final String[] extensions;
 
-    SkinElementNames(String name, String[] extensions) {
+    OsuElements(String name, String[] extensions) {
         this.name = name;
         this.names = new String[]{name, name + "@2x"};
         this.extensions = extensions;

@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.crashinvaders.vfx.VfxManager;
 import com.crashinvaders.vfx.effects.GaussianBlurEffect;
 import com.dasher.osugdx.Audio.AudioFactory;
-import com.dasher.osugdx.Config.UIConfig;
+import com.dasher.osugdx.Config.GameConfig;
 import com.dasher.osugdx.Framework.Graphics.Shaperendering.BuffedShapeRenderer;
 import com.dasher.osugdx.Graphics.Fonts;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapStore;
@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 public abstract class GameScreen implements Screen {
     protected OsuGame game;
     protected GameAssetManager assetManager;
-    protected UIConfig uiConfig;
     protected Batch batch;
     protected Viewport viewport;
     protected BuffedShapeRenderer shapeRenderer;
@@ -51,6 +50,7 @@ public abstract class GameScreen implements Screen {
     protected Parrot parrot;
     protected VfxManager vfxManager;
     protected GaussianBlurEffect backgroundBlurEffect;
+    protected GameConfig config;
 
     public GameScreen(@NotNull OsuGame game) {
         this.game = game;
@@ -61,7 +61,6 @@ public abstract class GameScreen implements Screen {
         cleanupTime = game.cleanupTime;
         assetManager = game.assetManager;
         fonts = game.fonts;
-        uiConfig = game.uiConfig;
         batch = game.batch;
         viewport = game.viewport;
         shapeRenderer = game.shapeRenderer;
@@ -81,6 +80,7 @@ public abstract class GameScreen implements Screen {
         parrot = game.parrot;
         vfxManager = game.vfxManager;
         backgroundBlurEffect = game.backgroundBlurEffect;
+        config = game.config;
     }
 
     @Override
@@ -101,13 +101,17 @@ public abstract class GameScreen implements Screen {
     protected void renderBackground(float delta) {
         viewport.apply(true);
         backgroundStage.act(delta);
-        vfxManager.addEffect(backgroundBlurEffect);
-        vfxManager.beginInputCapture();
+        if (config.getGraphics().isPostProcessingEnabled()) {
+            vfxManager.addEffect(backgroundBlurEffect);
+            vfxManager.beginInputCapture();
+        }
         backgroundStage.draw();
-        vfxManager.endInputCapture();
-        vfxManager.applyEffects();
-        vfxManager.renderToScreen();
-        vfxManager.removeEffect(backgroundBlurEffect);
+        if (config.getGraphics().isPostProcessingEnabled()) {
+            vfxManager.endInputCapture();
+            vfxManager.applyEffects();
+            vfxManager.renderToScreen();
+            vfxManager.removeEffect(backgroundBlurEffect);
+        }
         viewport.apply();
     }
 

@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
+import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.Images.GameImage;
@@ -64,7 +65,7 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
         float maxStars = Math.min(10 - 1, (int) beatmap.getBaseStars());
         float starScale = 0.25f;
         for (int i = 0; i < maxStars + 1; i++) {
-            Sprite starSprite = skin.star1.getSprite();
+            Sprite starSprite = skin.elements.get(OsuElements.STAR).getSprite();
             if (i == maxStars) {
                 // Last star can be "float"
                 float floatingStar = (float) (beatmap.getBaseStars() - i);

@@ -3,6 +3,7 @@ package com.dasher.osugdx.Skins;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 
 /**
@@ -358,20 +359,5 @@ public class Skin {
      */
     public int getComboFontOverlap() { return comboOverlap; }
 
-    public Array<SkinElement> elements = new Array<>();
-    public SkinElement cursor;
-    public SkinElement cursorMiddle;
-    public SkinElement cursorTrail;
-    public SkinElement menuButtonBG;
-    public SkinElement star1;
-    public SkinElement star2;
-    public SkinElement star3;
-    public SkinElement selectionMods;
-    public SkinElement selectionRandom;
-    public SkinElement selectionOptions;
-    public SkinElement selectionModsOver;
-    public SkinElement selectionRandomOver;
-    public SkinElement selectionOptionsOver;
-    public SkinElement selectionMode;
-    public SkinElement selectionModeHover;
+    public ObjectMap<OsuElements, SkinElement> elements = new ObjectMap<>();
 }
