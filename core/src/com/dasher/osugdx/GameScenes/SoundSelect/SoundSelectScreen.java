@@ -26,6 +26,7 @@ import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
+import com.dasher.osugdx.Skins.AnimatedSkinElement;
 import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.Skins.SkinElement;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
@@ -64,10 +65,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     public void show() {
         super.show();
         ObjectMap<OsuElements, SkinElement> elements = skinManager.getSelectedSkin().elements;
+        ObjectMap<OsuElements, AnimatedSkinElement> animatedElements = skinManager.getSelectedSkin().animatedElements;
 
         // DownBar
         menuOptionsStage = new Stage(viewport);
-        menuBack = new FooterOption(game, elements.get(OsuElements.MENU_BACK), menuOptionsStage, 200);
+        menuBack = new FooterOption(animatedElements.get(OsuElements.MENU_BACK), menuOptionsStage, 200);
         menuBack.setPosition(0, 0);
         selectionMode = new FooterOption(game, elements.get(OsuElements.SELECTION_MODE), elements.get(OsuElements.SELECTION_MODE_OVERLAY), menuBack, menuOptionsStage, 92);
         selectionMods = new FooterOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), selectionMode, menuOptionsStage);

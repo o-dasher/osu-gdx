@@ -360,4 +360,5 @@ public class Skin {
     public int getComboFontOverlap() { return comboOverlap; }
 
     public ObjectMap<OsuElements, SkinElement> elements = new ObjectMap<>();
+    public ObjectMap<OsuElements, AnimatedSkinElement> animatedElements = new ObjectMap<>();
 }

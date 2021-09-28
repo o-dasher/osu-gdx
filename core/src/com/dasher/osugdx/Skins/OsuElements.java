@@ -14,7 +14,7 @@ public enum OsuElements {
     STAR3("star3", Extensions.pngOnly),
 
     // Song select
-    MENU_BACK("menu-back", Extensions.pngOnly),
+    MENU_BACK("menu-back", Extensions.pngOnly, true),
 
     // Select buttons
     SELECTION_MODS ("selection-mods", Extensions.pngOnly),
@@ -34,10 +34,17 @@ public enum OsuElements {
     public final String name;
     public final String[] names;
     public final String[] extensions;
+    public boolean isAnimated;
 
     OsuElements(String name, String[] extensions) {
         this.name = name;
         this.names = new String[]{name, name + "@2x"};
         this.extensions = extensions;
+        this.isAnimated = false;
+    }
+
+    OsuElements(String name, String[] extensions, boolean isAnimated) {
+        this(name,extensions);
+        this.isAnimated = isAnimated;
     }
 }

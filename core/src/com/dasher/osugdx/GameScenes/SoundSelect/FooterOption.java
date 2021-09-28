@@ -1,21 +1,26 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
+
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.dasher.osugdx.Framework.Actors.AnimatedActor;
+import com.dasher.osugdx.Framework.Actors.AnimatedSprite;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
+import com.dasher.osugdx.Skins.AnimatedSkinElement;
 import com.dasher.osugdx.Skins.SkinElement;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FooterOption extends Actor {
-    private final GameImage defaultImage;
-    private GameImage hoverImage;
+    private final Actor defaultImage;
+    private Actor hoverImage;
     private final int w;
     private final int h = 90;
     private final float scale = 0.5f;
@@ -61,6 +66,12 @@ public class FooterOption extends Actor {
         this(game, defaultE, hoverE,  previousOption, menuOptionsStage, 77);
     }
 
+    public FooterOption(@NotNull AnimatedSkinElement animatedSkinElement, @NotNull Stage menuOptionsStage, int w) {
+        this.defaultImage = new AnimatedSprite(animatedSkinElement.getAnimation());
+        this.w = w;
+        menuOptionsStage.addActor(defaultImage);
+    }
+
     @Override
     public void setPosition(float x, float y) {
         defaultImage.setPosition(x, y);
@@ -93,11 +104,11 @@ public class FooterOption extends Actor {
         }
     }
 
-    public GameImage getDefaultImage() {
+    public Actor getDefaultImage() {
         return defaultImage;
     }
 
-    public @Nullable GameImage getHoverImage() {
+    public @Nullable Actor getHoverImage() {
         return hoverImage;
     }
 }

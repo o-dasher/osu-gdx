@@ -2,6 +2,7 @@ package com.dasher.osugdx.Skins;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.dasher.osugdx.OsuGame;
 
@@ -36,18 +37,55 @@ public class SkinManager {
             SkinElement createdElement;
             for (String name: elementName.names) {
                 for (String extension: elementName.extensions) {
-                    String path = selectedSkin.getDirectory().path() + "/" +name+"."+ extension;
+                    String sub = selectedSkin.getDirectory().path() + "/" +name;
+                    AnimatedSkinElement animatedSkinElement = null;
+                    if (elementName.isAnimated) {
+                        animatedSkinElement = new AnimatedSkinElement(selectedSkin);
+                        animatedSkinElement.beginSpriteInput();
+                        int i = -1;
+                        while (true) {
+                            i++;
+                            String currentPath = sub+"-"+i+"."+extension;
+                            FileHandle file = Gdx.files.internal(currentPath);
+                            SkinElement element = getElement(file);
+                            if (element == null) {
+                                break;
+                            } else {
+                                animatedSkinElement.addSprite((element.getSprite()));
+                            }
+                        }
+                        if (animatedSkinElement.getSprites().size > 0) {
+                            animatedSkinElement.endSpriteInput();
+                            break;
+                        }
+                    }
+                    String path = sub+"."+extension;
                     FileHandle file = Gdx.files.internal(path);
-                    ElementString string = new ElementString(file.nameWithoutExtension(), file.extension());
-                    try {
-                        createdElement = createElement(file, string);
-                    } catch (Exception e) {
+                    createdElement = getElement(file);
+                    if (createdElement == null) {
                         continue;
                     }
-                    selectedSkin.elements.put(elementName, createdElement);
+                    if (animatedSkinElement != null) {
+                        animatedSkinElement.addSprite(createdElement.getSprite());
+                        animatedSkinElement.endSpriteInput();
+                    }
+                    if (elementName.isAnimated) {
+                        selectedSkin.animatedElements.put(elementName, animatedSkinElement);
+                    } else {
+                        selectedSkin.elements.put(elementName, createdElement);
+                    }
                 }
             }
         }
+    }
+
+    public SkinElement getElement(FileHandle file) {
+        SkinElement skinElement = null;
+        ElementString string = new ElementString(file.nameWithoutExtension(), file.extension());
+        try {
+            skinElement = createElement(file, string);
+        } catch (Exception ignore) { }
+        return skinElement;
     }
 
     private void unloadElements() {
