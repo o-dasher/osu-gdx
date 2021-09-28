@@ -370,8 +370,8 @@ public class Skin {
     public SkinElement selectionRandom;
     public SkinElement selectionOptions;
     public SkinElement selectionModsOver;
-    public SkinElement selectionOtherOptions;
     public SkinElement selectionRandomOver;
     public SkinElement selectionOptionsOver;
-    public SkinElement selectionOtherOptionsOver;
+    public SkinElement selectionMode;
+    public SkinElement selectionModeHover;
 }

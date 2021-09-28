@@ -84,6 +84,12 @@ public class SkinManager {
                         case SELECTION_OPTIONS_OVERLAY:
                             selectedSkin.selectionOptionsOver = createdElement;
                             break;
+                        case SELECTION_MODE:
+                            selectedSkin.selectionMode = createdElement;
+                            break;
+                        case SELECTION_MODE_OVERLAY:
+                            selectedSkin.selectionModeHover = createdElement;
+                            break;
                         default:
                             break;
                     }

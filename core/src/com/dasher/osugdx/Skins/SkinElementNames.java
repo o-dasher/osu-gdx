@@ -19,7 +19,9 @@ public enum SkinElementNames {
     SELECTION_RANDOM ("selection-random", Extensions.pngOnly),
     SELECTION_RANDOM_OVERLAY ("selection-random-over", Extensions.pngOnly),
     SELECTION_OPTIONS ("selection-options", Extensions.pngOnly),
-    SELECTION_OPTIONS_OVERLAY ("selection-options-over", Extensions.pngOnly);
+    SELECTION_OPTIONS_OVERLAY ("selection-options-over", Extensions.pngOnly),
+    SELECTION_MODE("selection-mode", Extensions.pngOnly),
+    SELECTION_MODE_OVERLAY("selection-mode-over", Extensions.pngOnly);
 
     private static class Extensions {
         public static final String png = "png";
