@@ -52,8 +52,9 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     private boolean allowThumbnails;
     private MotionBlurEffect scrollMotionBlur;
     private Stage menuOptionsStage;
-    private final int downBarOutline = 80;
-    private final int downBarMain = downBarOutline - 2;
+    private final int downBarOutline = 90;
+    private final int downBarMain = downBarOutline - 3;
+    private GameImage selectionMode;
     private GameImage selectionMods;
     private GameImage randomOption;
     private GameImage otherOptions;
@@ -69,10 +70,12 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
         // DownBar
         menuOptionsStage = new Stage(viewport);
-        selectionMods = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), downBarMain, downBarMain);
-        selectionMods.setPosition(180, 0);
+        selectionMode = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODE), elements.get(OsuElements.SELECTION_MODE_OVERLAY));
+        selectionMode.setPosition(180, 0);
+        selectionMods = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), selectionMode);
         randomOption = new DownBarOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods);
         otherOptions = new DownBarOption(game, elements.get(OsuElements.SELECTION_OPTIONS), elements.get(OsuElements.SELECTION_OPTIONS_OVERLAY), randomOption);
+        menuOptionsStage.addActor(selectionMode);
         menuOptionsStage.addActor(selectionMods);
         menuOptionsStage.addActor(randomOption);
         menuOptionsStage.addActor(otherOptions);

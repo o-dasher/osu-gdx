@@ -140,12 +140,15 @@ public class BeatmapParser {
 				final String[] parts = string.split("\\s*,\\s*");
 				if (2 < parts.length) {
 					String backgroundFileName = parts[2].substring(1, parts[2].length() - 1);
-					breaks.add(new BreakPeriod(backgroundFileName));
+					breaks.add(new BreakPeriod(backgroundFileName, true));
 					continue;
 				}
 			}
+			String[] args = string.split(",");
+			if (string.trim().startsWith("Video,")) {
+				breaks.add(new BreakPeriod(args[args.length - 1].replaceAll("\"", ""), false));
+			}
 			if (string.trim().startsWith("2, ")) {
-				String[] args = string.split(",");
 				 breaks.add(new BreakPeriod(
 						Integer.parseInt(args[1].trim()),
 						Integer.parseInt(args[2].trim())

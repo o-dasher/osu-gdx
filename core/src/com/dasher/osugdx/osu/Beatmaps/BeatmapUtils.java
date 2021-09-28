@@ -76,7 +76,7 @@ public class BeatmapUtils {
         for (BreakPeriod breakPeriod: beatmap.getBreaks()) {
             if (breakPeriod.isBackground()) {
                 FileHandle beatmapFile = Gdx.files.external(beatmap.beatmapFilePath);
-                String bgFileName = breakPeriod.getBackgroundFileName();
+                String bgFileName = breakPeriod.getFileName();
                 FileHandle bgFile = Gdx.files.external(beatmapFile.parent() + "/" + bgFileName);
                 if (bgFile.exists()) {
                     return reusableTextureManager.getTexture(bgFile, textureParameter, listener);

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.Skins.SkinElement;
@@ -16,13 +17,14 @@ import org.jetbrains.annotations.NotNull;
 public class DownBarOption extends GameImage  {
     public Sprite defaultSprite;
     public Sprite hoverSprite;
+    private final float scale = 0.5f;
 
-    public DownBarOption(OsuGame game, @NotNull SkinElement defaultE, @NotNull SkinElement hoverE, float width, float downBarHeight) {
+    public DownBarOption(OsuGame game, @NotNull SkinElement defaultE, @NotNull SkinElement hoverE) {
         super(game, defaultE.getSprite(), false);
         this.defaultSprite = defaultE.getSprite();
         this.hoverSprite = hoverE.getSprite();
         setDrawable(new SpriteDrawable(defaultSprite));
-        setSize(width, downBarHeight);
+        setScale(scale);
         SpriteDrawable drawable = ((SpriteDrawable) getDrawable());
         addListener(new ClickListener() {
             @Override
@@ -37,7 +39,7 @@ public class DownBarOption extends GameImage  {
     }
 
     public DownBarOption(OsuGame game, SkinElement defaultE, SkinElement hoverE, @NotNull GameImage previousOption) {
-        this(game, defaultE, hoverE, previousOption.getWidth(), previousOption.getHeight());
-        setPosition(previousOption.getX() + getWidth(), previousOption.getY());
+        this(game, defaultE, hoverE);
+        setPosition(previousOption.getX() + previousOption.getWidth() * scale, previousOption.getY());
     }
 }

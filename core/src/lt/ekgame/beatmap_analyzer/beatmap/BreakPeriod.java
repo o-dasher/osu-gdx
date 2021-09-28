@@ -4,7 +4,8 @@ public class BreakPeriod {
 	
 	private int startTime, endTime;
 	private boolean isBackground;
-	private String backgroundFileName;
+	private boolean isVideo;
+	private String fileName;
 
 	private BreakPeriod() {}
 	
@@ -13,9 +14,13 @@ public class BreakPeriod {
 		this.endTime = endTime;
 	}
 
-	public BreakPeriod(String backgroundFileName) {
-		this.isBackground = true;
-		this.backgroundFileName = backgroundFileName;
+	public BreakPeriod(String fileName, boolean isBackground) {
+		if (isBackground) {
+			this.isBackground = true;
+		} else {
+			this.isVideo = true;
+		}
+		this.fileName = fileName;
 	}
 	
 	public BreakPeriod clone() {
@@ -42,7 +47,7 @@ public class BreakPeriod {
 		return isBackground;
 	}
 
-	public String getBackgroundFileName() {
-		return backgroundFileName;
+	public String getFileName() {
+		return fileName;
 	}
 }
