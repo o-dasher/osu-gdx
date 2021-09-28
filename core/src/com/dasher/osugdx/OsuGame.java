@@ -221,6 +221,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				beatmapManager.addListener(workingBackground);
 				beatmapManager.addListener(beatFactory);
 				backgroundBlurEffect = new GaussianBlurEffect();
+				backgroundBlurEffect.setType(GaussianBlurEffect.BlurType.Gaussian5x5b);
 				backgroundBlurEffect.setPasses(5);
 				skinManager.changeSkin(skinManager.getDefaultDir());
 				setSwitchFromIntroScreenTask = new ClockTask(delta * 2) {

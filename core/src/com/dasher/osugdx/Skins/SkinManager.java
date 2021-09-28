@@ -66,6 +66,24 @@ public class SkinManager {
                         case STAR3:
                             selectedSkin.star3 = createdElement;
                             break;
+                        case SELECTION_MODS:
+                            selectedSkin.selectionMods = createdElement;
+                            break;
+                        case SELECTION_RANDOM:
+                            selectedSkin.selectionRandom = createdElement;
+                            break;
+                        case SELECTION_OPTIONS:
+                            selectedSkin.selectionOptions = createdElement;
+                            break;
+                        case SELECTION_MODS_OVERLAY:
+                            selectedSkin.selectionModsOver = createdElement;
+                            break;
+                        case SELECTION_RANDOM_OVERLAY:
+                            selectedSkin.selectionRandomOver = createdElement;
+                            break;
+                        case SELECTION_OPTIONS_OVERLAY:
+                            selectedSkin.selectionOptionsOver = createdElement;
+                            break;
                         default:
                             break;
                     }

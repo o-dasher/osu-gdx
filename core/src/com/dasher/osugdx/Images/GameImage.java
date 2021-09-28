@@ -1,6 +1,7 @@
 package com.dasher.osugdx.Images;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.dasher.osugdx.Framework.Actors.CenteredImage;
@@ -27,6 +28,11 @@ public class GameImage extends CenteredImage {
 
     public GameImage(OsuGame game, Drawable drawable, boolean forceCenter) {
         super(drawable, forceCenter);
+        this.game = game;
+    }
+
+    public GameImage(OsuGame game, Sprite sprite, boolean forceCenter) {
+        super(sprite, forceCenter);
         this.game = game;
     }
 

@@ -366,4 +366,12 @@ public class Skin {
     public SkinElement star1;
     public SkinElement star2;
     public SkinElement star3;
+    public SkinElement selectionMods;
+    public SkinElement selectionRandom;
+    public SkinElement selectionOptions;
+    public SkinElement selectionModsOver;
+    public SkinElement selectionOtherOptions;
+    public SkinElement selectionRandomOver;
+    public SkinElement selectionOptionsOver;
+    public SkinElement selectionOtherOptionsOver;
 }

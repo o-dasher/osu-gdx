@@ -1,13 +1,25 @@
 package com.dasher.osugdx.Skins;
 
 public enum SkinElementNames {
+    // Cursor
     CURSOR("cursor", Extensions.pngOnly),
     CURSOR_MIDDLE("cursormiddle", Extensions.pngOnly),
     CURSOR_TRAIL("cursortrail", Extensions.pngOnly),
+
     MENU_BUTTON_BG("menu-button-background", Extensions.pngOnly),
+
+    // Stars
     STAR("star", Extensions.pngOnly),
     STAR2("star2",  Extensions.pngOnly),
-    STAR3("star3", Extensions.pngOnly);
+    STAR3("star3", Extensions.pngOnly),
+
+    // Select buttons
+    SELECTION_MODS ("selection-mods", Extensions.pngOnly),
+    SELECTION_MODS_OVERLAY ("selection-mods-over", Extensions.pngOnly),
+    SELECTION_RANDOM ("selection-random", Extensions.pngOnly),
+    SELECTION_RANDOM_OVERLAY ("selection-random-over", Extensions.pngOnly),
+    SELECTION_OPTIONS ("selection-options", Extensions.pngOnly),
+    SELECTION_OPTIONS_OVERLAY ("selection-options-over", Extensions.pngOnly);
 
     private static class Extensions {
         public static final String png = "png";

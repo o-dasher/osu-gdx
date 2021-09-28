@@ -7,8 +7,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
@@ -24,6 +26,8 @@ import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
+import com.dasher.osugdx.Images.GameImage;
+import com.dasher.osugdx.Skins.Skin;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
 import com.dasher.osugdx.Input.InputHelper;
@@ -44,6 +48,12 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     private Label.LabelStyle selectorLabelStyle;
     private boolean allowThumbnails;
     private MotionBlurEffect scrollMotionBlur;
+    private Stage menuOptionsStage;
+    private final int downBarOutline = 80;
+    private final int downBarMain = downBarOutline - 2;
+    private GameImage selectionMods;
+    private GameImage randomOption;
+    private GameImage otherOptions;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -52,11 +62,22 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     @Override
     public void show() {
         super.show();
+        Skin skin = skinManager.getSelectedSkin();
+
+        // DownBar
+        menuOptionsStage = new Stage(viewport);
+        selectionMods = new DownBarOption(game, skin.selectionMods, skin.selectionModsOver, downBarMain, downBarMain);
+        selectionMods.setPosition(180, 0);
+        randomOption = new DownBarOption(game, skin.selectionRandom, skin.selectionRandomOver, selectionMods);
+        otherOptions = new DownBarOption(game, skin.selectionOptions, skin.selectionOptionsOver, randomOption);
+        menuOptionsStage.addActor(selectionMods);
+        menuOptionsStage.addActor(randomOption);
+        menuOptionsStage.addActor(otherOptions);
+
+
         selectorLabelStyle = new Label.LabelStyle(fonts.allerFont, null);
         thumbnailLazyLoadingTime = 0.1f;
         beatmapSetSelectorStage = new Scrollable<>(viewport);
-        inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
-        inputMultiplexer.addProcessor(beatmapSetSelectorStage);
         beatmapSetSelectorStage.setYMultiplier(0.5f);
         beatmapSetSelectorStage.setScrollable(false, true);
         beatmapSetSelectorStage.setAlignX(Align.right);
@@ -70,6 +91,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setExponentialAlpha(true);
         allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
         scrollMotionBlur = new MotionBlurEffect(Pixmap.Format.RGBA8888, MixEffect.Method.MAX, 1);
+
+        inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));
+        inputMultiplexer.addProcessor(beatmapSetSelectorStage);
+        inputMultiplexer.addProcessor(menuOptionsStage);
+
         resetSelectors();
         beatmapManager.addListener(this);
     }
@@ -172,6 +198,8 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         vfxManager.renderToScreen();
         vfxManager.removeEffect(scrollMotionBlur);
 
+        renderDownBar();
+
         renderFade(delta);
 
         // loading thumbnails is rather slow on these platforms
@@ -184,6 +212,17 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
                 switchScreen(new MenuScreen(game, this));
             }
         }
+    }
+
+    private void renderDownBar() {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        Color mainColor = Color.BLACK;
+        Color outlineColor = Color.BLUE;
+        shapeRenderer.rect(0, 0, viewport.getWorldWidth(), downBarOutline, outlineColor, outlineColor, outlineColor, outlineColor);
+        shapeRenderer.rect(0,0, viewport.getWorldWidth(), downBarMain, mainColor, mainColor, mainColor, mainColor);
+        shapeRenderer.end();
+        menuOptionsStage.act();
+        menuOptionsStage.draw();
     }
 
     public void updateSelectorThumbnails(float delta) {
