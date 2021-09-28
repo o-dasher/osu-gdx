@@ -22,14 +22,11 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.crashinvaders.vfx.effects.MotionBlurEffect;
 import com.crashinvaders.vfx.effects.util.MixEffect;
 import com.dasher.osugdx.Framework.Actors.ActorHelper;
-import com.dasher.osugdx.Framework.Graphics.Textures.ReusableTexture;
 import com.dasher.osugdx.Framework.Scrollers.Scrollable;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.MainMenu.MenuScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
-import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.Skins.OsuElements;
-import com.dasher.osugdx.Skins.Skin;
 import com.dasher.osugdx.Skins.SkinElement;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
@@ -53,11 +50,11 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
     private MotionBlurEffect scrollMotionBlur;
     private Stage menuOptionsStage;
     private final int downBarOutline = 90;
-    private final int downBarMain = downBarOutline - 3;
-    private GameImage selectionMode;
-    private GameImage selectionMods;
-    private GameImage randomOption;
-    private GameImage otherOptions;
+    private FooterOption menuBack;
+    private FooterOption selectionMode;
+    private FooterOption selectionMods;
+    private FooterOption randomOption;
+    private FooterOption otherOptions;
 
     public SoundSelectScreen(@NotNull OsuGame game) {
         super(game);
@@ -70,16 +67,12 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
 
         // DownBar
         menuOptionsStage = new Stage(viewport);
-        selectionMode = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODE), elements.get(OsuElements.SELECTION_MODE_OVERLAY));
-        selectionMode.setPosition(180, 0);
-        selectionMods = new DownBarOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), selectionMode);
-        randomOption = new DownBarOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods);
-        otherOptions = new DownBarOption(game, elements.get(OsuElements.SELECTION_OPTIONS), elements.get(OsuElements.SELECTION_OPTIONS_OVERLAY), randomOption);
-        menuOptionsStage.addActor(selectionMode);
-        menuOptionsStage.addActor(selectionMods);
-        menuOptionsStage.addActor(randomOption);
-        menuOptionsStage.addActor(otherOptions);
-
+        menuBack = new FooterOption(game, elements.get(OsuElements.MENU_BACK), menuOptionsStage, 200);
+        menuBack.setPosition(0, 0);
+        selectionMode = new FooterOption(game, elements.get(OsuElements.SELECTION_MODE), elements.get(OsuElements.SELECTION_MODE_OVERLAY), menuBack, menuOptionsStage, 92);
+        selectionMods = new FooterOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), selectionMode, menuOptionsStage);
+        randomOption = new FooterOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods, menuOptionsStage);
+        otherOptions = new FooterOption(game, elements.get(OsuElements.SELECTION_OPTIONS), elements.get(OsuElements.SELECTION_OPTIONS_OVERLAY), randomOption, menuOptionsStage);
 
         selectorLabelStyle = new Label.LabelStyle(fonts.allerFont, null);
         thumbnailLazyLoadingTime = 0.1f;
@@ -229,6 +222,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         Color mainColor = Color.BLACK;
         Color outlineColor = Color.BLUE;
         shapeRenderer.rect(0, 0, viewport.getWorldWidth(), downBarOutline, outlineColor, outlineColor, outlineColor, outlineColor);
+        int downBarMain = downBarOutline - 3;
         shapeRenderer.rect(0,0, viewport.getWorldWidth(), downBarMain, mainColor, mainColor, mainColor, mainColor);
         shapeRenderer.end();
         menuOptionsStage.act();

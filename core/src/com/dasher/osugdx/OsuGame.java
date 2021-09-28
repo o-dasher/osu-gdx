@@ -83,7 +83,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public boolean canSwitchIntroScreen;
 	public boolean loadedAllAssets;
 	public Parrot parrot;
-	public ClockTask setSwitchFromIntroScreenTask;
 	public AsyncResult<Null> loadBeatmapsTask;
 	public GaussianBlurEffect backgroundBlurEffect;
 	public GameConfig config;
@@ -177,11 +176,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			}
 		}
 
-		if (setSwitchFromIntroScreenTask != null) {
-			setSwitchFromIntroScreenTask.update(Gdx.graphics.getDeltaTime());
-			setSwitchFromIntroScreenTask = null;
-		}
-
 		float delta = Gdx.graphics.getDeltaTime();
 
 		if (config.getGraphics().isPostProcessingEnabled()) {
@@ -226,12 +220,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				backgroundBlurEffect = new GaussianBlurEffect();
 				backgroundBlurEffect.setPasses(5);
 				skinManager.changeSkin(skinManager.getDefaultDir());
-				setSwitchFromIntroScreenTask = new ClockTask(delta * 2) {
-					@Override
-					public void run() {
-						((IntroScreen) currentScreen).setCanSwitchScreen(true);
-					}
-				};
+				((IntroScreen) currentScreen).setCanSwitchScreen(true);
 			}
 		}
 	}

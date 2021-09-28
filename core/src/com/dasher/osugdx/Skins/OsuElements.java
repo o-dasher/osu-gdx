@@ -13,6 +13,9 @@ public enum OsuElements {
     STAR2("star2",  Extensions.pngOnly),
     STAR3("star3", Extensions.pngOnly),
 
+    // Song select
+    MENU_BACK("menu-back", Extensions.pngOnly),
+
     // Select buttons
     SELECTION_MODS ("selection-mods", Extensions.pngOnly),
     SELECTION_MODS_OVERLAY ("selection-mods-over", Extensions.pngOnly),
