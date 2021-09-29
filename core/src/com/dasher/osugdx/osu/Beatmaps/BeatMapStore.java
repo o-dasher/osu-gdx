@@ -21,7 +21,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class BeatMapStore implements ModManagerListener, OSZParserListener {
-    private final int VERSION = 86;
+    private final int VERSION = 90;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();

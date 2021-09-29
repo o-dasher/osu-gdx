@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.dasher.osugdx.Audio.GameMusic;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
+import com.dasher.osugdx.GameScenes.Gameplay.GamePlayScreen;
 import com.dasher.osugdx.GameScenes.Intro.IntroScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.GameScenes.UIScreen;
@@ -64,10 +65,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     public void randomizeCurrentBeatmapSet() {
-        BeatMapSet previousBeatmapSet = currentBeatmapSet;
-        while (currentBeatmapSet == previousBeatmapSet) {
-            setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
+        BeatMapSet nextRandom = beatMapStore.getBeatMapSets().random();
+        if (currentBeatmapSet != null) {
+            String previousBeatmapSetFolder = currentBeatmapSet.beatmapSetFolderPath;
+            while (nextRandom.beatmapSetFolderPath.equals(previousBeatmapSetFolder)) {
+                nextRandom = beatMapStore.getBeatMapSets().random();
+            }
         }
+        setCurrentBeatmapSet(nextRandom);
     }
 
     // Return whether it's the same music repeating itself
@@ -105,10 +110,12 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 currentMusic.setAsynchronous(true);
                 currentMusic.getMusic().setOnCompletionListener((music) -> {
                     System.out.println("Beatmap music finished!");
-                    if (currentMusic.hashCode() == music.hashCode()) {
-                        // EVEN THOUGH THE THREAD THAT IS PLAYING THE MUSIC IS OR NOT THE GL
-                        // THREAD POSTRUNNABLE MUST BE CALLED NO IDEA WHY THOUGH
-                        Gdx.app.postRunnable(this::randomizeCurrentBeatmapSet);
+                    if (game.getScreen() instanceof UIScreen) {
+                        if (currentMusic.hashCode() == music.hashCode()) {
+                            // EVEN THOUGH THE THREAD THAT IS PLAYING THE MUSIC IS OR NOT THE GL
+                            // THREAD POSTRUNNABLE MUST BE CALLED NO IDEA WHY THOUGH
+                            Gdx.app.postRunnable(this::randomizeCurrentBeatmapSet);
+                        }
                     }
                 });
             } catch (Exception e) {
@@ -190,8 +197,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     public void startMusicPlaying(Beatmap beatmap, boolean isReplayingBeatmapMusic) {
         if (currentMusic != null && (!isReplayingBeatmapMusic || !currentMusic.getMusic().isPlaying())) {
             System.out.println("Starting playing music from Thread: " + Thread.currentThread().getName());
-            currentMusic.playParrot(false, true); // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
-            currentMusic.forcePosition(beatmap.getGenerals().getPreviewTime());
+            try {
+                currentMusic.playParrot(false, true); // <-- THIS NEEDS TO BE OUTSIDE OF THREAD
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (game.getScreen() instanceof UIScreen) {
+                currentMusic.forcePosition(beatmap.getGenerals().getPreviewTime());
+            }
         }
     }
 

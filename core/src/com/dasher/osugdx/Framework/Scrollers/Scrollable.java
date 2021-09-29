@@ -234,8 +234,15 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
                         }
                     }
                 }
-                upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
-                downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
+
+                try {
+                    upActors.sort((a, b) -> (int) (a.getY() - b.getY()));
+                    downActors.sort((a, b) -> (int) (b.getY() - a.getY()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
                 if (isExponentialAlpha) {
                     float time = 0.25f;
                     exponentialAlphaEffect(upActors, time);

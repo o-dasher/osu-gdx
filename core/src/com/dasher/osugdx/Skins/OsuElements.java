@@ -24,7 +24,12 @@ public enum OsuElements {
     SELECTION_OPTIONS ("selection-options", Extensions.pngOnly),
     SELECTION_OPTIONS_OVERLAY ("selection-options-over", Extensions.pngOnly),
     SELECTION_MODE("selection-mode", Extensions.pngOnly),
-    SELECTION_MODE_OVERLAY("selection-mode-over", Extensions.pngOnly);
+    SELECTION_MODE_OVERLAY("selection-mode-over", Extensions.pngOnly),
+
+    // Gameplay
+    HIT_CIRCLE("hitcircle", Extensions.pngOnly),
+    APPROACH_CIRCLE("approachcircle", Extensions.pngOnly),
+    HIT_CIRCLE_OVERLAY("hitcircleoverlay",Extensions.pngOnly, true);
 
     private static class Extensions {
         public static final String png = "png";

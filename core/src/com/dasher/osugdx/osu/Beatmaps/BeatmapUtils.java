@@ -53,7 +53,7 @@ public class BeatmapUtils {
             );
         } catch (NoSuchElementException e) {
             e.printStackTrace();
-            return beatmap;
+            return null;
         } catch (BeatmapException e) {
             beatMapStore.deleteBeatmapFile(null, mapFile);
             e.printStackTrace();

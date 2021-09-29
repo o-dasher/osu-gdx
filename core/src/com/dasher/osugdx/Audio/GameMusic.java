@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 
 
 public class GameMusic implements ParrotMusicType, Music, UpdateAble {
+    private float setPosition = -1;
     private final AudioFactory audioFactory;
     private final Music music;
     private final int channel;
-    private float setPosition;
     private boolean asynchronous;
     private boolean didSetPosition;
     private boolean isDisposed = false;
@@ -50,6 +50,9 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
         // THE ASYNCHRONOUS BOOLEAN IS JUST FOR THE SET POSITION NOT STOP THE MAIN THREAD
         if (!isDisposed) {  // disposal check for asynchronous.
             // TRY CATCH BECAUSE THE MUSIC MAY BE DISPOSED LATER ANYWAYS OR THE BUFFER WASN'T LOADED
+            if (isPlaying()) {
+                music.stop();
+            }
             try {
                 music.play();
             } catch (Exception e) {
@@ -155,7 +158,7 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
             disposeTask.update(delta);
         }
         if (asynchronous) {
-            if (!didSetPosition && setPosition > 0) {
+            if (!didSetPosition && setPosition >= 0) {
                 if (audioFactory.parrot.isMusicPlaying(channel)) {
                     System.out.println("Parrot finished waiting for channel: " + channel);
                     audioFactory.asyncExecutor.submit(() -> {

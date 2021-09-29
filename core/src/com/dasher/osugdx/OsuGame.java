@@ -183,7 +183,12 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 			vfxManager.update(delta);
 		}
 
-		parrot.update(delta);
+		try {
+			parrot.update(delta);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		audioFactory.update(delta);
 		super.render();
 

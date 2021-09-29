@@ -101,7 +101,7 @@ public class ManiaDifficultyCalculator implements DifficultyCalculator {
 
 		@Override
 		public int compareTo(DifficultyObject o) {
-			return object.getStartTime() - o.object.getStartTime();
+			return (int) (object.getStartTime() - o.object.getStartTime());
 		}
 
 		private final ManiaObject object;

@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
+import com.dasher.osugdx.GameScenes.GameScreen;
+import com.dasher.osugdx.GameScenes.Gameplay.GamePlayScreen;
 import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
@@ -192,7 +194,10 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
         addListener(toGameplayListener = new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("GAAMEPLAY: "+beatmap.getMetadata().getTitleRomanized());
+                if (!game.calledToSwitchScreen) {
+                    GameScreen gameScreen = (GameScreen) game.getScreen();
+                    gameScreen.switchScreen(new GamePlayScreen(game, beatmap));
+                }
                 return false;
             }
         });

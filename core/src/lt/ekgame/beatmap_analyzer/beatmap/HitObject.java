@@ -52,8 +52,8 @@ public abstract class HitObject {
 	 * Start time of the object.
 	 * @return Integer value.
 	 */
-	public int getStartTime() {
-		return startTime;
+	public float getStartTime() {
+		return startTime / 1000f;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public abstract class HitObject {
 	 * @return Integer value.
 	 */
 	public int getEndTime() {
-		return endTime;
+		return endTime / 1000;
 	}
 
 	public int getHitSound() {

@@ -28,11 +28,11 @@ public class BreakPeriod {
 	}
 
 	public int getStartTime() {
-		return startTime;
+		return startTime / 1000;
 	}
 
 	public int getEndTime() {
-		return endTime;
+		return endTime / 1000;
 	}
 
 	public void setStartTime(int startTime) {

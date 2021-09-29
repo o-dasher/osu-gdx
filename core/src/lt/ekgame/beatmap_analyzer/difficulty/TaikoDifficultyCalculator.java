@@ -47,7 +47,7 @@ public class TaikoDifficultyCalculator implements DifficultyCalculator {
     		difficultyObjects.add(difficultyObject);
 		}
 
-    	difficultyObjects.sort((a, b) -> a.object.getStartTime() - b.object.getStartTime());
+    	difficultyObjects.sort((a, b) -> (int) (a.object.getStartTime() - b.object.getStartTime()));
     	
     	DifficultyObject previous = null;
 		for (DifficultyObject current : difficultyObjects) {
