@@ -64,7 +64,10 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
     }
 
     public void randomizeCurrentBeatmapSet() {
-        setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
+        BeatMapSet previousBeatmapSet = currentBeatmapSet;
+        while (currentBeatmapSet == previousBeatmapSet) {
+            setCurrentBeatmapSet(beatMapStore.getBeatMapSets().random());
+        }
     }
 
     // Return whether it's the same music repeating itself

@@ -4,9 +4,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
@@ -36,6 +38,7 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     private final Color inactiveColor;
     private final BeatmapSetSelector beatmapSetSelector;
     private boolean generatedStars = false;
+    protected ClickListener toGameplayListener;
 
     public BeatmapSelector(
             OsuGame game, @NotNull Skin skin, BeatmapManager beatmapManager,
@@ -163,6 +166,14 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     public void disableSelector(Selector selector) {
         if (selector != null) {
             super.disableSelector(selector);
+            if (selector instanceof BeatmapSelector) {
+                BeatmapSelector beatmapSelector = ((BeatmapSelector) selector);
+                ClickListener gameplayListener = beatmapSelector.toGameplayListener;
+                if (gameplayListener != null) {
+                    beatmapSelector.removeListener(gameplayListener);
+                    beatmapSelector.toGameplayListener = null;
+                }
+            }
             for (Label label: selector.labels) {
                 label.addAction(Actions.color(skin.getSongSelectInactiveTextColor(), colorSelectTime));
             }
@@ -178,6 +189,13 @@ class BeatmapSelector extends Selector implements BeatmapManagerListener, ModMan
     public void changeSelectedSelector() {
         disableSelector(soundSelectScreen.selectedBeatmap);
         soundSelectScreen.selectedBeatmap = this;
+        addListener(toGameplayListener = new ClickListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("GAAMEPLAY: "+beatmap.getMetadata().getTitleRomanized());
+                return false;
+            }
+        });
     }
 
     @Override
