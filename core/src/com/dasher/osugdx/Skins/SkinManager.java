@@ -42,29 +42,29 @@ public class SkinManager {
                     AnimatedSkinElement animatedSkinElement = null;
                     if (elementName.isAnimated) {
                         animatedSkinElement = new AnimatedSkinElement(selectedSkin);
-                        animatedSkinElement.beginSpriteInput();
-                        int i = -1;
-                        while (true) {
-                            i++;
-                            String indexedSub = base+name.replaceAll("\\{i}", String.valueOf(i));
-                            String currentPath = indexedSub+"."+extension;
-                            FileHandle file = Gdx.files.internal(currentPath);
-                            System.out.println(currentPath);
-                            if (!file.exists()) {
-                                break;
+                        if (name.contains("{i}")) {
+                            animatedSkinElement.beginSpriteInput();
+                            int i = -1;
+                            while (true) {
+                                i++;
+                                String indexedSub = base + name.replaceAll("\\{i}", String.valueOf(i));
+                                String currentPath = indexedSub + "." + extension;
+                                FileHandle file = Gdx.files.internal(currentPath);
+                                if (!file.exists()) {
+                                    break;
+                                }
+                                SkinElement element = getElement(file);
+                                if (element == null) {
+                                    break;
+                                } else {
+                                    animatedSkinElement.addSprite((element.getSprite()));
+                                }
                             }
-                            SkinElement element = getElement(file);
-                            if (element == null) {
-                                break;
-                            } else {
-                                animatedSkinElement.addSprite((element.getSprite()));
-                            }
-                        }
-                        if (animatedSkinElement.getSprites().size > 0) {
                             animatedSkinElement.endSpriteInput();
-                            System.out.println(animatedSkinElement.getSprites());
-                            selectedSkin.animatedElements.put(elementName, animatedSkinElement);
-                            continue;
+                            if (animatedSkinElement.getSprites().size > 0) {
+                                selectedSkin.animatedElements.put(elementName, animatedSkinElement);
+                                continue;
+                            }
                         }
                     }
                     String path = sub+"."+extension;
@@ -74,10 +74,12 @@ public class SkinManager {
                         continue;
                     }
                     if (animatedSkinElement != null) {
+                        animatedSkinElement.beginSpriteInput();
                         animatedSkinElement.addSprite(createdElement.getSprite());
                         animatedSkinElement.endSpriteInput();
                     }
                     if (elementName.isAnimated) {
+                        System.out.println(file.path());
                         selectedSkin.animatedElements.put(elementName, animatedSkinElement);
                     } else {
                         selectedSkin.elements.put(elementName, createdElement);
@@ -87,7 +89,7 @@ public class SkinManager {
         }
     }
 
-    public SkinElement getElement(FileHandle file) {
+    public SkinElement getElement(@NotNull FileHandle file) {
         SkinElement skinElement = null;
         ElementString string = new ElementString(file.nameWithoutExtension(), file.extension());
         try {
