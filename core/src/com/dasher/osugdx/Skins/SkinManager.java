@@ -55,14 +55,11 @@ public class SkinManager {
                             }
                             SkinElement element = getElement(file);
                             if (element == null) {
-                                System.out.println("BAHH" + currentPath);
                                 break;
                             } else {
-                                System.out.print("OO");
                                 animatedSkinElement.addSprite((element.getSprite()));
                             }
                         }
-                        System.out.println("NNEHUM");
                         if (animatedSkinElement.getSprites().size > 0) {
                             animatedSkinElement.endSpriteInput();
                             System.out.println(animatedSkinElement.getSprites());
