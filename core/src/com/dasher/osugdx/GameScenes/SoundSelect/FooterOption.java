@@ -1,7 +1,6 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -46,15 +45,6 @@ public class FooterOption extends Actor {
             }
         });
     }
-
-    public FooterOption(OsuGame game, @NotNull SkinElement defaultE, @NotNull Stage menuOptionsStage, int w) {
-        this.w = w;
-        this.defaultImage = new GameImage(game, defaultE.getSprite(), false);
-        menuOptionsStage.addActor(defaultImage);
-        setScale(scale);
-    }
-
-
 
     public FooterOption(OsuGame game, SkinElement defaultE, SkinElement hoverE, @NotNull FooterOption previousOption, Stage menuOptionsStage, int w) {
         this(game, defaultE, hoverE, menuOptionsStage, w);

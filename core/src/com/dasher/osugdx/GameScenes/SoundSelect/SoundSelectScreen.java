@@ -73,7 +73,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         menuBack.setPosition(0, 0);
         selectionMode = new FooterOption(game, elements.get(OsuElements.SELECTION_MODE), elements.get(OsuElements.SELECTION_MODE_OVERLAY), menuBack, menuOptionsStage, 92);
         selectionMods = new FooterOption(game, elements.get(OsuElements.SELECTION_MODS), elements.get(OsuElements.SELECTION_MODS_OVERLAY), selectionMode, menuOptionsStage);
-        randomOption = new FooterOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods, menuOptionsStage);
+        randomOption = new RandomOption(game, elements.get(OsuElements.SELECTION_RANDOM), elements.get(OsuElements.SELECTION_RANDOM_OVERLAY), selectionMods, menuOptionsStage);
         otherOptions = new FooterOption(game, elements.get(OsuElements.SELECTION_OPTIONS), elements.get(OsuElements.SELECTION_OPTIONS_OVERLAY), randomOption, menuOptionsStage);
         menuOptionsStage.addActor(menuBack.getDefaultImage());
 
