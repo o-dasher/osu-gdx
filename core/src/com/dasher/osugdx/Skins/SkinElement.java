@@ -14,9 +14,11 @@ public class SkinElement {
     private final Sprite sprite;
     private final boolean isHD;
     private final Skin skin;
+    private final FileHandle file;
 
     public SkinElement(FileHandle file, @NotNull ElementString elementString, Skin skin, TextureLoader.@NotNull TextureParameter textureParameter) {
         this.isHD = elementString.isHD();
+        this.file = file;
         this.texture = new Texture(file, textureParameter.genMipMaps);
         texture.setFilter(textureParameter.minFilter, textureParameter.magFilter);
         this.sprite = new Sprite(texture);
@@ -44,5 +46,9 @@ public class SkinElement {
 
     public void dispose() {
         texture.dispose();
+    }
+
+    public FileHandle getFile() {
+        return file;
     }
 }

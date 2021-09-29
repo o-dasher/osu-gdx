@@ -4,7 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 
 public class GraphicsConfig {
-    private boolean isPostProcessingEnabled = Gdx.app.getType() != Application.ApplicationType.Android;
+    private boolean isPostProcessingEnabled = false;
 
     public boolean isPostProcessingEnabled() {
         return isPostProcessingEnabled;

@@ -38,14 +38,14 @@ public enum OsuElements {
 
     OsuElements(String name, String[] extensions) {
         this.name = name;
-        this.names = new String[]{name, name + "@2x"};
+        this.names = new String[]{name + "@2x", name};
         this.extensions = extensions;
         this.isAnimated = false;
     }
 
     OsuElements(String name, String[] extensions, boolean isAnimated) {
         this.name = name;
-        this.names = new String[]{name, name+"@2x", name+"-{i}@2x"};
+        this.names = new String[]{name+"-{i}@2x", name+"@2x", name};
         this.extensions = extensions;
         this.isAnimated = isAnimated;
     }

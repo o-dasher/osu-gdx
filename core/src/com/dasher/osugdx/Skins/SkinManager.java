@@ -35,6 +35,7 @@ public class SkinManager {
     public void loadElements() {
         for (OsuElements elementName: OsuElements.values()) {
             SkinElement createdElement;
+            boolean isBreak = false;
             for (String name: elementName.names) {
                 for (String extension: elementName.extensions) {
                     String base = selectedSkin.getDirectory().path() + "/";
@@ -63,7 +64,8 @@ public class SkinManager {
                             animatedSkinElement.endSpriteInput();
                             if (animatedSkinElement.getSprites().size > 0) {
                                 selectedSkin.animatedElements.put(elementName, animatedSkinElement);
-                                continue;
+                                isBreak = true;
+                                break;
                             }
                         }
                     }
@@ -78,12 +80,17 @@ public class SkinManager {
                         animatedSkinElement.addSprite(createdElement.getSprite());
                         animatedSkinElement.endSpriteInput();
                     }
+                    System.out.println(" element loaded: "+createdElement.getFile().path());
                     if (elementName.isAnimated) {
-                        System.out.println(file.path());
                         selectedSkin.animatedElements.put(elementName, animatedSkinElement);
                     } else {
                         selectedSkin.elements.put(elementName, createdElement);
                     }
+                    isBreak = true;
+                    break;
+                }
+                if (isBreak) {
+                    break;
                 }
             }
         }

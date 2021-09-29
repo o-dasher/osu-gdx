@@ -1,14 +1,13 @@
 package com.dasher.osugdx.GameScenes.SoundSelect;
 
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.dasher.osugdx.Framework.Actors.AnimatedActor;
 import com.dasher.osugdx.Framework.Actors.AnimatedSprite;
 import com.dasher.osugdx.Images.GameImage;
 import com.dasher.osugdx.OsuGame;
@@ -66,10 +65,10 @@ public class FooterOption extends Actor {
         this(game, defaultE, hoverE,  previousOption, menuOptionsStage, 77);
     }
 
-    public FooterOption(@NotNull AnimatedSkinElement animatedSkinElement, @NotNull Stage menuOptionsStage, int w) {
+    public FooterOption(@NotNull AnimatedSkinElement animatedSkinElement, int w) {
         this.defaultImage = new AnimatedSprite(animatedSkinElement.getAnimation());
+        setOrigin(Align.bottomLeft);
         this.w = w;
-        menuOptionsStage.addActor(defaultImage);
     }
 
     @Override
@@ -110,5 +109,13 @@ public class FooterOption extends Actor {
 
     public @Nullable Actor getHoverImage() {
         return hoverImage;
+    }
+
+    @Override
+    public void setOrigin(int alignment) {
+        defaultImage.setOrigin(alignment);
+        if (hoverImage != null) {
+            hoverImage.setOrigin(alignment);
+        }
     }
 }
