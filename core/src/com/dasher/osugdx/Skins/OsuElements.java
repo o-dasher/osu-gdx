@@ -44,7 +44,9 @@ public enum OsuElements {
     }
 
     OsuElements(String name, String[] extensions, boolean isAnimated) {
-        this(name,extensions);
+        this.name = name;
+        this.names = new String[]{name, name+"@2x", name+"-{i}@2x"};
+        this.extensions = extensions;
         this.isAnimated = isAnimated;
     }
 }

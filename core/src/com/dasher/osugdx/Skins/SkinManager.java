@@ -37,7 +37,8 @@ public class SkinManager {
             SkinElement createdElement;
             for (String name: elementName.names) {
                 for (String extension: elementName.extensions) {
-                    String sub = selectedSkin.getDirectory().path() + "/" +name;
+                    String base = selectedSkin.getDirectory().path() + "/";
+                    String sub = base+name;
                     AnimatedSkinElement animatedSkinElement = null;
                     if (elementName.isAnimated) {
                         animatedSkinElement = new AnimatedSkinElement(selectedSkin);
@@ -45,18 +46,28 @@ public class SkinManager {
                         int i = -1;
                         while (true) {
                             i++;
-                            String currentPath = sub+"-"+i+"."+extension;
+                            String indexedSub = base+name.replaceAll("\\{i}", String.valueOf(i));
+                            String currentPath = indexedSub+"."+extension;
                             FileHandle file = Gdx.files.internal(currentPath);
+                            System.out.println(currentPath);
+                            if (!file.exists()) {
+                                break;
+                            }
                             SkinElement element = getElement(file);
                             if (element == null) {
+                                System.out.println("BAHH" + currentPath);
                                 break;
                             } else {
+                                System.out.print("OO");
                                 animatedSkinElement.addSprite((element.getSprite()));
                             }
                         }
+                        System.out.println("NNEHUM");
                         if (animatedSkinElement.getSprites().size > 0) {
                             animatedSkinElement.endSpriteInput();
-                            break;
+                            System.out.println(animatedSkinElement.getSprites());
+                            selectedSkin.animatedElements.put(elementName, animatedSkinElement);
+                            continue;
                         }
                     }
                     String path = sub+"."+extension;
