@@ -12,7 +12,6 @@ import com.dasher.osugdx.Framework.Actors.AnimatedSprite;
 import com.dasher.osugdx.Framework.Interfaces.ResizeListener;
 import com.dasher.osugdx.GameScenes.Gameplay.StatisticType;
 import com.dasher.osugdx.OsuGame;
-import com.dasher.osugdx.Skins.Skin;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +59,6 @@ public abstract class OsuCircleObject extends OsuGameObject implements ResizeLis
         addActor(circleOverlay);
         addActor(approachCircle);
         float diameter = getDiameter();
-        System.out.println(diameter/circle.getWidth());
         setScale((diameter / circle.getWidth()) * 2);
         initColor();
     }
@@ -73,14 +71,11 @@ public abstract class OsuCircleObject extends OsuGameObject implements ResizeLis
         float percentage = timeDiff / approachTime;
         float approachScale = 1 * (1 + 2 * (1 - percentage));
         approachCircle.setScale(approachScale);
-        if (musicPosition >= baseObject.getStartTimeS()) {
-            boolean isInTime = !(musicPosition >= baseObject.getStartTimeS() + approachTime);
-            if (isInTime) {
-                setVisible(true);
-            } else {
-                getParent().addAction(Actions.removeActor(this));
-            }
-        }
+    }
+
+    @Override
+    protected boolean finalizeCondition() {
+        return currentMusic.getPosition() >= baseObject.getStartTimeS() + approachTime;
     }
 
     @Override

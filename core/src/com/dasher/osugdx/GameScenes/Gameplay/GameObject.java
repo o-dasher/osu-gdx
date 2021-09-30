@@ -3,6 +3,7 @@ package com.dasher.osugdx.GameScenes.Gameplay;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.dasher.osugdx.OsuGame;
@@ -33,6 +34,25 @@ public abstract class GameObject<T extends HitObject> extends Group {
         setVisible(false);
         color = getColor(screen.getAmountComboSections());
     }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        final float musicPosition = currentMusic.getPosition();
+        if (finalizeCondition()) {
+            Group parent = getParent();
+            if (isVisible() && parent != null) {
+                setVisible(false);
+                parent.addAction(Actions.removeActor(this));
+            }
+        } else if (musicPosition >= baseObject.getStartTimeS()) {
+            if (!isVisible()) {
+                setVisible(true);
+            }
+        }
+    }
+
+    protected abstract boolean finalizeCondition();
 
     protected void initColor() {
         applyToColor(color);
