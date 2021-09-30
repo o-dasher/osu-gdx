@@ -286,7 +286,7 @@ public class Scrollable<T extends Actor> extends Stage implements GestureDetecto
         for (int i = 0; i < itemsPart.size; i++) {
             Actor actor = itemsPart.get(i);
             float a = 1 - (i * 0.1f );
-            if (actor.getColor().a != a) {
+            if (actor != null && actor.getColor().a != a) {
                 actor.addAction(Actions.alpha(a, realAdjustTime));
             }
         }

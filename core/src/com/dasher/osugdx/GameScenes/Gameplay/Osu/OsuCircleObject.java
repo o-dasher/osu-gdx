@@ -50,12 +50,12 @@ public abstract class OsuCircleObject extends OsuGameObject {
     public void act(float delta) {
         super.act(delta);
         final float musicPosition = currentMusic.getPosition();
-        float timeDiff = musicPosition - baseObject.getStartTime();
+        float timeDiff = musicPosition - baseObject.getStartTimeS();
         float percentage = timeDiff / approachTime;
         float approachScale = 1 * (1 + 1 * (1 - percentage));
         approachCircle.setScale(approachScale);
-        if (musicPosition >= baseObject.getStartTime()) {
-            boolean isInTime = !(musicPosition >= baseObject.getStartTime() + approachTime);
+        if (musicPosition >= baseObject.getStartTimeS()) {
+            boolean isInTime = !(musicPosition >= baseObject.getStartTimeS() + approachTime);
             if (isInTime) {
                 setVisible(true);
             } else {

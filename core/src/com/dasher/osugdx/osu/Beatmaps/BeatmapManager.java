@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 
 public class BeatmapManager implements Listenable<BeatmapManagerListener>, BeatmapManagerListener, BeatmapManagerReferencesListener {
@@ -156,16 +157,14 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
                 }
             }
         }
+        if (newMap.getTimingPoints() == null) {
+            game.modManager.calculateBeatmap(newMap, Mods.NOMOD);
+            newMap.getHitObjects().clear();
+        }
         isProcessingDiff = true;
         onPreBeatmapChange();
         setupMusic(newMap);
         currentMap = newMap;
-        for (int i = 0; i < currentBeatmapSet.beatmaps.size; i++) {
-            Beatmap beatmap = currentBeatmapSet.beatmaps.get(i);
-            if (beatmap.beatmapFilePath.equals(currentMap.beatmapFilePath)) {
-                currentBeatmapSet.beatmaps.set(i, beatmap);
-            }
-        }
         setBeatmapReference(currentMap);
         long time = TimeUtils.millis();
         System.out.println(TimeUtils.timeSinceMillis(time) + "ms to load beatmap");

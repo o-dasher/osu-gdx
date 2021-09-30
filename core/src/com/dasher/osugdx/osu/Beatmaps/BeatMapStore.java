@@ -21,7 +21,7 @@ import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.utils.Mods;
 
 public class BeatMapStore implements ModManagerListener, OSZParserListener {
-    private final int VERSION = 90;
+    private final int VERSION = 97;
     private final String versionKey = "VERSION";
     private final Array<String> specialFiles = new Array<>();
     private final Array<BeatMapSet> tempCachedBeatmaps = new Array<>();
@@ -254,7 +254,6 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
                 deleteBeatmapFile(null, beatmapFile);
                 return;
             }
-            beatMap.getHitObjects().clear();
             beatMapSet.beatmaps.add(beatMap);
             logBeatmapLoaded(beatMap);
         }
@@ -378,9 +377,8 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
         }
 
         saveCacheInfo();
-        if (libraryChanged) {
-            game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
-        }
+        game.modManager.calculateBeatmapSets(beatMapSets, Mods.NOMOD);
+
         tempCachedBeatmaps.clear();
         double loadTime = ((System.nanoTime() - beatmapStoreCreationTime) / 1e6);
         System.out.println("Loaded " + beatMapSets.size + " BeatmapSets in " + loadTime + "ms");
@@ -409,13 +407,35 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
 
     public Array<BeatMapSet> cacheBeatmapSetArray;
 
+    public void freeBeatmapsetObjects() {
+        for (int i = 0; i < beatMapSets.size; i++) {
+            BeatMapSet beatMapSet = beatMapSets.get(i);
+            for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
+                Beatmap beatmap = beatMapSet.beatmaps.get(j);
+                beatmap.getHitObjects().clear();
+            }
+        }
+    }
+
     @Override
     public void onCompleteCalculation(Array<BeatMapSet> calculatedBeatmapSets) {
         if (calculatedBeatmapSets == beatMapSets) {
             loadedAllBeatmaps = true;
-            cacheBeatmapSets(calculatedBeatmapSets);
+            if (libraryChanged) {
+                cacheBeatmapSets(calculatedBeatmapSets);
+            } else {
+                freeBeatmapsetObjects();
+            }
             System.out.println("Finished beatmapSets calculation");
         } else if (calculatedBeatmapSets == cacheBeatmapSetArray) {
+            for (int i = 0; i < cacheBeatmapSetArray.size; i++) {
+                BeatMapSet beatMapSet = cacheBeatmapSetArray.get(i);
+                for (int j = 0; j < beatMapSet.beatmaps.size; j++) {
+                    Beatmap beatmap = beatMapSet.beatmaps.get(j);
+                    beatmap.freeResources();
+                }
+            }
+            freeBeatmapsetObjects();
             libCacheFile.writeString(game.json.toJson(cacheBeatmapSetArray), false);
             isSavingCache = false;
             System.out.println("Saved beatmap cache successfully");
@@ -441,7 +461,6 @@ public class BeatMapStore implements ModManagerListener, OSZParserListener {
                         }
                         if (clone != null) {
                             System.out.println("Copied " + clone.getMetadata().getTitleRomanized() + " for cache saving.");
-                            clone.freeResources();
                             cloneBeatmapSet.beatmaps.add(clone);
                         }
                     }
