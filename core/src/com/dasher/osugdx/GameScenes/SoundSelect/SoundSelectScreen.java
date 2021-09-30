@@ -98,6 +98,10 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         inputMultiplexer.addProcessor(beatmapSetSelectorStage);
         inputMultiplexer.addProcessor(menuOptionsStage);
 
+        if (!beatmapManager.getCurrentMusic().isPlaying()) {
+            beatmapManager.startMusicPlaying();
+        }
+
         resetSelectors();
         beatmapManager.addListener(this);
     }

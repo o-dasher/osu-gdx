@@ -3,13 +3,17 @@ package com.dasher.osugdx.GameScenes.Gameplay.Osu;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.AnimatedSprite;
 import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
 import com.dasher.osugdx.GameScenes.Gameplay.GamePlayScreen;
+import com.dasher.osugdx.GameScenes.Gameplay.StatisticType;
 import com.dasher.osugdx.OsuGame;
 
 import org.jetbrains.annotations.NotNull;
@@ -30,19 +34,36 @@ public abstract class OsuCircleObject extends OsuGameObject {
         }
     }
 
+    @Override
+    public void onResize() {
+        if (getStage() != null) {
+            Vector2 position = baseObject.getPosition();
+            Viewport viewport = getStage().getViewport();
+            setPosition(viewport.getWorldWidth() / 2 - position.x, viewport.getWorldHeight() / 2- position.y);
+        }
+    }
+
+    public float getDiameter() {
+        return 109 - 9 * (statistics.get(StatisticType.CS));
+    }
+
     protected void init(@NotNull Image circle, @NotNull Image approachCircle, @NotNull AnimatedSprite circleOverlay) {
         this.circle = circle;
         this.approachCircle = approachCircle;
         this.circleOverlay = circleOverlay;
         circle.setOrigin(Align.center);
+        circle.setAlign(Align.center);
         approachCircle.setOrigin(Align.center);
+        approachCircle.setAlign(Align.center);
         circleOverlay.setOrigin(Align.center);
         circleOverlay.setPosition(circleOverlay.getX() + circle.getWidth() / 2, circleOverlay.getY() + circle.getHeight() / 2);
-        int overlayScale = 2;
-        circleOverlay.setScale(overlayScale);
+        circleOverlay.setScale(2);
         addActor(circle);
         addActor(circleOverlay);
         addActor(approachCircle);
+        float diameter = getDiameter();
+        System.out.println(diameter/circle.getWidth());
+        setScale((diameter / circle.getWidth()) * 2);
         initColor();
     }
 
@@ -52,7 +73,7 @@ public abstract class OsuCircleObject extends OsuGameObject {
         final float musicPosition = currentMusic.getPosition();
         float timeDiff = musicPosition - baseObject.getStartTimeS();
         float percentage = timeDiff / approachTime;
-        float approachScale = 1 * (1 + 1 * (1 - percentage));
+        float approachScale = 1 * (1 + 2 * (1 - percentage));
         approachCircle.setScale(approachScale);
         if (musicPosition >= baseObject.getStartTimeS()) {
             boolean isInTime = !(musicPosition >= baseObject.getStartTimeS() + approachTime);

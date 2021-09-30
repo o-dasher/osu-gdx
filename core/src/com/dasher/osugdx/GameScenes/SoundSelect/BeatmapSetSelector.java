@@ -38,9 +38,13 @@ public class BeatmapSetSelector extends Selector {
             game.beatmapManager.addListener(beatmapSelector);
             beatmapSelectors.add(beatmapSelector);
         }
-        beatmapSelectors.sort((o1, o2) ->
-                Double.compare(o1.beatmap.getBaseStars(), o2.beatmap.getBaseStars())
-        );
+        try {
+            beatmapSelectors.sort((o1, o2) ->
+                    Double.compare(o1.beatmap.getBaseStars(), o2.beatmap.getBaseStars())
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         menuBackground.setColor(inactiveColor());
     }
 

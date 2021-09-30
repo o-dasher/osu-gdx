@@ -158,8 +158,12 @@ public class BeatmapManager implements Listenable<BeatmapManagerListener>, Beatm
             }
         }
         if (newMap.getTimingPoints() == null) {
-            game.modManager.calculateBeatmap(newMap, Mods.NOMOD);
-            newMap.getHitObjects().clear();
+            try {
+                game.modManager.calculateBeatmap(newMap, Mods.NOMOD);
+                newMap.getHitObjects().clear();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         isProcessingDiff = true;
         onPreBeatmapChange();

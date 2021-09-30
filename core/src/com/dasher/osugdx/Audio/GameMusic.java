@@ -50,11 +50,12 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
         // THE ASYNCHRONOUS BOOLEAN IS JUST FOR THE SET POSITION NOT STOP THE MAIN THREAD
         if (!isDisposed) {  // disposal check for asynchronous.
             // TRY CATCH BECAUSE THE MUSIC MAY BE DISPOSED LATER ANYWAYS OR THE BUFFER WASN'T LOADED
-            if (isPlaying()) {
-                music.stop();
-            }
             try {
-                music.play();
+                if (isPlaying()) {
+                    music.setPosition(0);
+                } else {
+                    music.play();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -35,9 +35,11 @@ public abstract class Beatmap implements Cloneable {
 	}
 
 	public void calculateBase(Mods mods) {
-		Difficulty baseDifficulty = getDifficulty(mods);
-		baseStars = baseDifficulty.getStars();
-		baseCombo = baseDifficulty.getMaxCombo();
+		if (getHitObjects().notEmpty()) {
+			Difficulty baseDifficulty = getDifficulty(mods);
+			baseStars = baseDifficulty.getStars();
+			baseCombo = baseDifficulty.getMaxCombo();
+		}
 	}
 
 	public void freeResources() {

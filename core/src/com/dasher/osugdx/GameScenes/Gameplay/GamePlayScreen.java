@@ -1,8 +1,11 @@
 package com.dasher.osugdx.GameScenes.Gameplay;
 
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.dasher.osugdx.GameScenes.GameScreen;
+import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuCircleObject;
+import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuGameObject;
 import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuHitCircle;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.Input.InputHelper;
@@ -14,14 +17,21 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuCircle;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 
 public class GamePlayScreen extends GameScreen {
     private Beatmap gameplayBeatmap;
     private int currentComboObjectNumber = 0;
     private int amountComboSections = 0;
+    private final Array<GameObject<?>> gameObjects = new Array<>();
     private final ObjectMap<StatisticType, Float> statisticTimes = new ObjectMap<>();
     private final Stage hitObjectStage = new Stage(viewport);
+
+    public void addGameObject(GameObject<?> gameObject) {
+        gameObjects.add(gameObject);
+        hitObjectStage.addActor(gameObject);
+    }
 
     public GamePlayScreen(@NotNull OsuGame game, @NotNull Beatmap beatmap) {
         super(game);
@@ -29,15 +39,18 @@ public class GamePlayScreen extends GameScreen {
         gameplayBeatmap = beatmapUtils.createMap(beatmap);  // reInit objects
         beatmapManager.startMusicPlaying();
         if (gameplayBeatmap.getGenerals().getGamemode() == GameMode.OSU && gameplayBeatmap instanceof OsuBeatmap) {
+            statisticTimes.put(StatisticType.CS, (float) ((OsuBeatmap) gameplayBeatmap).getCS());
             statisticTimes.put(StatisticType.AR, GameplayUtils.mapDifficultyRange((float) ((OsuBeatmap) gameplayBeatmap).getAR(), 1800, 1200, 450));
         }
         for (int i = gameplayBeatmap.getHitObjects().size - 1; i >= 0; i--) {
             HitObject hitObjectData = gameplayBeatmap.getHitObjects().get(i);
-            GameObject<?> gameObject = null;
             if (hitObjectData instanceof OsuObject) {
-                gameObject = new OsuHitCircle((OsuObject) hitObjectData, game, this);
+                if (hitObjectData instanceof OsuCircle) {
+                    OsuHitCircle circle = new OsuHitCircle((OsuObject) hitObjectData, game, this);
+                    addGameObject(circle);
+                    circle.onResize();
+                }
             }
-            hitObjectStage.addActor(gameObject);
         }
         inputMultiplexer.addProcessor(hitObjectStage);
     }
@@ -67,7 +80,11 @@ public class GamePlayScreen extends GameScreen {
 
     @Override
     public void resize(int width, int height) {
-
+        for (GameObject<?> gameObject: gameObjects) {
+            if (gameObject instanceof OsuGameObject) {
+                ((OsuGameObject) gameObject).onResize();
+            }
+        }
     }
 
     @Override
