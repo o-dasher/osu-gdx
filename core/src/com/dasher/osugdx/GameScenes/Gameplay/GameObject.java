@@ -17,15 +17,15 @@ public abstract class GameObject<T extends HitObject> extends Group {
     protected ObjectMap<StatisticType, Float> statistics;
     protected Music currentMusic;
     protected Skin skin;
-    protected GamePlayScreen screen;
+    protected AbstractPlayScreen<?, ?> screen;
     protected OsuGame game;
     protected T baseObject;
     protected Color color;
 
-    public GameObject(@NotNull T baseObject, @NotNull OsuGame game, @NotNull GamePlayScreen screen) {
+    public GameObject(@NotNull T baseObject, @NotNull OsuGame game, @NotNull AbstractPlayScreen<?, ?> screen) {
         this.game = game;
         this.screen = screen;
-        this.statistics = screen.getStatisticTimes();
+        this.statistics = screen.getStatisticData();
         this.baseObject = baseObject;
         this.skin = game.skinManager.getSelectedSkin();
         currentMusic = game.beatmapManager.getCurrentMusic();

@@ -4,9 +4,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.dasher.osugdx.GameScenes.GameScreen;
-import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuCircleObject;
-import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuGameObject;
-import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuHitCircle;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.Input.InputHelper;
 import com.dasher.osugdx.OsuGame;
@@ -17,43 +14,41 @@ import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
-import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuCircle;
-import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 
-public class GamePlayScreen extends GameScreen {
-    private Beatmap gameplayBeatmap;
+public abstract class AbstractPlayScreen<OBJECT_TYPE extends HitObject, BEATMAP_TYPE extends Beatmap> extends GameScreen {
+    protected final BEATMAP_TYPE gameplayBeatmap;
+    protected final Array<GameObject<OBJECT_TYPE>> gameObjects = new Array<>();
     private int currentComboObjectNumber = 0;
     private int amountComboSections = 0;
-    private final Array<GameObject<?>> gameObjects = new Array<>();
-    private final ObjectMap<StatisticType, Float> statisticTimes = new ObjectMap<>();
+    private final ObjectMap<StatisticType, Float> statisticData = new ObjectMap<>();
     private final Stage hitObjectStage = new Stage(viewport);
 
-    public void addGameObject(GameObject<?> gameObject) {
+    public void addGameObject(GameObject<OBJECT_TYPE> gameObject) {
         gameObjects.add(gameObject);
         hitObjectStage.addActor(gameObject);
     }
 
-    public GamePlayScreen(@NotNull OsuGame game, @NotNull Beatmap beatmap) {
+    public AbstractPlayScreen(@NotNull OsuGame game, @NotNull BEATMAP_TYPE beatmap) {
         super(game);
         System.out.println("Gaming: " + beatmap.getMetadata().getTitleRomanized());
-        gameplayBeatmap = beatmapUtils.createMap(beatmap);  // reInit objects
+        gameplayBeatmap = getBeatmap(beatmap);
         beatmapManager.startMusicPlaying();
-        if (gameplayBeatmap.getGenerals().getGamemode() == GameMode.OSU && gameplayBeatmap instanceof OsuBeatmap) {
-            statisticTimes.put(StatisticType.CS, (float) ((OsuBeatmap) gameplayBeatmap).getCS());
-            statisticTimes.put(StatisticType.AR, GameplayUtils.mapDifficultyRange((float) ((OsuBeatmap) gameplayBeatmap).getAR(), 1800, 1200, 450));
-        }
+        putStatistics(statisticData);
         for (int i = gameplayBeatmap.getHitObjects().size - 1; i >= 0; i--) {
             HitObject hitObjectData = gameplayBeatmap.getHitObjects().get(i);
-            if (hitObjectData instanceof OsuObject) {
-                if (hitObjectData instanceof OsuCircle) {
-                    OsuHitCircle circle = new OsuHitCircle((OsuObject) hitObjectData, game, this);
-                    addGameObject(circle);
-                    circle.onResize();
-                }
+            GameObject<OBJECT_TYPE> gameObject = getObject(hitObjectData);
+            if (gameObject == null) {
+                System.out.println(hitObjectData.getClass().getName() + " not implemented for screen: " + getClass().getName());
+            } else {
+                addGameObject(getObject(hitObjectData));
             }
         }
         inputMultiplexer.addProcessor(hitObjectStage);
     }
+
+    public abstract GameObject<OBJECT_TYPE> getObject(HitObject hitObjectData);
+    public abstract BEATMAP_TYPE getBeatmap(Beatmap beatmap);
+    public abstract void putStatistics(ObjectMap<StatisticType, Float> statisticTimes);
 
     @Override
     public void show() {
@@ -80,11 +75,6 @@ public class GamePlayScreen extends GameScreen {
 
     @Override
     public void resize(int width, int height) {
-        for (GameObject<?> gameObject: gameObjects) {
-            if (gameObject instanceof OsuGameObject) {
-                ((OsuGameObject) gameObject).onResize();
-            }
-        }
     }
 
     @Override
@@ -116,8 +106,8 @@ public class GamePlayScreen extends GameScreen {
         currentComboObjectNumber++;
     }
 
-    public ObjectMap<StatisticType, Float> getStatisticTimes() {
-        return statisticTimes;
+    public ObjectMap<StatisticType, Float> getStatisticData() {
+        return statisticData;
     }
 
     public int getAmountComboSections() {

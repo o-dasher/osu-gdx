@@ -2,30 +2,28 @@ package com.dasher.osugdx.GameScenes.Gameplay.Osu;
 
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dasher.osugdx.Framework.Actors.AnimatedSprite;
-import com.dasher.osugdx.Framework.Helpers.CenteringHelper;
-import com.dasher.osugdx.GameScenes.Gameplay.GamePlayScreen;
+import com.dasher.osugdx.Framework.Interfaces.ResizeListener;
 import com.dasher.osugdx.GameScenes.Gameplay.StatisticType;
 import com.dasher.osugdx.OsuGame;
+import com.dasher.osugdx.Skins.Skin;
 
 import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 
-public abstract class OsuCircleObject extends OsuGameObject {
+public abstract class OsuCircleObject extends OsuGameObject implements ResizeListener {
     protected Image circle;
     protected Image approachCircle;
     protected AnimatedSprite circleOverlay;
 
-    public OsuCircleObject(@NotNull OsuObject baseObject, OsuGame game, GamePlayScreen screen) {
+    public OsuCircleObject(@NotNull OsuObject baseObject, OsuGame game, OsuPlayScreen screen) {
         super(baseObject, game, screen);
         if (baseObject.isNewCombo()) {
             screen.resetCurrentComboObjectNumber();
@@ -89,10 +87,10 @@ public abstract class OsuCircleObject extends OsuGameObject {
     public Color getColor(int comboSections) {
         Color color = null;
         ObjectMap<Integer, Color> colors = new ObjectMap<>();
-        colors.put(1, Color.RED);
-        colors.put(2, Color.GREEN);
-        colors.put(3, Color.BLUE);
-        colors.put(4, Color.YELLOW);
+        Color[] comboColors = game.skinManager.getSelectedSkin().getComboColors();
+        for (int i = 0; i < comboColors.length; i++) {
+            colors.put(i + 1, comboColors[i]);
+        }
         for (int i = colors.size - 1; i >= 0; i--) {
             int c = i + 1;
             if (comboSections % c == 0) {

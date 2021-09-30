@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
 import com.dasher.osugdx.GameScenes.GameScreen;
-import com.dasher.osugdx.GameScenes.Gameplay.GamePlayScreen;
+import com.dasher.osugdx.GameScenes.Gameplay.Osu.OsuPlayScreen;
 import com.dasher.osugdx.Skins.OsuElements;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.BeatmapMetadata;
+import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
 
 public class BeatmapSelector extends Selector implements BeatmapManagerListener, ModManagerListener, BeatmapManagerReferencesListener {
     protected Beatmap beatmap;
@@ -195,7 +196,9 @@ public class BeatmapSelector extends Selector implements BeatmapManagerListener,
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 if (!game.calledToSwitchScreen) {
                     GameScreen gameScreen = (GameScreen) game.getScreen();
-                    gameScreen.switchScreen(new GamePlayScreen(game, beatmap));
+                    if (beatmap instanceof OsuBeatmap) {
+                        gameScreen.switchScreen(new OsuPlayScreen(game, (OsuBeatmap) beatmap));
+                    }
                 }
                 return false;
             }

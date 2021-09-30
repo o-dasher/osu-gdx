@@ -28,10 +28,10 @@ public class Skin {
 
     /** The default combo colors (used when a beatmap does not provide custom colors). */
     private static final Color[] DEFAULT_COMBO = {
-            new Color(255, 192, 0, 1),
-            new Color(0, 202, 0, 1),
-            new Color(18, 124, 255, 1),
-            new Color(242, 24, 57, 1)
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.YELLOW
     };
 
     /** The default menu visualization bar color. */
