@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import lt.ekgame.beatmap_analyzer.GameMode;
 import lt.ekgame.beatmap_analyzer.beatmap.Beatmap;
+import lt.ekgame.beatmap_analyzer.beatmap.HitObject;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuBeatmap;
 import lt.ekgame.beatmap_analyzer.beatmap.osu.OsuObject;
 
@@ -30,7 +31,8 @@ public class GamePlayScreen extends GameScreen {
         if (gameplayBeatmap.getGenerals().getGamemode() == GameMode.OSU && gameplayBeatmap instanceof OsuBeatmap) {
             statisticTimes.put(StatisticType.AR, GameplayUtils.mapDifficultyRange((float) ((OsuBeatmap) gameplayBeatmap).getAR(), 1800, 1200, 450));
         }
-        for (lt.ekgame.beatmap_analyzer.beatmap.HitObject hitObjectData: gameplayBeatmap.getHitObjects()) {
+        for (int i = gameplayBeatmap.getHitObjects().size - 1; i >= 0; i--) {
+            HitObject hitObjectData = gameplayBeatmap.getHitObjects().get(i);
             GameObject<?> gameObject = null;
             if (hitObjectData instanceof OsuObject) {
                 gameObject = new OsuHitCircle((OsuObject) hitObjectData, game, this);
