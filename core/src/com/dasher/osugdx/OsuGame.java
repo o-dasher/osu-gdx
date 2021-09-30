@@ -233,7 +233,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
-		vfxManager.resize(width, height);
+		try {
+			vfxManager.resize(width, height);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		// CENTERINGHELPER SETTING SHOULD BE THE FIRST CALL AFTER VIEWPORT UPDATE ALWAYS
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
