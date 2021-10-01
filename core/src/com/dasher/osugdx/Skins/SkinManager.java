@@ -48,7 +48,7 @@ public class SkinManager {
                             int i = -1;
                             while (true) {
                                 i++;
-                                String indexedSub = base + name.replaceAll("\\{i}", String.valueOf(i));
+                                String indexedSub = base + name.replace("{i}", String.valueOf(i));
                                 String currentPath = indexedSub + "." + extension;
                                 FileHandle file = Gdx.files.internal(currentPath);
                                 if (!file.exists()) {

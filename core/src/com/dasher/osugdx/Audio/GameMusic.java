@@ -1,5 +1,7 @@
 package com.dasher.osugdx.Audio;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
@@ -51,7 +53,7 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
         if (!isDisposed) {  // disposal check for asynchronous.
             // TRY CATCH BECAUSE THE MUSIC MAY BE DISPOSED LATER ANYWAYS OR THE BUFFER WASN'T LOADED
             try {
-                if (isPlaying()) {
+                if (isPlaying() && asynchronous) {
                     music.setPosition(0);
                 } else {
                     music.play();
@@ -162,10 +164,14 @@ public class GameMusic implements ParrotMusicType, Music, UpdateAble {
             if (!didSetPosition && setPosition >= 0) {
                 if (audioFactory.parrot.isMusicPlaying(channel)) {
                     System.out.println("Parrot finished waiting for channel: " + channel);
-                    audioFactory.asyncExecutor.submit(() -> {
+                    if (Gdx.app.getType() == Application.ApplicationType.Android) {
                         setPosition(setPosition);
-                        return null;
-                    });
+                    } else {
+                        audioFactory.asyncExecutor.submit(() -> {
+                            setPosition(setPosition);
+                            return null;
+                        });
+                    }
                     didSetPosition = true;
                 } else {
                     System.out.println("Parrot is waiting for: " + channel);

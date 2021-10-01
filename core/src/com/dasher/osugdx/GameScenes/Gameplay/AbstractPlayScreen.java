@@ -1,8 +1,10 @@
 package com.dasher.osugdx.GameScenes.Gameplay;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.dasher.osugdx.Framework.Interfaces.ResizeListener;
 import com.dasher.osugdx.GameScenes.GameScreen;
 import com.dasher.osugdx.GameScenes.SoundSelect.SoundSelectScreen;
 import com.dasher.osugdx.Input.InputHelper;
@@ -26,6 +28,9 @@ public abstract class AbstractPlayScreen<OBJECT_TYPE extends HitObject, BEATMAP_
     public void addGameObject(GameObject<OBJECT_TYPE> gameObject) {
         gameObjects.add(gameObject);
         hitObjectStage.addActor(gameObject);
+        if (gameObject instanceof ResizeListener) {
+            ((ResizeListener) gameObject).onResize();
+        }
     }
 
     public AbstractPlayScreen(@NotNull OsuGame game, @NotNull BEATMAP_TYPE beatmap) {
@@ -58,6 +63,8 @@ public abstract class AbstractPlayScreen<OBJECT_TYPE extends HitObject, BEATMAP_
     @Override
     public void render(float delta) {
         super.render(delta);
+
+        System.out.println(Gdx.graphics.getFramesPerSecond());
 
         renderBackground(delta);
 

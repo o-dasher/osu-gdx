@@ -86,9 +86,10 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	public AsyncResult<Null> loadBeatmapsTask;
 	public GaussianBlurEffect backgroundBlurEffect;
 	public GameConfig config;
+	public float currentMusicPosition;
 
-	private int WORLD_WIDTH;
-	private int WORLD_HEIGHT;
+	public int WORLD_WIDTH;
+	public int WORLD_HEIGHT;
 
 	public OsuGame(PlatformToast toast) {
 		this.toast = toast;
@@ -104,11 +105,6 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 		gameName = "osu!gdx";
 		WORLD_WIDTH = 800;
 		WORLD_HEIGHT = 600;
-		if (Gdx.app.getType() == Application.ApplicationType.Android) {
-			float androidMultiplier = 0.85f;
-			WORLD_WIDTH *= androidMultiplier;
-			WORLD_HEIGHT *= androidMultiplier;
-		}
 		viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();
 		CenteringHelper.WORLD_HEIGHT = viewport.getWorldHeight();
@@ -163,8 +159,11 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 
 		if (beatmapManager != null) {
 			Music currentMusic = beatmapManager.getCurrentMusic();
-			if (currentMusic != null && currentMusic.isPlaying()) {
-				beatFactory.update();
+			if (currentMusic != null) {
+				currentMusicPosition = currentMusic.getPosition();
+				if (currentMusic.isPlaying()) {
+					beatFactory.update();
+				}
 			}
 		}
 
@@ -218,7 +217,7 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 				fonts = new Fonts(assetManager);
 				Texture bgTexture = assetManager.get(assetManager.textures.menuBackgrounds.random());
 				workingBackground = new WorkingBackground(this, bgTexture);
-				beatFactory = new BeatFactory(beatmapManager);
+				beatFactory = new BeatFactory(beatmapManager, this);
 				backgroundStage.addActor(workingBackground);
 				beatmapManager.addListener(workingBackground);
 				beatmapManager.addListener(beatFactory);
@@ -233,10 +232,8 @@ public class OsuGame extends Game implements BeatmapManagerListener {
 	@Override
 	public void resize(int width, int height) {
 		viewport.update(width, height);
-		try {
+		if (vfxManager.getResultBuffer() != null) {
 			vfxManager.resize(width, height);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		// CENTERINGHELPER SETTING SHOULD BE THE FIRST CALL AFTER VIEWPORT UPDATE ALWAYS
 		CenteringHelper.WORLD_WIDTH = viewport.getWorldWidth();

@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.dasher.osugdx.Framework.Interfaces.Listenable;
 import com.dasher.osugdx.Framework.Interfaces.UpdateAble;
 import com.dasher.osugdx.Framework.Tasks.ClockTask;
+import com.dasher.osugdx.OsuGame;
 import com.dasher.osugdx.osu.Beatmaps.BeatMapSet;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManager;
 import com.dasher.osugdx.osu.Beatmaps.BeatmapManagerListener;
@@ -17,9 +18,11 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
     private final BeatmapManager beatmapManager;
     private final Array<BeatListener> listeners = new Array<>();
     private ClockTask clockTask;
+    private OsuGame game;
 
-    public BeatFactory(BeatmapManager beatmapManager) {
+    public BeatFactory(BeatmapManager beatmapManager, OsuGame game) {
         this.beatmapManager = beatmapManager;
+        this.game = game;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class BeatFactory implements Listenable<BeatListener>, UpdateAble, BeatLi
             }
         }
 
-        while (currentTimingPointIndex < timingPoints.size - 1 && timingPoints.get(currentTimingPointIndex + 1).getTimestamp() <= beatmapManager.getCurrentMusic().getPosition() * 1000) {
+        while (currentTimingPointIndex < timingPoints.size - 1 && timingPoints.get(currentTimingPointIndex + 1).getTimestamp() <= game.currentMusicPosition * 1000) {
             currentTimingPointIndex++;
         }
 

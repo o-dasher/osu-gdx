@@ -91,7 +91,7 @@ public class SoundSelectScreen extends UIScreen implements BeatmapManagerListene
         beatmapSetSelectorStage.setHoverXMultiplier(0.05f);
         beatmapSetSelectorStage.setStartFromSidesStaircase(true);
         beatmapSetSelectorStage.setExponentialAlpha(true);
-        allowThumbnails = Gdx.app.getType() != Application.ApplicationType.Android;
+        allowThumbnails = false;
         scrollMotionBlur = new MotionBlurEffect(Pixmap.Format.RGBA8888, MixEffect.Method.MAX, 1);
 
         inputMultiplexer.addProcessor(new GestureDetector(beatmapSetSelectorStage));

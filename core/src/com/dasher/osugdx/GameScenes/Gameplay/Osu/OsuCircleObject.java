@@ -33,11 +33,24 @@ public abstract class OsuCircleObject extends OsuGameObject implements ResizeLis
 
     @Override
     public void onResize() {
-        if (getStage() != null) {
-            Vector2 position = baseObject.getPosition();
-            Viewport viewport = getStage().getViewport();
-            setPosition(viewport.getWorldWidth() / 2 - position.x, viewport.getWorldHeight() / 2- position.y);
+        if (getStage() == null) {
+            return;
         }
+        float width = getStage().getViewport().getWorldWidth();
+        float height = getStage().getViewport().getWorldHeight();
+        float swidth = width;
+        float sheight = height;
+        if (swidth * 3 > sheight * 4)
+            swidth = sheight * 4 / 3;
+        else
+            sheight = swidth * 3 / 4;
+        float xMultiplier = swidth / game.WORLD_WIDTH;
+        float yMultiplier = sheight / game.WORLD_HEIGHT;
+        int MAX_X = 512, MAX_Y = 384;
+        int xOffset = (int) (width - MAX_X * xMultiplier) / 2;
+        int yOffset = (int) (height - MAX_Y * yMultiplier) / 2;
+        Vector2 position = baseObject.getPosition();
+        setPosition(position.x * xMultiplier + xOffset, position.y * yMultiplier + yOffset);
     }
 
     public float getDiameter() {
@@ -59,14 +72,14 @@ public abstract class OsuCircleObject extends OsuGameObject implements ResizeLis
         addActor(circleOverlay);
         addActor(approachCircle);
         float diameter = getDiameter();
-        setScale((diameter / circle.getWidth()) * 2);
+        setScale((diameter / circle.getWidth()) * 1.5f);
         initColor();
     }
 
     @Override
     public void act(float delta) {
         super.act(delta);
-        final float musicPosition = currentMusic.getPosition();
+        final float musicPosition = game.currentMusicPosition;
         float timeDiff = musicPosition - baseObject.getStartTimeS();
         float percentage = timeDiff / approachTime;
         float approachScale = 1 * (1 + 2 * (1 - percentage));
@@ -75,7 +88,7 @@ public abstract class OsuCircleObject extends OsuGameObject implements ResizeLis
 
     @Override
     protected boolean finalizeCondition() {
-        return currentMusic.getPosition() >= baseObject.getStartTimeS() + approachTime;
+        return game.currentMusicPosition >= baseObject.getStartTimeS() + approachTime;
     }
 
     @Override

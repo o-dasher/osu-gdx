@@ -38,14 +38,13 @@ public abstract class GameObject<T extends HitObject> extends Group {
     @Override
     public void act(float delta) {
         super.act(delta);
-        final float musicPosition = currentMusic.getPosition();
         if (finalizeCondition()) {
             Group parent = getParent();
             if (isVisible() && parent != null) {
                 setVisible(false);
                 parent.addAction(Actions.removeActor(this));
             }
-        } else if (musicPosition >= baseObject.getStartTimeS()) {
+        } else if (game.currentMusicPosition >= baseObject.getStartTimeS()) {
             if (!isVisible()) {
                 setVisible(true);
             }

@@ -24,9 +24,7 @@ public class OsuPlayScreen extends AbstractPlayScreen<OsuObject, OsuBeatmap> {
     public OsuGameObject getObject(HitObject hitObjectData) {
         if (hitObjectData instanceof OsuObject) {
             if (hitObjectData instanceof OsuCircle) {
-                OsuHitCircle object = new OsuHitCircle((OsuObject) hitObjectData, game, this);
-                ((OsuHitCircle) object).onResize();
-                return object;
+                return new OsuHitCircle((OsuObject) hitObjectData, game, this);
             }
         }
         return null;
